@@ -142,9 +142,11 @@ Float_t lim_sup_errsigma[numPart] = {10, 0.0004, 0.0004, 10, 10, 10, 10}; // loo
 const Float_t massParticle[numPart] = {0.497611, 1.115683, 1.115683, 1.32171, 1.32171, 1.67245, 1.67245};
 TString Spart[numPart] = {"K0s", "Lambda", "AntiLambda", "XiNeg", "XiPos", "OmegaNeg", "OmegaPlus"};
 
-void Yields_from_invmass(TString year = "LHC22f_NoTOF",
-                         TString SPathIn = "../TriggerForRun3/AnalysisResults_FinalTOT_NoTOF.root"
-                         /*"../Run3QA/LHC21k6_MC_pp/AnalysisResults_Train48456_v0s_MC.root" /*"../Run3QA/LHC22s_PbPb/CascLHC22spass4_train47592.root" /*../Run3QA/LHC22s_PbPb/V0sLHC22spass4_train47593.root"*/,
+void Yields_from_invmass(TString year = "LHC22m_pass2_Train52781",
+                         TString SPathIn = /*"../TriggerForRun3/AnalysisResults_FinalTOT_NoTOF.root"*/
+                         /*"../Run3QA/LHC21k6_MC_pp/AnalysisResults_Train48456_v0s_MC.root" /*"../Run3QA/LHC22s_PbPb/CascLHC22spass4_train47592.root" /*../Run3QA/LHC22s_PbPb/V0sLHC22spass4_train47593.root"*/
+                         "../Run3QA/LHC22m_pass2/AnalysisResults_Train52781_LHC22m_pass2.root",
+                         TString OutputDir = "../Run3QA/LHC22m_pass2/"/*"../TriggerForRun3/"*/, 
                          Int_t part = 3,
                          Bool_t UseTwoGauss = 1,
                          Bool_t isBkgParab = 0,
@@ -239,7 +241,7 @@ void Yields_from_invmass(TString year = "LHC22f_NoTOF",
     }
   }
 
-  Int_t NEvents = 0;
+  Double_t NEvents = 0;
   if (isV0CascadeAnalysis)
     hEvents = (TH1F *)dir->Get("hEventSelection");
   else if (isFilter)
@@ -727,6 +729,10 @@ void Yields_from_invmass(TString year = "LHC22f_NoTOF",
   TCanvas *canvasYield = new TCanvas("canvasYield", "canvasYield", 1000, 800);
   histoCountsPerEvent->Draw("same");
   histoYield->DrawClone("same");
+  TLegend * legendYield = new TLegend (0.7, 0.7, 0.9, 0.9);
+  legendYield->AddEntry(histoCountsPerEvent, "w/o bkg subtraction", "pl");
+  legendYield->AddEntry(histoYield, "w/ bkg subtraction", "pl");
+  legendYield->Draw("");
 
   TCanvas *canvasSummary = new TCanvas("canvasSummary", "canvasSummary", 1000, 800);
   canvasSummary->Divide(2, 2);
@@ -756,7 +762,7 @@ void Yields_from_invmass(TString year = "LHC22f_NoTOF",
   if (isV0CascadeAnalysis)
     Soutputfile = "../Run3QA/" + year + "/Yields_" + Spart[part] + "_" + year; //"_FrancescaBin.root";
   else if (isFilter)
-    Soutputfile = "../TriggerForRun3/Yields_" + Spart[part] + "_" + year;
+    Soutputfile = OutputDir +"Yields_" + Spart[part] + "_" + year;
 
   // save canvases
   canvas->SaveAs(Soutputfile + ".pdf(");
