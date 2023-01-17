@@ -125,16 +125,15 @@ const Float_t massParticle[numPart] = {1.32171, 1.67245};
 // TString Spart[numPart+2] = {"XiNeg", "XiPos", "OmegaNeg", "OmegaPlus"};
 TString Spart[numPart] = {"Xi", "Omega"};
 
-void PostProcessing_Filters(TString year = "LHC22m_pass2_NoGlobalTracks",
+void PostProcessing_Filters(TString year = "LHC22m_pass2_Train52782_hasTOF",
                             TString SPathIn = /*"../TriggerForRun3/AnalysisResults_FinalTOT_NoTOF.root"*/
-                            "../TriggerForRun3/AnalysisResults_22mpass2_New_8_NoGlobalTrackHC_Eta0.9.root",
-                            Int_t part = 0,
-                            Bool_t UseTwoGauss = 1,
-                            Bool_t isBkgParab = 0,
-                            Bool_t isMeanFixedPDG = 0,
-                            Float_t sigmacentral = 4)
+                            /*"../TriggerForRun3/AnalysisResults_22mpass2_New_8_NoGlobalTrackHC_Eta0.9.root"*/
+                            "../Run3QA/LHC22m_pass2/AnalysisResults_Train52782_LHC22m_pass2_hasTOF.root",
+                            TString OutputDir = /*"../TriggerForRun3/"*/ "../Run3QA/LHC22m_pass2/",
+                            Float_t ptthr = 5)
 {
 
+  cout << "Input file: " << SPathIn << endl;
   TFile *filein = new TFile(SPathIn, "");
   if (!filein)
   {
@@ -149,6 +148,14 @@ void PostProcessing_Filters(TString year = "LHC22m_pass2_NoGlobalTracks",
     return;
   }
 
+  TDirectoryFile *dirQA;
+  dirQA = (TDirectoryFile *)dir->Get("QAHistos");
+  if (!dirQA)
+  {
+    cout << "Directory QAHistos not available" << endl;
+    return;
+  }
+
   TH1F *hEvents = (TH1F *)dir->Get("hProcessedEvents");
   if (!hEvents)
   {
@@ -156,13 +163,33 @@ void PostProcessing_Filters(TString year = "LHC22m_pass2_NoGlobalTracks",
     return;
   }
 
-  Int_t NEvents = hEvents->GetBinContent(1);
+  // Nevents vs trigger type
+  Double_t NEvents = hEvents->GetBinContent(1);
+  cout << "NEvents " << NEvents << endl;
   hEvents->Scale(1. / NEvents);
   hEvents->GetYaxis()->SetRangeUser(10e-8, 1);
+  hEvents->SetTitle("Rejection factors");
+  hEvents->GetXaxis()->SetTitle("");
+  hEvents->GetYaxis()->SetTitle("Rejection factor");
 
   TCanvas *canvasNEvents = new TCanvas("canvasNEvents", "canvasNEvents", 800, 500);
   gPad->SetLogy();
   hEvents->Draw("");
+
+  // Z vertex distribution of selected events
+  TH1F *hVtxZ = (TH1F *)dirQA->Get("hVtxZ");
+  if (!hVtxZ)
+  {
+    cout << "hVtxZ not available" << endl;
+    return;
+  }
+  TCanvas *canvasVtxZ = new TCanvas("canvasVtxZ", "canvasVtxZ", 800, 500);
+  hVtxZ->SetTitle("Z-vertex distribution of selected events");
+  hVtxZ->Draw("");
+  TLegend *legendNumberEvents = new TLegend(0.6, 0.8, 0.9, 0.9);
+  legendNumberEvents->SetBorderSize(0);
+  legendNumberEvents->AddEntry("", Form("Number of selected events: %.0f", NEvents));
+  legendNumberEvents->Draw();
 
   TH1F *hCascCandidates = (TH1F *)dir->Get("hCandidate");
   if (!hCascCandidates)
@@ -200,8 +227,9 @@ void PostProcessing_Filters(TString year = "LHC22m_pass2_NoGlobalTracks",
   TH1F *hTrackQA1D[numQATrackHistos - 1];
   TString hSTrackQA[numQATrackHistos - 1] = {"hEtaTriggerAllEv", "hPhiTriggerAllEv", "hDCAxyTriggerAllEv", "hDCAzTriggerAllEv"};
 
-  const Int_t numPtTrigg = 7;
-  Float_t binptTrigg[numPtTrigg + 1] = {0, 0.5, 1, 1.5, 2, 3, 10};
+  const Int_t numPtTrigg = 6;
+  // Float_t binptTrigg[numPtTrigg + 1] = {0, 0.5, 1, 1.5, 2, 3, 10};
+  Float_t binptTrigg[numPtTrigg + 1] = {5, 5.5, 6.0, 6.5, 7, 8, 10};
   Int_t ColorPtTrigg[numPtTrigg + 1] = {634, 628, 797, 815, 418, 429, 867};
   Int_t MarkerPtTrigg[numPtTrigg + 1] = {20, 21, 22, 33, 20, 21, 22};
 
@@ -223,21 +251,23 @@ void PostProcessing_Filters(TString year = "LHC22m_pass2_NoGlobalTracks",
     canvasTrackQA->cd(i + 2);
     for (Int_t pt = 0; pt < numPtTrigg; pt++)
     {
-      if (binptTrigg[pt] > 2.5)
-        continue;
+      // if (binptTrigg[pt] > 9)
+      // continue;
 
       hTrackQA1D[i] = (TH1F *)hTrackQA[i]->ProjectionX(Form("hTrackQA_var%i_pt%i", i, pt), hTrackQA[i]->GetYaxis()->FindBin(binptTrigg[pt] + 0.001), hTrackQA[i]->GetYaxis()->FindBin(binptTrigg[pt + 1] - 0.001));
       hTrackQA1D[i]->SetLineColor(ColorPtTrigg[pt]);
       hTrackQA1D[i]->SetMarkerColor(ColorPtTrigg[pt]);
       hTrackQA1D[i]->SetMarkerSize(MarkerPtTrigg[pt]);
       hTrackQA1D[i]->SetMarkerSize(1.5);
-      if ( hSTrackQA[i] == "hDCAxyTriggerAllEv" || hSTrackQA[i] == "hDCAzTriggerAllEv") hTrackQA1D[i]->Scale(1. / hTrackQA1D[i]->Integral(hTrackQA1D[i]->FindBin(-0.1),hTrackQA1D[i]->FindBin(0.1)));
-      else  hTrackQA1D[i]->Scale(1. / hTrackQA1D[i]->GetEntries());
+      if (hSTrackQA[i] == "hDCAxyTriggerAllEv" || hSTrackQA[i] == "hDCAzTriggerAllEv")
+        hTrackQA1D[i]->Scale(1. / hTrackQA1D[i]->Integral(hTrackQA1D[i]->FindBin(-0.1), hTrackQA1D[i]->FindBin(0.1)));
+      else
+        hTrackQA1D[i]->Scale(1. / hTrackQA1D[i]->GetEntries());
 
       // if (hSTrackQA[i] == "hPhiTriggerAllEv") hTrackQA1D[i]->Rebin(2);
       hTrackQA1D[i]->Rebin(4);
       if (hSTrackQA[i] == "hDCAxyTriggerAllEv")
-        hTrackQA1D[i]->GetXaxis()->SetRangeUser(-0.1, 0.1);
+        hTrackQA1D[i]->GetXaxis()->SetRangeUser(-0.05, 0.05);
       hTrackQA1D[i]->GetYaxis()->SetRangeUser(0, 2 * hTrackQA1D[i]->GetMaximum());
 
       if (i == 0)
@@ -253,8 +283,24 @@ void PostProcessing_Filters(TString year = "LHC22m_pass2_NoGlobalTracks",
   {
     return;
   }
+  hTriggerParticles->GetXaxis()->SetRangeUser(0, 8);
+  hTriggerParticles->SetTitle("Number of trigger particles (p_{T} > p_{T}^{th}) per event");
   TCanvas *canvasTrigger = new TCanvas("canvasTrigger", "canvasTrigger", 800, 500);
+  gPad->SetLogy();
   hTriggerParticles->Draw("");
+
+  TH1F *hRejFactorshXi = (TH1F *)dir->Get("hEvtvshMinPt");
+  if (!hRejFactorshXi)
+  {
+    return;
+  }
+  TCanvas *canvasRejFactorshXi = new TCanvas("canvasRejFactorshXi", "canvasRejFactorshXi", 800, 500);
+  hRejFactorshXi->Scale(1. / NEvents);
+  hRejFactorshXi->GetXaxis()->SetRangeUser(ptthr, 11);
+  hRejFactorshXi->SetTitle("Rejection factors of hXi events for p_{T} > p_{T}^{th}");
+  hRejFactorshXi->GetXaxis()->SetTitle("p_{T}^{th} (GeV/c)");
+  hRejFactorshXi->GetYaxis()->SetTitle("Rejection factor");
+  hRejFactorshXi->Draw("text");
 
   // Cascade topological variables (after all topo sleections, for the time being)
   TDirectoryFile *dirCascVar;
@@ -286,6 +332,10 @@ void PostProcessing_Filters(TString year = "LHC22m_pass2_NoGlobalTracks",
   TString TopVarCascUnit[NTopCascVar] = {"", "", "(cm)", "(cm)",
                                          "(GeV/#it{c}^2)", "(cm)", "(cm)", "(cm)",
                                          "(cm)", "(cm)", "(cm)"};
+  Double_t TopVarCascCuts[NTopCascVar] = {0.95, 0.95, 0.3, 1,
+                                          0, 2, 2, 0.05,
+                                          0, 0.05, 0.05};
+  TLine *lineCascCuts[NTopCascVar];
 
   for (Int_t var = 0; var < NTopCascVar; var++)
   {
@@ -306,20 +356,53 @@ void PostProcessing_Filters(TString year = "LHC22m_pass2_NoGlobalTracks",
       canvasTopology[1]->cd(var + 1 - 6);
     gPad->SetLogy();
     hTopVar[var]->DrawCopy("hist");
+    lineCascCuts[var] = new TLine(TopVarCascCuts[var], hTopVar[var]->GetMinimum(), TopVarCascCuts[var], hTopVar[var]->GetMaximum());
+    // lineCascCuts[var] = new TLine(TopVarCascCuts[var], 0, TopVarCascCuts[var], 100);
+    lineCascCuts[var]->SetLineColor(867);
+    lineCascCuts[var]->Draw("");
+  }
+
+  // repidity, eta, ctau and pt
+  const int NKineCascVar = 8;
+
+  TH1F *hKineVar[NKineCascVar];
+  TCanvas *canvasKine[2];
+  canvasKine[0] = new TCanvas("canvasKine1", "canvasKine1", 1800, 1400);
+  canvasKine[0]->Divide(2, 2);
+  canvasKine[1] = new TCanvas("canvasKine2", "canvasKine2", 1800, 1400);
+  canvasKine[1]->Divide(2, 2);
+
+  TString KineVarCascInput[NKineCascVar] = {"hPtXi", "hEtaXi", "hRapXi", "hProperLifetimeXi", "hPtOmega", "hEtaOmega", "hRapOmega", "hProperLifetimeOmega"};
+  TString KineVarCasc[NKineCascVar] = {"p_{T} Xi", "#eta Xi", "y Xi", "ctau Xi", "p_{T} Omega", "#eta Omega", "y Omega", "ctau Omega"};
+  TString KineVarCascUnit[NKineCascVar] = {"GeV/c", "", "", "(cm)", "GeV/c", "", "", "(cm)"};
+
+  for (Int_t var = 0; var < NKineCascVar; var++)
+  {
+    if (var > 5)
+      continue;
+    hKineVar[var] = (TH1F *)dirQA->Get(KineVarCascInput[var]);
+    if (!hKineVar[var])
+    {
+      cout << KineVarCascInput[var] << " not available" << endl;
+      return;
+    }
+    hKineVar[var]->Scale(1. / NEvents);
+    hKineVar[var]->GetYaxis()->SetRangeUser(0.1 * hKineVar[var]->GetMinimum(1.e-10), 1.2 * hKineVar[var]->GetMaximum());
+    hKineVar[var]->SetTitle(KineVarCasc[var]);
+    hKineVar[var]->GetXaxis()->SetTitle(KineVarCasc[var] + " " + KineVarCascUnit[var]);
+    hKineVar[var]->GetYaxis()->SetTitle("1/N_{ev} Counts");
+    if (var < 4)
+      canvasKine[0]->cd(var + 1);
+    else
+      canvasKine[1]->cd(var + 1 - 4);
+    //gPad->SetLogy();
+    hKineVar[var]->DrawCopy("hist");
   }
 
   // inv mass distributions of Xi (all selected xis) and Omegas (all selected omegas) vs pT
-  TDirectoryFile *dirCasc;
-  dirCasc = (TDirectoryFile *)dir->Get("QAHistos");
-  if (!dirCasc)
-  {
-    cout << "Directory QAHistos not available" << endl;
-    return;
-  }
-
   TH2F *hMassvsPt[2];
-  hMassvsPt[0] = (TH2F *)dirCasc->Get("hMassXiAfterSelvsPt");
-  hMassvsPt[1] = (TH2F *)dirCasc->Get("hMassOmegaAfterSelvsPt");
+  hMassvsPt[0] = (TH2F *)dirQA->Get("hMassXiAfterSelvsPt");
+  hMassvsPt[1] = (TH2F *)dirQA->Get("hMassOmegaAfterSelvsPt");
   if (!hMassvsPt[0])
   {
     cout << "hMassXiAfterSelvsPt not available" << endl;
@@ -385,14 +468,18 @@ void PostProcessing_Filters(TString year = "LHC22m_pass2_NoGlobalTracks",
 
   // h-Xi events vs pt,thr
 
-  TString Soutputfile = "../TriggerForRun3/" + year;
+  TString Soutputfile = OutputDir + "FilterPostProcessing_" + year;
   canvasNEvents->SaveAs(Soutputfile + ".pdf(");
+  canvasRejFactorshXi->SaveAs(Soutputfile + ".pdf");
+  canvasVtxZ->SaveAs(Soutputfile + ".pdf");
   canvasTrackQA2D->SaveAs(Soutputfile + ".pdf");
   canvasTrackQA->SaveAs(Soutputfile + ".pdf");
   canvasTrigger->SaveAs(Soutputfile + ".pdf");
   canvasCasc->SaveAs(Soutputfile + ".pdf");
   canvasTopology[0]->SaveAs(Soutputfile + ".pdf");
   canvasTopology[1]->SaveAs(Soutputfile + ".pdf");
+  canvasKine[0]->SaveAs(Soutputfile + ".pdf");
+  canvasKine[1]->SaveAs(Soutputfile + ".pdf");
   canvas[0]->SaveAs(Soutputfile + ".pdf");
   canvas[1]->SaveAs(Soutputfile + ".pdf)");
 
