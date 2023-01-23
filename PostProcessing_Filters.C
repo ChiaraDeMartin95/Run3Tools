@@ -34,9 +34,9 @@ void StyleCanvas(TCanvas *canvas, Float_t LMargin, Float_t RMargin, Float_t TMar
 void StyleHisto(TH1F *histo, Float_t Low, Float_t Up, Int_t color, Int_t style, TString titleX,
                 TString titleY, TString title, Bool_t XRange, Float_t XLow, Float_t XUp, Float_t xOffset, Float_t yOffset, Float_t mSize)
 {
-  histo->GetYaxis()->SetRangeUser(Low, Up);
   if (XRange)
     histo->GetXaxis()->SetRangeUser(XLow, XUp);
+  histo->GetYaxis()->SetRangeUser(Low, Up);
   histo->SetLineColor(color);
   histo->SetMarkerColor(color);
   histo->SetMarkerStyle(style);
@@ -125,11 +125,13 @@ const Float_t massParticle[numPart] = {1.32171, 1.67245};
 // TString Spart[numPart+2] = {"XiNeg", "XiPos", "OmegaNeg", "OmegaPlus"};
 TString Spart[numPart] = {"Xi", "Omega"};
 
-void PostProcessing_Filters(TString year = "LHC22m_pass2_Train52782_hasTOF",
-                            TString SPathIn = /*"../TriggerForRun3/AnalysisResults_FinalTOT_NoTOF.root"*/
+void PostProcessing_Filters(TString year = /*"LHC21k6_Train54362"*/"LHC22m_pass2_Train52781",
+                            TString SPathIn = 
+                            /*"../Run3QA/LHC21k6_MC_pp/AnalysisResults_Filter_Train54362_LHC21k6.root"
+                            /*"../TriggerForRun3/AnalysisResults_FinalTOT_NoTOF.root"*/
                             /*"../TriggerForRun3/AnalysisResults_22mpass2_New_8_NoGlobalTrackHC_Eta0.9.root"*/
-                            "../Run3QA/LHC22m_pass2/AnalysisResults_Train52782_LHC22m_pass2_hasTOF.root",
-                            TString OutputDir = /*"../TriggerForRun3/"*/ "../Run3QA/LHC22m_pass2/",
+                            "../Run3QA/LHC22m_pass2/AnalysisResults_Train52781_LHC22m_pass2.root",
+                            TString OutputDir = "../Run3QA/LHC22m_pass2/"/*"../TriggerForRun3/"*/ /*"../Run3QA/LHC21k6_MC_pp/"*/,
                             Float_t ptthr = 5)
 {
 
@@ -140,6 +142,15 @@ void PostProcessing_Filters(TString year = "LHC22m_pass2_Train52782_hasTOF",
     cout << "FileIn not available" << endl;
     return;
   }
+
+  TDirectoryFile *dirCascB;
+  dirCascB = (TFile *)filein->Get("cascade-builder");
+  if (!dirCascB)
+  {
+    cout << "dirCascB not available" << endl;
+    return;
+  }
+
   TDirectoryFile *dir;
   dir = (TFile *)filein->Get("lf-strangeness-filter");
   if (!dir)
@@ -167,7 +178,7 @@ void PostProcessing_Filters(TString year = "LHC22m_pass2_Train52782_hasTOF",
   Double_t NEvents = hEvents->GetBinContent(1);
   cout << "NEvents " << NEvents << endl;
   hEvents->Scale(1. / NEvents);
-  hEvents->GetYaxis()->SetRangeUser(10e-8, 1);
+  hEvents->GetYaxis()->SetRangeUser(10e-9, 1);
   hEvents->SetTitle("Rejection factors");
   hEvents->GetXaxis()->SetTitle("");
   hEvents->GetYaxis()->SetTitle("Rejection factor");
@@ -190,6 +201,28 @@ void PostProcessing_Filters(TString year = "LHC22m_pass2_Train52782_hasTOF",
   legendNumberEvents->SetBorderSize(0);
   legendNumberEvents->AddEntry("", Form("Number of selected events: %.0f", NEvents));
   legendNumberEvents->Draw();
+
+  //cascade candidates
+
+  TH1F *hCascCandidatesB = (TH1F *)dirCascB->Get("hCascadeCriteria");
+  if (!hCascCandidatesB)
+  {
+    cout << "hCascadeCriteria in cascade-builder not available " << endl;
+    return;
+  }
+
+  Int_t NInitialCascB = hCascCandidatesB->GetBinContent(1);
+  hCascCandidatesB->Scale(1. / NInitialCascB);
+  hCascCandidatesB->GetXaxis()->SetBinLabel(1, "All candidates");
+  hCascCandidatesB->GetXaxis()->SetBinLabel(2, "Lambda mass");
+  hCascCandidatesB->GetXaxis()->SetBinLabel(3, "Bach TPC refit");
+  hCascCandidatesB->GetXaxis()->SetBinLabel(4, "Bach TPC crossed rows");
+  hCascCandidatesB->GetXaxis()->SetBinLabel(5, "Bach DCAxy");
+  hCascCandidatesB->GetXaxis()->SetBinLabel(6, "Casc DCA dau");
+  hCascCandidatesB->GetXaxis()->SetBinLabel(7, "Casc Cos PA");
+  hCascCandidatesB->GetXaxis()->SetBinLabel(8, "Casc Radius");
+  TCanvas *canvasCascB = new TCanvas("canvasCascB", "canvasCascB", 800, 500);
+  hCascCandidatesB->Draw("text");
 
   TH1F *hCascCandidates = (TH1F *)dir->Get("hCandidate");
   if (!hCascCandidates)
@@ -265,7 +298,7 @@ void PostProcessing_Filters(TString year = "LHC22m_pass2_Train52782_hasTOF",
         hTrackQA1D[i]->Scale(1. / hTrackQA1D[i]->GetEntries());
 
       // if (hSTrackQA[i] == "hPhiTriggerAllEv") hTrackQA1D[i]->Rebin(2);
-      hTrackQA1D[i]->Rebin(4);
+      //hTrackQA1D[i]->Rebin(4);
       if (hSTrackQA[i] == "hDCAxyTriggerAllEv")
         hTrackQA1D[i]->GetXaxis()->SetRangeUser(-0.05, 0.05);
       hTrackQA1D[i]->GetYaxis()->SetRangeUser(0, 2 * hTrackQA1D[i]->GetMaximum());
@@ -301,6 +334,81 @@ void PostProcessing_Filters(TString year = "LHC22m_pass2_Train52782_hasTOF",
   hRejFactorshXi->GetXaxis()->SetTitle("p_{T}^{th} (GeV/c)");
   hRejFactorshXi->GetYaxis()->SetTitle("Rejection factor");
   hRejFactorshXi->Draw("text");
+
+  // TPC nsigma distributions for all cascade candidates before selections
+  TH2F *hNSigmaTPCvsPt[4];
+  hNSigmaTPCvsPt[0] = (TH2F *)dirQA->Get("hTPCNsigmaPi");
+  hNSigmaTPCvsPt[1] = (TH2F *)dirQA->Get("hTPCNsigmaPr");
+  hNSigmaTPCvsPt[2] = (TH2F *)dirQA->Get("hTPCNsigmaBachPi");
+  hNSigmaTPCvsPt[3] = (TH2F *)dirQA->Get("hTPCNsigmaBachKa");
+  if (!hNSigmaTPCvsPt[0])
+  {
+    cout << "hTPCNsigmaPi not available" << endl;
+    return;
+  }
+  if (!hNSigmaTPCvsPt[1])
+  {
+    cout << "hTPCNsigmaPr not available" << endl;
+    return;
+  }
+  if (!hNSigmaTPCvsPt[2])
+  {
+    cout << "hTPCNsigmaBachPi not available" << endl;
+    return;
+  }
+  if (!hNSigmaTPCvsPt[3])
+  {
+    cout << "hTPCNsigmaBachKa not available" << endl;
+    return;
+  }
+  const Int_t numPtDau = 6; // six pt intervals
+
+  Float_t binptDauPi[numPtDau + 1] = {0.1, 0.2, 0.3, 0.5, 0.7, 0.9, 1.2};
+  Float_t binptDauPr[numPtDau + 1] = {0.1, 0.3, 0.5, 0.7, 0.8, 1.2, 1.6};
+  Float_t binptDauBachPi[numPtDau + 1] = {0.1, 0.2, 0.3, 0.5, 0.7, 0.9, 1.2};
+  Float_t binptDauBachKa[numPtDau + 1] = {0.1, 0.2, 0.3, 0.5, 0.7, 0.9, 1.2};
+  Float_t binptDau[numPtDau + 1] = {0, 0, 0, 0, 0, 0, 0};
+
+  TString SPtDau[numPtDau] = {""};
+  TH1F *hNSigmaTPC[4][numPtDau];
+  TCanvas *canvasTPC[4];
+  TString TitleNSigmaTPC[4] = {"hTPCNsigmaPi", "hTPCNsigmaPr", "hTPCNsigmaBachPi", "hTPCNsigmaBachKa"};
+
+  for (Int_t dau = 0; dau < 4; dau++)
+  {
+    canvasTPC[dau] = new TCanvas(Form("canvasTPC_dau%i", dau), Form("canvasTPC_dau%i", dau), 1800, 1400);
+    canvasTPC[dau]->Divide(numPtDau / 2, 2);
+    StyleCanvas(canvasTPC[dau], 0.15, 0.05, 0.05, 0.15);
+
+    for (Int_t pt = 0; pt < numPtDau+1; pt++)
+    {
+      if (dau == 0)
+        binptDau[pt] = binptDauPi[pt];
+      else if (dau == 1)
+        binptDau[pt] = binptDauPr[pt];
+      else if (dau == 2)
+        binptDau[pt] = binptDauBachPi[pt];
+      else if (dau == 3)
+        binptDau[pt] = binptDauBachKa[pt];
+    }
+
+    for (Int_t pt = 0; pt < numPtDau; pt++)
+    {
+      SPtDau[pt] = Form("%.1f < p_{T} < %.1f", binptDau[pt], binptDau[pt + 1]);
+
+      hNSigmaTPC[dau][pt] = (TH1F *)hNSigmaTPCvsPt[dau]->ProjectionX(Form("hNSigmaTPC_dau%i_pt%i", dau, pt), hNSigmaTPCvsPt[dau]->GetYaxis()->FindBin(binptDau[pt] + 0.001), hNSigmaTPCvsPt[dau]->GetYaxis()->FindBin(binptDau[pt + 1] - 0.001));
+      hNSigmaTPC[dau][pt]->Rebin(2);
+      StyleHisto(hNSigmaTPC[dau][pt], 0, 1.2 * hNSigmaTPC[dau][pt]->GetBinContent(hNSigmaTPC[dau][pt]->GetMaximumBin()), 1, 20, "Nsigma", "Counts", TitleNSigmaTPC[dau] + " " + SPtDau[pt], 1, -6, 6, 1.4, 1.4, 1.2);
+      hNSigmaTPC[dau][pt]->GetXaxis()->SetRangeUser(-6, 6);
+      hNSigmaTPC[dau][pt]->GetYaxis()->SetRangeUser(0, 1.2 * hNSigmaTPC[dau][pt]->GetBinContent(hNSigmaTPC[dau][pt]->GetMaximumBin()));
+      canvasTPC[dau]->cd(pt + 1);
+      gPad->SetTopMargin(0.08);
+      gPad->SetLeftMargin(0.15);
+      gPad->SetRightMargin(0.1);
+      gPad->SetBottomMargin(0.2);
+      hNSigmaTPC[dau][pt]->DrawClone("e same");
+    }
+  }
 
   // Cascade topological variables (after all topo sleections, for the time being)
   TDirectoryFile *dirCascVar;
@@ -395,7 +503,7 @@ void PostProcessing_Filters(TString year = "LHC22m_pass2_Train52782_hasTOF",
       canvasKine[0]->cd(var + 1);
     else
       canvasKine[1]->cd(var + 1 - 4);
-    //gPad->SetLogy();
+    // gPad->SetLogy();
     hKineVar[var]->DrawCopy("hist");
   }
 
@@ -475,7 +583,12 @@ void PostProcessing_Filters(TString year = "LHC22m_pass2_Train52782_hasTOF",
   canvasTrackQA2D->SaveAs(Soutputfile + ".pdf");
   canvasTrackQA->SaveAs(Soutputfile + ".pdf");
   canvasTrigger->SaveAs(Soutputfile + ".pdf");
+  canvasTPC[0]->SaveAs(Soutputfile + ".pdf");
+  canvasTPC[1]->SaveAs(Soutputfile + ".pdf");
+  canvasTPC[2]->SaveAs(Soutputfile + ".pdf");
+  canvasTPC[3]->SaveAs(Soutputfile + ".pdf");
   canvasCasc->SaveAs(Soutputfile + ".pdf");
+  canvasCascB->SaveAs(Soutputfile + ".pdf");
   canvasTopology[0]->SaveAs(Soutputfile + ".pdf");
   canvasTopology[1]->SaveAs(Soutputfile + ".pdf");
   canvasKine[0]->SaveAs(Soutputfile + ".pdf");
