@@ -142,11 +142,14 @@ Float_t lim_sup_errsigma[numPart] = {10, 0.0004, 0.0004, 10, 10, 10, 10}; // loo
 const Float_t massParticle[numPart] = {0.497611, 1.115683, 1.115683, 1.32171, 1.32171, 1.67245, 1.67245};
 TString Spart[numPart] = {"K0s", "Lambda", "AntiLambda", "XiNeg", "XiPos", "OmegaNeg", "OmegaPlus"};
 
-void Yields_from_invmass(TString year = "LHC22m_pass2_Train52781",
+void Yields_from_invmass(TString year = "LHC22o_triggsel_Train57049"/*"LHC22m_pass1_Train54926"/*"LHC21k6_Train54362"/"LHC22m_pass2_Train52781"*/,
                          TString SPathIn = /*"../TriggerForRun3/AnalysisResults_FinalTOT_NoTOF.root"*/
                          /*"../Run3QA/LHC21k6_MC_pp/AnalysisResults_Train48456_v0s_MC.root" /*"../Run3QA/LHC22s_PbPb/CascLHC22spass4_train47592.root" /*../Run3QA/LHC22s_PbPb/V0sLHC22spass4_train47593.root"*/
-                         "../Run3QA/LHC22m_pass2/AnalysisResults_Train52781_LHC22m_pass2.root",
-                         TString OutputDir = "../Run3QA/LHC22m_pass2/"/*"../TriggerForRun3/"*/, 
+                         /*"../Run3QA/LHC22m_pass2/AnalysisResults_Train52781_LHC22m_pass2.root"*/
+                         "../Run3QA/LHC22o_pass2/AnalysisResults_LHC22o_triggsel_Train57049.root"
+                         /*"../Run3QA/LHC21k6_MC_pp/AnalysisResults_Filter_Train54362_LHC21k6.root"*/
+                         /*"../Run3QA/LHC22m_pass1/AnalysisResults_LHC22m_pass1_Train54926.root"*/,
+                         TString OutputDir = "../Run3QA/LHC22o_pass2/"/*"../Run3QA/LHC22m_pass2/"/*"../Run3QA/LHC21k6_MC_pp/"/*"../Run3QA/LHC22m_pass2/" /*"../TriggerForRun3/"*/,
                          Int_t part = 3,
                          Bool_t UseTwoGauss = 1,
                          Bool_t isBkgParab = 0,
@@ -168,6 +171,8 @@ void Yields_from_invmass(TString year = "LHC22m_pass2_Train52781",
       cout << "this value of part is not specified, choose 3 (Xi) or 5 (Omega) " << endl;
       return;
     }
+    Spart[3] = "Xi";
+    Spart[5] = "Omega";
   }
 
   TFile *filein = new TFile(SPathIn, "");
@@ -465,7 +470,7 @@ void Yields_from_invmass(TString year = "LHC22m_pass2_Train52781",
       }
 
       cout << "\n\n fit total " << endl;
-      if (Spart[part] == "XiNeg" || Spart[part] == "XiPos")
+      if (Spart[part] == "XiNeg" || Spart[part] == "XiPos" || Spart[part] == "Xi")
       {
         total[pt]->SetParLimits(0, 0.08 * hInvMass[pt]->GetBinContent(hInvMass[pt]->GetMaximumBin()), hInvMass[pt]->GetBinContent(hInvMass[pt]->GetMaximumBin()));
         total[pt]->SetParLimits(1, 1.318, 1.326);
@@ -610,7 +615,7 @@ void Yields_from_invmass(TString year = "LHC22m_pass2_Train52781",
       }
 
       cout << "\n\n fit total " << endl;
-      if (Spart[part] == "XiNeg" || Spart[part] == "XiPos")
+      if (Spart[part] == "XiNeg" || Spart[part] == "XiPos" || Spart[part]== "Xi")
       {
         total[pt]->SetParLimits(0, 0.08 * hInvMass[pt]->GetBinContent(hInvMass[pt]->GetMaximumBin()), hInvMass[pt]->GetBinContent(hInvMass[pt]->GetMaximumBin()));
         total[pt]->SetParLimits(1, 1.318, 1.326);
@@ -729,7 +734,7 @@ void Yields_from_invmass(TString year = "LHC22m_pass2_Train52781",
   TCanvas *canvasYield = new TCanvas("canvasYield", "canvasYield", 1000, 800);
   histoCountsPerEvent->Draw("same");
   histoYield->DrawClone("same");
-  TLegend * legendYield = new TLegend (0.7, 0.7, 0.9, 0.9);
+  TLegend *legendYield = new TLegend(0.7, 0.7, 0.9, 0.9);
   legendYield->AddEntry(histoCountsPerEvent, "w/o bkg subtraction", "pl");
   legendYield->AddEntry(histoYield, "w/ bkg subtraction", "pl");
   legendYield->Draw("");
@@ -740,7 +745,7 @@ void Yields_from_invmass(TString year = "LHC22m_pass2_Train52781",
   canvasSummary->cd(1);
   gPad->SetBottomMargin(0.14);
   gPad->SetLeftMargin(0.14);
-  StyleHisto(histoMean, LowLimitMass[part], UpLimitMass[part], 1, 1, titlePt, "#mu (GeV/c^{2})",  "histoMean", 0, 0, 0, 1.4, 1.4, 1.2);
+  StyleHisto(histoMean, LowLimitMass[part], UpLimitMass[part], 1, 1, titlePt, "#mu (GeV/c^{2})", "histoMean", 0, 0, 0, 1.4, 1.4, 1.2);
   histoMean->Draw("");
   canvasSummary->cd(2);
   gPad->SetBottomMargin(0.14);
@@ -762,7 +767,7 @@ void Yields_from_invmass(TString year = "LHC22m_pass2_Train52781",
   if (isV0CascadeAnalysis)
     Soutputfile = "../Run3QA/" + year + "/Yields_" + Spart[part] + "_" + year; //"_FrancescaBin.root";
   else if (isFilter)
-    Soutputfile = OutputDir +"Yields_" + Spart[part] + "_" + year;
+    Soutputfile = OutputDir + "Yields_" + Spart[part] + "_" + year;
 
   // save canvases
   canvas->SaveAs(Soutputfile + ".pdf(");
@@ -772,6 +777,9 @@ void Yields_from_invmass(TString year = "LHC22m_pass2_Train52781",
   TFile *outputfile = new TFile(Soutputfile + ".root", "RECREATE");
   outputfile->WriteTObject(histoCountsPerEvent);
   outputfile->WriteTObject(histoYield);
+    outputfile->WriteTObject(histoMean);
+      outputfile->WriteTObject(histoSigma);
+        outputfile->WriteTObject(histoPurity);
   outputfile->Close();
   cout << "Ho creato il file: " << Soutputfile << endl;
 
