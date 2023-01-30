@@ -125,14 +125,18 @@ const Float_t massParticle[numPart] = {1.32171, 1.67245};
 // TString Spart[numPart+2] = {"XiNeg", "XiPos", "OmegaNeg", "OmegaPlus"};
 TString Spart[numPart] = {"Xi", "Omega"};
 
-void PostProcessing_Filters(TString year = /*"LHC21k6_Train54362"*/"LHC22m_pass2_Train52781",
-                            TString SPathIn = 
-                            /*"../Run3QA/LHC21k6_MC_pp/AnalysisResults_Filter_Train54362_LHC21k6.root"
-                            /*"../TriggerForRun3/AnalysisResults_FinalTOT_NoTOF.root"*/
+void PostProcessing_Filters(TString year = "LHC22o_triggsel_Train57049" /*"LHC22m_pass2_Train523186"/*"LHC22m_pass1_Train54926"/*"LHC21k6_Train54362""LHC22m_pass2_Train52781"*/,
+                            TString SPathIn =
+                                /*"../Run3QA/LHC21k6_MC_pp/AnalysisResults_Filter_Train54362_LHC21k6.root"
+                                /*"../TriggerForRun3/AnalysisResults_FinalTOT_NoTOF.root"*/
                             /*"../TriggerForRun3/AnalysisResults_22mpass2_New_8_NoGlobalTrackHC_Eta0.9.root"*/
-                            "../Run3QA/LHC22m_pass2/AnalysisResults_Train52781_LHC22m_pass2.root",
-                            TString OutputDir = "../Run3QA/LHC22m_pass2/"/*"../TriggerForRun3/"*/ /*"../Run3QA/LHC21k6_MC_pp/"*/,
-                            Float_t ptthr = 5)
+                            /*"../Run3QA/LHC22m_pass2/AnalysisResults_Train52781_LHC22m_pass2.root"*/
+                            /*"../Run3QA/LHC22m_pass2/AnalysisResults_FilterLHC22m_pass2_Train523186.root"*/
+                            /*"../Run3QA/LHC22m_pass1/AnalysisResults_LHC22m_pass1_Train54926.root"*/
+                            "../Run3QA/LHC22o_pass2/AnalysisResults_LHC22o_triggsel_Train57049.root",
+                            TString OutputDir = "../Run3QA/LHC22o_pass2/" /*"../Run3QA/LHC22m_pass1/"/*"../TriggerForRun3/"*/ /*"../Run3QA/LHC21k6_MC_pp/"*/,
+                            Float_t ptthr = 5,
+                            Bool_t isOldVersionBf2701 = 0)
 {
 
   cout << "Input file: " << SPathIn << endl;
@@ -202,7 +206,7 @@ void PostProcessing_Filters(TString year = /*"LHC21k6_Train54362"*/"LHC22m_pass2
   legendNumberEvents->AddEntry("", Form("Number of selected events: %.0f", NEvents));
   legendNumberEvents->Draw();
 
-  //cascade candidates
+  // cascade candidates
 
   TH1F *hCascCandidatesB = (TH1F *)dirCascB->Get("hCascadeCriteria");
   if (!hCascCandidatesB)
@@ -298,7 +302,7 @@ void PostProcessing_Filters(TString year = /*"LHC21k6_Train54362"*/"LHC22m_pass2
         hTrackQA1D[i]->Scale(1. / hTrackQA1D[i]->GetEntries());
 
       // if (hSTrackQA[i] == "hPhiTriggerAllEv") hTrackQA1D[i]->Rebin(2);
-      //hTrackQA1D[i]->Rebin(4);
+      // hTrackQA1D[i]->Rebin(4);
       if (hSTrackQA[i] == "hDCAxyTriggerAllEv")
         hTrackQA1D[i]->GetXaxis()->SetRangeUser(-0.05, 0.05);
       hTrackQA1D[i]->GetYaxis()->SetRangeUser(0, 2 * hTrackQA1D[i]->GetMaximum());
@@ -336,30 +340,28 @@ void PostProcessing_Filters(TString year = /*"LHC21k6_Train54362"*/"LHC22m_pass2
   hRejFactorshXi->Draw("text");
 
   // TPC nsigma distributions for all cascade candidates before selections
-  TH2F *hNSigmaTPCvsPt[4];
-  hNSigmaTPCvsPt[0] = (TH2F *)dirQA->Get("hTPCNsigmaPi");
-  hNSigmaTPCvsPt[1] = (TH2F *)dirQA->Get("hTPCNsigmaPr");
-  hNSigmaTPCvsPt[2] = (TH2F *)dirQA->Get("hTPCNsigmaBachPi");
-  hNSigmaTPCvsPt[3] = (TH2F *)dirQA->Get("hTPCNsigmaBachKa");
-  if (!hNSigmaTPCvsPt[0])
+  TH2F *hNSigmaTPCvsPt[12];
+  TString SNSigmaTPCvsPt[12] = {"hTPCNsigmaXiBachPiPlus", "hTPCNsigmaXiV0PiPlus", "hTPCNsigmaXiV0AntiProton",
+                                "hTPCNsigmaXiBachPiMinus", "hTPCNsigmaXiV0PiMinus", "hTPCNsigmaXiV0Proton",
+                                "hTPCNsigmaOmegaBachKaPlus", "hTPCNsigmaOmegaV0PiPlus", "hTPCNsigmaOmegaV0AntiProton",
+                                "hTPCNsigmaOmegaBachKaMinus", "hTPCNsigmaOmegaV0PiMinus", "hTPCNsigmaOmegaV0Proton"};
+  if (isOldVersionBf2701)
   {
-    cout << "hTPCNsigmaPi not available" << endl;
-    return;
+    SNSigmaTPCvsPt[0] = "hTPCNsigmaPi";
+    SNSigmaTPCvsPt[1] = "hTPCNsigmaPr";
+    SNSigmaTPCvsPt[2] = "hTPCNsigmaBachPi";
+    SNSigmaTPCvsPt[3] = "hTPCNsigmaBachKa";
   }
-  if (!hNSigmaTPCvsPt[1])
+  for (Int_t dau = 0; dau < 12; dau++)
   {
-    cout << "hTPCNsigmaPr not available" << endl;
-    return;
-  }
-  if (!hNSigmaTPCvsPt[2])
-  {
-    cout << "hTPCNsigmaBachPi not available" << endl;
-    return;
-  }
-  if (!hNSigmaTPCvsPt[3])
-  {
-    cout << "hTPCNsigmaBachKa not available" << endl;
-    return;
+    if (isOldVersionBf2701 && dau > 3)
+      continue;
+    hNSigmaTPCvsPt[dau] = (TH2F *)dirQA->Get(SNSigmaTPCvsPt[dau]);
+    if (!hNSigmaTPCvsPt[dau])
+    {
+      cout << SNSigmaTPCvsPt[dau] << " not available" << endl;
+      return;
+    }
   }
   const Int_t numPtDau = 6; // six pt intervals
 
@@ -370,26 +372,39 @@ void PostProcessing_Filters(TString year = /*"LHC21k6_Train54362"*/"LHC22m_pass2
   Float_t binptDau[numPtDau + 1] = {0, 0, 0, 0, 0, 0, 0};
 
   TString SPtDau[numPtDau] = {""};
-  TH1F *hNSigmaTPC[4][numPtDau];
-  TCanvas *canvasTPC[4];
-  TString TitleNSigmaTPC[4] = {"hTPCNsigmaPi", "hTPCNsigmaPr", "hTPCNsigmaBachPi", "hTPCNsigmaBachKa"};
+  TH1F *hNSigmaTPC[12][numPtDau];
+  TCanvas *canvasTPC[12];
 
-  for (Int_t dau = 0; dau < 4; dau++)
+  for (Int_t dau = 0; dau < 12; dau++)
   {
+    if (isOldVersionBf2701 && dau > 3)
+      continue;
     canvasTPC[dau] = new TCanvas(Form("canvasTPC_dau%i", dau), Form("canvasTPC_dau%i", dau), 1800, 1400);
     canvasTPC[dau]->Divide(numPtDau / 2, 2);
     StyleCanvas(canvasTPC[dau], 0.15, 0.05, 0.05, 0.15);
 
-    for (Int_t pt = 0; pt < numPtDau+1; pt++)
+    for (Int_t pt = 0; pt < numPtDau + 1; pt++)
     {
-      if (dau == 0)
-        binptDau[pt] = binptDauPi[pt];
-      else if (dau == 1)
-        binptDau[pt] = binptDauPr[pt];
-      else if (dau == 2)
+      if (dau == 0 || dau == 3)
         binptDau[pt] = binptDauBachPi[pt];
-      else if (dau == 3)
+      else if (dau == 1 || dau == 4 || dau == 7 || dau == 10)
+        binptDau[pt] = binptDauPi[pt];
+      else if (dau == 2 || dau == 5 || dau == 8 || dau == 11)
+        binptDau[pt] = binptDauPr[pt];
+      else if (dau == 6 || dau == 9)
         binptDau[pt] = binptDauBachKa[pt];
+
+      if (isOldVersionBf2701)
+      {
+        if (dau == 0)
+          binptDau[pt] = binptDauPi[pt];
+        else if (dau == 1)
+          binptDau[pt] = binptDauPr[pt];
+        else if (dau == 2)
+          binptDau[pt] = binptDauBachPi[pt];
+        else if (dau == 6)
+          binptDau[pt] = binptDauBachKa[pt];
+      }
     }
 
     for (Int_t pt = 0; pt < numPtDau; pt++)
@@ -398,7 +413,7 @@ void PostProcessing_Filters(TString year = /*"LHC21k6_Train54362"*/"LHC22m_pass2
 
       hNSigmaTPC[dau][pt] = (TH1F *)hNSigmaTPCvsPt[dau]->ProjectionX(Form("hNSigmaTPC_dau%i_pt%i", dau, pt), hNSigmaTPCvsPt[dau]->GetYaxis()->FindBin(binptDau[pt] + 0.001), hNSigmaTPCvsPt[dau]->GetYaxis()->FindBin(binptDau[pt + 1] - 0.001));
       hNSigmaTPC[dau][pt]->Rebin(2);
-      StyleHisto(hNSigmaTPC[dau][pt], 0, 1.2 * hNSigmaTPC[dau][pt]->GetBinContent(hNSigmaTPC[dau][pt]->GetMaximumBin()), 1, 20, "Nsigma", "Counts", TitleNSigmaTPC[dau] + " " + SPtDau[pt], 1, -6, 6, 1.4, 1.4, 1.2);
+      StyleHisto(hNSigmaTPC[dau][pt], 0, 1.2 * hNSigmaTPC[dau][pt]->GetBinContent(hNSigmaTPC[dau][pt]->GetMaximumBin()), 1, 20, "Nsigma", "Counts", SNSigmaTPCvsPt[dau] + " " + SPtDau[pt], 1, -6, 6, 1.4, 1.4, 1.2);
       hNSigmaTPC[dau][pt]->GetXaxis()->SetRangeUser(-6, 6);
       hNSigmaTPC[dau][pt]->GetYaxis()->SetRangeUser(0, 1.2 * hNSigmaTPC[dau][pt]->GetBinContent(hNSigmaTPC[dau][pt]->GetMaximumBin()));
       canvasTPC[dau]->cd(pt + 1);
@@ -422,18 +437,19 @@ void PostProcessing_Filters(TString year = /*"LHC21k6_Train54362"*/"LHC22m_pass2
   const int NTopCascVar = 11;
 
   TH1F *hTopVar[NTopCascVar];
-  TCanvas *canvasTopology[2];
-  canvasTopology[0] = new TCanvas("canvasTopology1", "canvasTopology1", 1800, 1400);
-  canvasTopology[0]->Divide(3, 2);
-  canvasTopology[1] = new TCanvas("canvasTopology2", "canvasTopology2", 1800, 1400);
-  canvasTopology[1]->Divide(3, 2);
+  TCanvas *canvasTopology[2][2];
+  canvasTopology[0][0] = new TCanvas("canvasTopologyXi1", "canvasTopologyXi1", 1800, 1400);
+  canvasTopology[0][0]->Divide(3, 2);
+  canvasTopology[0][1] = new TCanvas("canvasTopologyXi2", "canvasTopologyXi2", 1800, 1400);
+  canvasTopology[0][1]->Divide(3, 2);
+  canvasTopology[1][0] = new TCanvas("canvasTopologyOmega1", "canvasTopologyOmega1", 1800, 1400);
+  canvasTopology[1][0]->Divide(3, 2);
+  canvasTopology[1][1] = new TCanvas("canvasTopologyOmega2", "canvasTopologyOmega2", 1800, 1400);
+  canvasTopology[1][1]->Divide(3, 2);
 
   TString TopVarCascInput[NTopCascVar] = {"CascCosPA", "V0CosPA", "CascRadius", "V0Radius",
                                           "InvMassLambda", "DCACascDaughters", "DCAV0Daughters", "DCABachToPV",
                                           "DCAV0ToPV", "DCAPosToPV", "DCANegToPV"};
-  // TString TopVarCascInput[NTopCascVar] = {"hXiCascCosPA", "hXiV0CosPA", "hXiCascRadius", "hXiV0Radius",
-  //                                         "hXiInvMassLambda", "hXiDCACascDaughters", "hXiDCAV0Daughters", "hXiDCABachToPV",
-  //                                         "hXiDCAV0ToPV", "hXiDCAPosToPV", "hXiDCANegToPV"};
   TString TopVarCasc[NTopCascVar] = {"Casc #it{cos}#theta_{PA}", "V0 #it{cos}#theta_{PA}", "Casc #it{R}", "V0 #it{R}",
                                      "#it{m}_{inv} #Lambda Daughter", "DCA Casc Daughters", "DCA V0 Daughters", "DCA Bach. To PV",
                                      "DCA V0 To PV", "DCA Pos. To PV", "DCA Neg. To PV"};
@@ -444,32 +460,43 @@ void PostProcessing_Filters(TString year = /*"LHC21k6_Train54362"*/"LHC22m_pass2
                                           0, 2, 2, 0.05,
                                           0, 0.05, 0.05};
   TLine *lineCascCuts[NTopCascVar];
+  TString SXiorOmega[2] = {"Xi", "Omega"};
+  TString prefix = "h";
 
-  for (Int_t var = 0; var < NTopCascVar; var++)
+  for (Int_t XiorOmega = 0; XiorOmega < 2; XiorOmega++)
   {
-    hTopVar[var] = (TH1F *)dirCascVar->Get(TopVarCascInput[var]);
-    if (!hTopVar[var])
+    if (isOldVersionBf2701)
     {
-      cout << TopVarCascInput[var] << " not available" << endl;
-      return;
+      SXiorOmega[0] = "";
+      prefix = "";
+      if (XiorOmega == 1)
+        continue;
     }
-    hTopVar[var]->Scale(1. / NEvents);
-    hTopVar[var]->GetYaxis()->SetRangeUser(0.1 * hTopVar[var]->GetMinimum(1.e-10), 10 * hTopVar[var]->GetMaximum());
-    hTopVar[var]->SetTitle(TopVarCasc[var]);
-    hTopVar[var]->GetXaxis()->SetTitle(TopVarCasc[var] + " " + TopVarCascUnit[var]);
-    hTopVar[var]->GetYaxis()->SetTitle("1/N_{ev} Counts");
-    if (var < 6)
-      canvasTopology[0]->cd(var + 1);
-    else
-      canvasTopology[1]->cd(var + 1 - 6);
-    gPad->SetLogy();
-    hTopVar[var]->DrawCopy("hist");
-    lineCascCuts[var] = new TLine(TopVarCascCuts[var], hTopVar[var]->GetMinimum(), TopVarCascCuts[var], hTopVar[var]->GetMaximum());
-    // lineCascCuts[var] = new TLine(TopVarCascCuts[var], 0, TopVarCascCuts[var], 100);
-    lineCascCuts[var]->SetLineColor(867);
-    lineCascCuts[var]->Draw("");
+    for (Int_t var = 0; var < NTopCascVar; var++)
+    {
+      hTopVar[var] = (TH1F *)dirCascVar->Get(prefix + TopVarCascInput[var] + SXiorOmega[XiorOmega]);
+      if (!hTopVar[var])
+      {
+        cout << prefix << TopVarCascInput[var] << SXiorOmega[XiorOmega]<< " not available" << endl;
+        return;
+      }
+      hTopVar[var]->Scale(1. / NEvents);
+      hTopVar[var]->GetYaxis()->SetRangeUser(0.1 * hTopVar[var]->GetMinimum(1.e-10), 10 * hTopVar[var]->GetMaximum());
+      hTopVar[var]->SetTitle(TopVarCasc[var]);
+      hTopVar[var]->GetXaxis()->SetTitle(TopVarCasc[var] + " " + TopVarCascUnit[var]);
+      hTopVar[var]->GetYaxis()->SetTitle("1/N_{ev} Counts");
+      if (var < 6)
+        canvasTopology[XiorOmega][0]->cd(var + 1);
+      else
+        canvasTopology[XiorOmega][1]->cd(var + 1 - 6);
+      gPad->SetLogy();
+      hTopVar[var]->DrawCopy("hist");
+      lineCascCuts[var] = new TLine(TopVarCascCuts[var], hTopVar[var]->GetMinimum(), TopVarCascCuts[var], hTopVar[var]->GetMaximum());
+      // lineCascCuts[var] = new TLine(TopVarCascCuts[var], 0, TopVarCascCuts[var], 100);
+      lineCascCuts[var]->SetLineColor(867);
+      lineCascCuts[var]->Draw("");
+    }
   }
-
   // repidity, eta, ctau and pt
   const int NKineCascVar = 8;
 
@@ -486,9 +513,10 @@ void PostProcessing_Filters(TString year = /*"LHC21k6_Train54362"*/"LHC22m_pass2
 
   for (Int_t var = 0; var < NKineCascVar; var++)
   {
-    if (var > 5)
+    if (isOldVersionBf2701 && var > 5)
       continue;
-    hKineVar[var] = (TH1F *)dirQA->Get(KineVarCascInput[var]);
+    if (isOldVersionBf2701 || (KineVarCascInput[var]!="hProperLifetimeXi" && KineVarCascInput[var]!= "hProperLifetimeOmega")) hKineVar[var] = (TH1F *)dirQA->Get(KineVarCascInput[var]);
+    else hKineVar[var] = (TH1F *)dirCascVar->Get(KineVarCascInput[var]);
     if (!hKineVar[var])
     {
       cout << KineVarCascInput[var] << " not available" << endl;
@@ -583,14 +611,21 @@ void PostProcessing_Filters(TString year = /*"LHC21k6_Train54362"*/"LHC22m_pass2
   canvasTrackQA2D->SaveAs(Soutputfile + ".pdf");
   canvasTrackQA->SaveAs(Soutputfile + ".pdf");
   canvasTrigger->SaveAs(Soutputfile + ".pdf");
-  canvasTPC[0]->SaveAs(Soutputfile + ".pdf");
-  canvasTPC[1]->SaveAs(Soutputfile + ".pdf");
-  canvasTPC[2]->SaveAs(Soutputfile + ".pdf");
-  canvasTPC[3]->SaveAs(Soutputfile + ".pdf");
+  for (Int_t dau = 0; dau < 12; dau++)
+  {
+    if (isOldVersionBf2701 && dau > 3)
+      continue;
+    canvasTPC[dau]->SaveAs(Soutputfile + ".pdf");
+  }
   canvasCasc->SaveAs(Soutputfile + ".pdf");
   canvasCascB->SaveAs(Soutputfile + ".pdf");
-  canvasTopology[0]->SaveAs(Soutputfile + ".pdf");
-  canvasTopology[1]->SaveAs(Soutputfile + ".pdf");
+  canvasTopology[0][0]->SaveAs(Soutputfile + ".pdf");
+  canvasTopology[0][1]->SaveAs(Soutputfile + ".pdf");
+  if (!isOldVersionBf2701)
+  {
+    canvasTopology[1][0]->SaveAs(Soutputfile + ".pdf");
+    canvasTopology[1][1]->SaveAs(Soutputfile + ".pdf");
+  }
   canvasKine[0]->SaveAs(Soutputfile + ".pdf");
   canvasKine[1]->SaveAs(Soutputfile + ".pdf");
   canvas[0]->SaveAs(Soutputfile + ".pdf");
