@@ -77,10 +77,15 @@ Double_t fparab(Double_t *x, Double_t *par)
     LimInf = 0.474;
     LimSup = 0.520;
   }
-  else if (par[3] == 4 || par[3] == 5 || par[3] == 8)
+  else if (par[3] == 3 || par[3] == 4)
   {
     LimInf = 1.310;
     LimSup = 1.335;
+  }
+  else if (par[2] == 5 || par[2] == 6)
+  {
+    LimInf = 1.65; //was 658
+    LimSup = 1.69; //was 68
   }
   if (reject && x[0] > LimInf && x[0] < LimSup)
   {
@@ -99,10 +104,15 @@ Double_t fretta(Double_t *x, Double_t *par)
     LimInf = 0.47;
     LimSup = 0.530;
   }
-  else if (par[2] == 4 || par[2] == 5 || par[2] == 8)
+  else if (par[2] == 3 || par[2] == 3)
   {
     LimInf = 1.310;
     LimSup = 1.335;
+  }
+  else if (par[2] == 5 || par[2] == 6)
+  {
+    LimInf = 1.65;
+    LimSup = 1.69;
   }
   if (reject && x[0] > LimInf && x[0] < LimSup)
   {
@@ -120,43 +130,43 @@ TString TitleInvMass[numPart] = {"(#pi^{+}, #pi^{-}) invariant mass (GeV/#it{c}^
 TString namehisto[numPart] = {"h3dMassK0Short", "", "", "h2dMassXiMinus", "h2dMassXiPlus", "h2dMassOmegaMinus", "h2dMassOmegaPlus"};
 Float_t LowLimitMass[numPart] = {0.42, 1.09, 1.09, 1.29, 1.29, 1.62, 1.62}; // 0.44
 Float_t UpLimitMass[numPart] = {0.57, 1.14, 1.14, 1.35, 1.35, 1.72, 1.72};  // 0.55
-Float_t LowMassRange[numPart] = {0.48, 1.09, 1.09, 1.31};
-Float_t UpMassRange[numPart] = {0.51, 1.14, 1.14, 1.33};
+Float_t LowMassRange[numPart] = {0.48, 1.09, 1.09, 1.31, 1.31, 1.655, 1.655};
+Float_t UpMassRange[numPart] = {0.51, 1.14, 1.14, 1.33, 1.33, 1.685, 1.685};
 
-Float_t min_range_signal[numPart] = {0.46, 1.105, 1.105, 1.31, 1.31, 1.66, 1.66}; // estremi region fit segnale (gaussiane)
-Float_t max_range_signal[numPart] = {0.535, 1.125, 1.125, 1.334, 1.334, 1.685, 1.685};
+Float_t min_range_signal[numPart] = {0.46, 1.105, 1.105, 1.31, 1.31, 1.65, 1.65}; // estremi region fit segnale (gaussiane)
+Float_t max_range_signal[numPart] = {0.535, 1.125, 1.125, 1.334, 1.334, 1.69, 1.69};
 Float_t min_histo[numPart] = {0.42, 1.09, 1.09, 1.30, 1.30, 1.62, 1.62}; // estremi del range degli istogrammi
 Float_t max_histo[numPart] = {0.57, 1.14, 1.14, 1.342, 1.342, 1.72, 1.72};
-Float_t liminf[numPart] = {0.45, 1.1153, 1.1153, 1.30, 1.30, 1.66, 1.66}; // estremi regione fit del bkg e total
-Float_t limsup[numPart] = {0.545, 1.1168, 1.1168, 1.342, 1.342, 1.685, 1.685};
-
-Float_t lim_inf_mean[numPart] = {0.495, 1.1153, 1.1153, 1.31, 1.31, 1.66, 1.66};
-Float_t lim_sup_mean[numPart] = {0.500, 1.1168, 1.1168, 1.33, 1.33, 1.685, 1.685};
-Float_t lim_inf_sigma[numPart] = {0};
-Float_t lim_sup_sigma[numPart] = {0.008, 0.002, 0.002, 0.008, 0.008, 0.008, 0.008};
-Float_t lim_inf_errmean[numPart] = {0};
-Float_t lim_sup_errmean[numPart] = {10, 0.0006, 0.0006, 10, 10, 10, 10}; // loooooose
-Float_t lim_inf_errsigma[numPart] = {0};
-Float_t lim_sup_errsigma[numPart] = {10, 0.0004, 0.0004, 10, 10, 10, 10}; // loose
+Float_t liminf[numPart] = {0.45, 1.1153, 1.1153, 1.29, 1.29, 1.63, 1.63}; // estremi regione fit del bkg e total
+Float_t limsup[numPart] = {0.545, 1.1168, 1.1168, 1.35, 1.35, 1.71, 1.71};
+// in the past (before LHC22m_pass3) they were: 1.3 and 1.342
 
 const Float_t massParticle[numPart] = {0.497611, 1.115683, 1.115683, 1.32171, 1.32171, 1.67245, 1.67245};
 TString Spart[numPart] = {"K0s", "Lambda", "AntiLambda", "XiNeg", "XiPos", "OmegaNeg", "OmegaPlus"};
+TString SpartType[numPart] = {"K0s", "Lambda", "Lambda", "Xi", "Xi", "Omega", "Omega"};
+TString IsOneOrTwoGauss[2] = {"_OneGaussFit", ""};
 
-void Yields_from_invmass(TString year = "LHC22o_triggsel_Train57049"/*"LHC22m_pass1_Train54926"/*"LHC21k6_Train54362"/"LHC22m_pass2_Train52781"*/,
+void Yields_from_invmass(Int_t part = 3,
+                         TString year = "LHC22m_pass3_relval_Train63492_qa"/*"LHC22m_pass3_relval_Train66676"*"LHC22m_pass3_relval_Train63790_qa" /*"LHC22o_triggsel_Train57049"/*"LHC22m_pass1_Train54926"/*"LHC21k6_Train54362"/"LHC22m_pass2_Train52781"*/,
                          TString SPathIn = /*"../TriggerForRun3/AnalysisResults_FinalTOT_NoTOF.root"*/
                          /*"../Run3QA/LHC21k6_MC_pp/AnalysisResults_Train48456_v0s_MC.root" /*"../Run3QA/LHC22s_PbPb/CascLHC22spass4_train47592.root" /*../Run3QA/LHC22s_PbPb/V0sLHC22spass4_train47593.root"*/
                          /*"../Run3QA/LHC22m_pass2/AnalysisResults_Train52781_LHC22m_pass2.root"*/
-                         "../Run3QA/LHC22o_pass2/AnalysisResults_LHC22o_triggsel_Train57049.root"
+                         /*"../Run3QA/LHC22o_pass2/AnalysisResults_LHC22o_triggsel_Train57049.root"*/
+                         /*"../Run3QA/LHC22o_pass2/AnalysisResults_LHC22o_pass2_small_Train57351.root"*/
+                         /*"../Run3QA/LHC22m_pass3/AnalysisResults_Filters_LHC22m_pass3_relval_cpu2_Train63790.root"*/
+                         /*"../Run3QA/LHC22m_pass3/Filtro_Treno68152_22mpass3relval.root"*/
                          /*"../Run3QA/LHC21k6_MC_pp/AnalysisResults_Filter_Train54362_LHC21k6.root"*/
-                         /*"../Run3QA/LHC22m_pass1/AnalysisResults_LHC22m_pass1_Train54926.root"*/,
-                         TString OutputDir = "../Run3QA/LHC22o_pass2/"/*"../Run3QA/LHC22m_pass2/"/*"../Run3QA/LHC21k6_MC_pp/"/*"../Run3QA/LHC22m_pass2/" /*"../TriggerForRun3/"*/,
-                         Int_t part = 3,
-                         Bool_t UseTwoGauss = 1,
+                         /*"../Run3QA/LHC22m_pass1/AnalysisResults_LHC22m_pass1_Train54926.root"*/
+                         /*"../Run3QA/LHC22m_pass3/AnalysisResults_qatask_LHC22m_pass3_relval_cpu2_Train63492.root"*/
+                         "../Run3QA/LHC22m_pass3/AnalysisResults_qatask_LHC22m_pass3_relval_cpu2_Train63492.root",
+                         TString OutputDir = "../Run3QA/LHC22m_pass3/" /*"../Run3QA/LHC22m_pass2/"/*"../Run3QA/LHC21k6_MC_pp/"/*"../Run3QA/LHC22m_pass2/" /*"../TriggerForRun3/"*/,
+                         Bool_t UseTwoGauss = 0,
                          Bool_t isBkgParab = 0,
                          Bool_t isMeanFixedPDG = 0,
-                         Float_t sigmacentral = 4,
+                         Float_t sigmacentral = 3,
                          Bool_t isV0CascadeAnalysis = 0,
-                         Bool_t isFilter = 1)
+                         Bool_t isFilter = 0,
+                         Bool_t isPostProcess = 1)
 {
 
   if (isV0CascadeAnalysis && isFilter)
@@ -183,9 +193,11 @@ void Yields_from_invmass(TString year = "LHC22o_triggsel_Train57049"/*"LHC22m_pa
   }
 
   TDirectoryFile *dir;
+  TDirectoryFile *dirEvt;
   TDirectoryFile *dirCasc;
   TH3F *h3;
   TH2F *h2;
+  TH2F *h2Bis;
   TH1F *hEvents;
 
   if (isV0CascadeAnalysis)
@@ -199,6 +211,11 @@ void Yields_from_invmass(TString year = "LHC22o_triggsel_Train57049"/*"LHC22m_pa
   {
     dir = (TFile *)filein->Get("lf-strangeness-filter");
   }
+  else if (isPostProcess)
+  {
+    dir = (TFile *)filein->Get("v0cascades-q-a");
+  }
+
   if (!dir)
   {
     cout << "dir not available" << endl;
@@ -245,12 +262,47 @@ void Yields_from_invmass(TString year = "LHC22o_triggsel_Train57049"/*"LHC22m_pa
       return;
     }
   }
+  else if (isPostProcess)
+  {
+    dirCasc = (TDirectoryFile *)dir->Get("histos-Casc");
+    if (!dirCasc)
+    {
+      cout << "Directory QAHistos not available" << endl;
+      return;
+    }
+    if (part == 3)
+    {
+      h2 = (TH2F *)dirCasc->Get("InvMassXiMinus");
+      h2Bis = (TH2F *)dirCasc->Get("InvMassXiPlus");
+    }
+    else
+    {
+      h2 = (TH2F *)dirCasc->Get("InvMassOmegaMinus");
+      h2Bis = (TH2F *)dirCasc->Get("InvMassOmegaPlus");
+    }
+    if (!h2)
+    {
+      cout << "h2 cascade not avilable " << endl;
+      return;
+    }
+    if (!h2Bis)
+    {
+      cout << "h2Bis cascade not avilable " << endl;
+      return;
+    }
+    h2->Add(h2Bis, 1);
+  }
 
   Double_t NEvents = 0;
   if (isV0CascadeAnalysis)
     hEvents = (TH1F *)dir->Get("hEventSelection");
   else if (isFilter)
     hEvents = (TH1F *)dir->Get("hProcessedEvents");
+  else if (isPostProcess)
+  {
+    dirEvt = (TDirectoryFile *)dir->Get("histos-eve");
+    hEvents = (TH1F *)dirEvt->Get("hEventCounter");
+  }
   if (!hEvents)
   {
     cout << "hEventSelection/hProcessEvents not avilable " << endl;
@@ -260,17 +312,20 @@ void Yields_from_invmass(TString year = "LHC22o_triggsel_Train57049"/*"LHC22m_pa
     NEvents = hEvents->GetBinContent(3);
   else if (isFilter)
     NEvents = hEvents->GetBinContent(1);
+  else if (isPostProcess)
+    NEvents = hEvents->GetBinContent(1);
   cout << "NEvents" << NEvents << endl;
 
   h2->SetName("InvMassvsPt");
 
-  const Int_t numPt = 6; // six pt intervals
+  const Int_t numPt = 9; // six pt intervals
   // Float_t binpt[numPt + 1] = {0.4, 0.6, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.5, 3, 4}; // 10
   // Float_t binpt[numPt + 1] = {0.4, 0.6, 0.8, 1.0, 1.2, 1.6, 2.0};
 
   // Xi
   // Float_t binpt[numPt + 1] = {1.0, 1.5, 2.0, 2.3, 2.6, 5.0, 10.0};
-  Float_t binpt[numPt + 1] = {1.0, 1.5, 1.8, 2.1, 2.4, 2.6, 6.0};
+  // Float_t binpt[numPt + 1] = {1.0, 1.5, 1.8, 2.1, 2.4, 2.6, 6.0};
+  Float_t binpt[numPt + 1] = {0.6, 1.0, 1.2, 1.5, 1.8, 2.1, 2.4, 2.7, 3.0, 4.0};
 
   // Omega
   // Float_t binpt[numPt + 1] = {1.0, 1.5, 2.0, 3.0, 6.0};
@@ -279,7 +334,7 @@ void Yields_from_invmass(TString year = "LHC22o_triggsel_Train57049"/*"LHC22m_pa
   TH1F *hInvMass[numPt];
 
   TCanvas *canvas = new TCanvas("canvas", "canvas", 1800, 1400);
-  canvas->Divide(numPt / 2, 2);
+  canvas->Divide(numPt / 3, 3);
   StyleCanvas(canvas, 0.15, 0.05, 0.05, 0.15);
 
   TH1F *histoCountsPerEvent = new TH1F("histoCountsPerEvent", "histoCountsPerEvent", numPt, binpt);
@@ -295,7 +350,7 @@ void Yields_from_invmass(TString year = "LHC22o_triggsel_Train57049"/*"LHC22m_pa
     SPt[pt] = Form("%.1f < p_{T} < %.1f", binpt[pt], binpt[pt + 1]);
     cout << binpt[pt] << endl;
 
-    if (isV0CascadeAnalysis)
+    if (isV0CascadeAnalysis || isPostProcess)
       hInvMass[pt] = (TH1F *)h2->ProjectionY(Form("hInvMass_pt%i", pt), h2->GetXaxis()->FindBin(binpt[pt] + 0.001), h2->GetXaxis()->FindBin(binpt[pt + 1] - 0.001));
     else if (isFilter)
       hInvMass[pt] = (TH1F *)h2->ProjectionX(Form("hInvMass_pt%i", pt), h2->GetYaxis()->FindBin(binpt[pt] + 0.001), h2->GetYaxis()->FindBin(binpt[pt + 1] - 0.001));
@@ -355,6 +410,7 @@ void Yields_from_invmass(TString year = "LHC22o_triggsel_Train57049"/*"LHC22m_pa
   Float_t Yield[numPt] = {0};
   Float_t ErrYield[numPt] = {0};
   Float_t TotYield = 0;
+  Float_t TotSigBkg = 0;
 
   for (Int_t pt = 0; pt < numPt; pt++)
   {
@@ -371,7 +427,7 @@ void Yields_from_invmass(TString year = "LHC22o_triggsel_Train57049"/*"LHC22m_pa
     }
     // end of special settings
 
-    UseTwoGauss = 1;
+    // UseTwoGauss = 1;
     canvas->cd(pt + 1);
 
     functionsFirst[pt] = new TF1(Form("1f_%i", pt), "gaus", min_range_signal[part], max_range_signal[part]);
@@ -394,13 +450,13 @@ void Yields_from_invmass(TString year = "LHC22o_triggsel_Train57049"/*"LHC22m_pa
     functionsSecond[pt]->SetParLimits(2, 0.001, 0.15);
     functionsSecond[pt]->SetParLimits(0, 0, 1.1 * hInvMass[pt]->GetBinContent(hInvMass[pt]->GetMaximumBin()));
 
-    functions1[pt] = new TF1(Form("1f_%i_final", pt), "gaus", min_range_signal[part], max_range_signal[part]);
+    functions1[pt] = new TF1(Form("1f_%i_final", pt), "gaus", LowLimitMass[part], UpLimitMass[part]);
     functions1[pt]->SetLineColor(kRed); // 867
     functions1[pt]->SetParName(0, "norm");
     functions1[pt]->SetParName(1, "mean");
     functions1[pt]->SetParName(2, "sigma");
 
-    functions2[pt] = new TF1(Form("2f_%i_final", pt), "gaus", min_range_signal[part], max_range_signal[part]);
+    functions2[pt] = new TF1(Form("2f_%i_final", pt), "gaus", LowLimitMass[part], UpLimitMass[part]);
     functions2[pt]->SetLineColor(kMagenta); // 891
     functions2[pt]->SetParName(0, "norm");
     functions2[pt]->SetParName(1, "mean");
@@ -474,7 +530,7 @@ void Yields_from_invmass(TString year = "LHC22o_triggsel_Train57049"/*"LHC22m_pa
       {
         total[pt]->SetParLimits(0, 0.08 * hInvMass[pt]->GetBinContent(hInvMass[pt]->GetMaximumBin()), hInvMass[pt]->GetBinContent(hInvMass[pt]->GetMaximumBin()));
         total[pt]->SetParLimits(1, 1.318, 1.326);
-        total[pt]->SetParLimits(2, 0.0012, 0.010);                                                                                                                 // it was 0.001
+        total[pt]->SetParLimits(2, 0.0012, 0.010);
         total[pt]->SetParLimits(3, 0.08 * hInvMass[pt]->GetBinContent(hInvMass[pt]->GetMaximumBin()), hInvMass[pt]->GetBinContent(hInvMass[pt]->GetMaximumBin())); // maximum was wothout 0.3
         total[pt]->SetParLimits(4, 1.318, 1.326);
         if (isMeanFixedPDG)
@@ -483,7 +539,21 @@ void Yields_from_invmass(TString year = "LHC22o_triggsel_Train57049"/*"LHC22m_pa
           total[pt]->FixParameter(4, massParticle[part]);
         }
       }
-      if (Spart[part] == "K0s")
+      else if (Spart[part] == "OmegaNeg" || Spart[part] == "OmegaPos" || Spart[part] == "Omega")
+      {
+        total[pt]->SetParLimits(0, 0.08 * hInvMass[pt]->GetBinContent(hInvMass[pt]->GetMaximumBin()), hInvMass[pt]->GetBinContent(hInvMass[pt]->GetMaximumBin()));
+        total[pt]->SetParLimits(1, 1.66, 1.68);
+        total[pt]->SetParLimits(2, 0.002, 0.02);
+        total[pt]->SetParLimits(3, 0.08 * hInvMass[pt]->GetBinContent(hInvMass[pt]->GetMaximumBin()), hInvMass[pt]->GetBinContent(hInvMass[pt]->GetMaximumBin())); // maximum was wothout 0.3
+        total[pt]->SetParLimits(4, 1.66, 1.68);
+        total[pt]->SetParLimits(5, 0.002, 0.02);
+        if (isMeanFixedPDG)
+        {
+          total[pt]->FixParameter(1, massParticle[part]);
+          total[pt]->FixParameter(4, massParticle[part]);
+        }
+      }
+      else if (Spart[part] == "K0s")
       {
         total[pt]->SetParLimits(0, 0.08 * hInvMass[pt]->GetBinContent(hInvMass[pt]->GetMaximumBin()), hInvMass[pt]->GetBinContent(hInvMass[pt]->GetMaximumBin()));
         total[pt]->SetParLimits(1, 0.485, 0.505);
@@ -567,7 +637,7 @@ void Yields_from_invmass(TString year = "LHC22o_triggsel_Train57049"/*"LHC22m_pa
         Double_t cov_mean = cov[1][4];
         Double_t cov_sigma = cov[2][5];
         mean[pt] = (functions1[pt]->GetParameter(1) + functions2[pt]->GetParameter(1)) / 2;
-        errmean[pt] = (functionsFirst[pt]->GetParError(1) + functionsSecond[pt]->GetParError(1)) / 2;
+        errmean[pt] = (total[pt]->GetParError(1) + total[pt]->GetParError(4)) / 2;
         sigma[pt] = (functions1[pt]->GetParameter(2) + functions2[pt]->GetParameter(2)) / 2;
         errsigma[pt] = sqrt(pow(total[pt]->GetParError(2), 2) + pow(total[pt]->GetParError(5), 2) + 2 * cov_sigma) / 2;
       }
@@ -615,7 +685,7 @@ void Yields_from_invmass(TString year = "LHC22o_triggsel_Train57049"/*"LHC22m_pa
       }
 
       cout << "\n\n fit total " << endl;
-      if (Spart[part] == "XiNeg" || Spart[part] == "XiPos" || Spart[part]== "Xi")
+      if (Spart[part] == "XiNeg" || Spart[part] == "XiPos" || Spart[part] == "Xi")
       {
         total[pt]->SetParLimits(0, 0.08 * hInvMass[pt]->GetBinContent(hInvMass[pt]->GetMaximumBin()), hInvMass[pt]->GetBinContent(hInvMass[pt]->GetMaximumBin()));
         total[pt]->SetParLimits(1, 1.318, 1.326);
@@ -623,10 +693,19 @@ void Yields_from_invmass(TString year = "LHC22o_triggsel_Train57049"/*"LHC22m_pa
         if (isMeanFixedPDG)
         {
           total[pt]->FixParameter(1, massParticle[part]);
-          total[pt]->FixParameter(4, massParticle[part]);
         }
       }
-      if (Spart[part] == "K0s")
+      else if (Spart[part] == "OmegaNeg" || Spart[part] == "OmegaPos" || Spart[part] == "Omega")
+      {
+        //total[pt]->SetParLimits(0, 0.08 * hInvMass[pt]->GetBinContent(hInvMass[pt]->GetMaximumBin()), hInvMass[pt]->GetBinContent(hInvMass[pt]->GetMaximumBin()));
+        total[pt]->SetParLimits(1, 1.66, 1.68);
+        total[pt]->SetParLimits(2, 0.002, 0.02);
+        if (isMeanFixedPDG)
+        {
+          total[pt]->FixParameter(1, massParticle[part]);
+        }
+      }
+      else if (Spart[part] == "K0s")
       {
         total[pt]->SetParLimits(0, 0.08 * hInvMass[pt]->GetBinContent(hInvMass[pt]->GetMaximumBin()), hInvMass[pt]->GetBinContent(hInvMass[pt]->GetMaximumBin()));
         total[pt]->SetParLimits(1, 0.485, 0.505);
@@ -635,11 +714,9 @@ void Yields_from_invmass(TString year = "LHC22o_triggsel_Train57049"/*"LHC22m_pa
         if (isMeanFixedPDG)
         {
           total[pt]->FixParameter(1, massParticle[part]);
-          total[pt]->FixParameter(4, massParticle[part]);
         }
-        cout << "max value " << hInvMass[pt]->GetBinContent(hInvMass[pt]->GetMaximumBin()) << endl;
       }
-
+      cout << "max value " << hInvMass[pt]->GetBinContent(hInvMass[pt]->GetMaximumBin()) << endl;
       fFitResultPtr0[pt] = hInvMass[pt]->Fit(total[pt], "SRB+"); // per errore gaussiana, S indica che il risultato del fit e' accessibile da fFitResultPtr0
 
       totalbis[pt] = (TF1 *)total[pt]->Clone();
@@ -677,9 +754,9 @@ void Yields_from_invmass(TString year = "LHC22o_triggsel_Train57049"/*"LHC22m_pa
         bkg1[pt]->Draw("same");
       functions1[pt]->Draw("same");
 
-      mean[pt] = functions1[pt]->GetParameter(1);
-      errmean[pt] = functionsFirst[pt]->GetParError(1);
-      sigma[pt] = functions1[pt]->GetParameter(2);
+      mean[pt] = total[pt]->GetParameter(1);
+      errmean[pt] = total[pt]->GetParError(1);
+      sigma[pt] = total[pt]->GetParameter(2);
       errsigma[pt] = total[pt]->GetParError(2);
     }
 
@@ -711,6 +788,7 @@ void Yields_from_invmass(TString year = "LHC22o_triggsel_Train57049"/*"LHC22m_pa
     Yield[pt] = entries_range[pt] - b[pt];
     ErrYield[pt] = sqrt(entries_range[pt] + pow(errb[pt], 2));
     TotYield += Yield[pt];
+    TotSigBkg += entries_range[pt];
 
     SSB[pt] = (entries_range[pt] - b[pt]) / entries_range[pt];
     errSSB[pt] = SSB[pt] * sqrt(1. / entries_range[pt] + pow(errb[pt] / b[pt], 2));
@@ -729,9 +807,11 @@ void Yields_from_invmass(TString year = "LHC22o_triggsel_Train57049"/*"LHC22m_pa
   }
 
   TotYield = TotYield / NEvents;
+  TotSigBkg = TotSigBkg / NEvents;
   histoYield->SetLineColor(kRed);
 
   TCanvas *canvasYield = new TCanvas("canvasYield", "canvasYield", 1000, 800);
+  if (part ==5 || part == 6)  histoCountsPerEvent->GetYaxis()->SetRangeUser(0, 0.00007);
   histoCountsPerEvent->Draw("same");
   histoYield->DrawClone("same");
   TLegend *legendYield = new TLegend(0.7, 0.7, 0.9, 0.9);
@@ -751,6 +831,8 @@ void Yields_from_invmass(TString year = "LHC22o_triggsel_Train57049"/*"LHC22m_pa
   gPad->SetBottomMargin(0.14);
   gPad->SetLeftMargin(0.14);
   StyleHisto(histoSigma, 0, 0.010, 1, 1, titlePt, "#sigma (GeV/c^{2})", "histoSigma", 0, 0, 0, 1.4, 1.4, 1.2);
+  if (part >= 5)
+    histoSigma->GetYaxis()->SetRangeUser(0, 0.02);
   histoSigma->Draw("");
   canvasSummary->cd(3);
   gPad->SetBottomMargin(0.14);
@@ -768,6 +850,10 @@ void Yields_from_invmass(TString year = "LHC22o_triggsel_Train57049"/*"LHC22m_pa
     Soutputfile = "../Run3QA/" + year + "/Yields_" + Spart[part] + "_" + year; //"_FrancescaBin.root";
   else if (isFilter)
     Soutputfile = OutputDir + "Yields_" + Spart[part] + "_" + year;
+  else if (isPostProcess)
+    Soutputfile = OutputDir + "YieldsQATask_" + SpartType[part] + "_" + year;
+
+  Soutputfile += IsOneOrTwoGauss[UseTwoGauss];
 
   // save canvases
   canvas->SaveAs(Soutputfile + ".pdf(");
@@ -777,11 +863,12 @@ void Yields_from_invmass(TString year = "LHC22o_triggsel_Train57049"/*"LHC22m_pa
   TFile *outputfile = new TFile(Soutputfile + ".root", "RECREATE");
   outputfile->WriteTObject(histoCountsPerEvent);
   outputfile->WriteTObject(histoYield);
-    outputfile->WriteTObject(histoMean);
-      outputfile->WriteTObject(histoSigma);
-        outputfile->WriteTObject(histoPurity);
+  outputfile->WriteTObject(histoMean);
+  outputfile->WriteTObject(histoSigma);
+  outputfile->WriteTObject(histoPurity);
   outputfile->Close();
   cout << "Ho creato il file: " << Soutputfile << endl;
 
-  // cout << "Total raw yield " << TotYield;
+  cout << "Total raw yield (signal only) " << TotYield << endl;
+  cout << "Total raw yield (signal+bkg within 3sigmas) " << TotSigBkg << endl;
 }
