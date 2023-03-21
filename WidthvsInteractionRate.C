@@ -76,59 +76,66 @@ const Int_t numPart = 7;
 const Int_t numChoice = 4; // mean, sigma, purity, yield
 Float_t ParticleMassPDG[numPart] = {0.497611, 1.115683, 1.115683, 1.32171, 1.32171, 1.67245, 1.67245};
 TString Spart[numPart] = {"K0S", "Lam", "ALam", "XiMin", "XiPlu", "OmMin", "OmPlu"};
+TString SpartLeg[numPart] = {"K^{0}_{S}", "#Lambda", "#bar{#Lambda}", "#Xi^{-}", "#Xi^{+}", "#Omega^{-}", "#Omega^{+}"};
 
 const Int_t numIntRate = 4;
 const Int_t numRecoTypes = 3; // pass2, pass3, MC
 Float_t InteractionRate[numIntRate] = {10, 100, 500, 1000};
 TString SIntRate[numIntRate] = {"22q 6/15 kHz", "22r 100 kHz", "22m 500 kHz", "22o 1 MHz"};
 Float_t YLowSigma[numPart] = {0.0002, 0.0002, 0.0002, 0.0002, 0.0002, 0.0002, 0.0002};
-Float_t YUpSigma[numPart] = {0.018, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015};
+Float_t YUpSigma[numPart] = {0.03, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015};
 // periods: 22q, 22r, 22m, 22o
 // datasets pass2: LHC22q_pass2, LHC22r_pass2_low_rate_subset, LHC22m_pass2_subset, LHC22o_pass2_triggersel
-// datasets pass3: LHC22q_pass3, LHC22r_pass3_low_rate_subset, LHC22m_pass3_relval_cpu2, TO BE DEFINED
-// runs pass2: 12 runs (all), 529066 + 529067,  ??, 526712
-// runs pass3: 12 runs (all), 529066 + 529067, 523308, ??
-// Trains pass2: 60333, 70105 (ongoing), to be done, 58982
-// Trains pass3: 64267, 70106 (ongoing), 63492, to be done
-// status pass2: done, ongoing, NA, done
-// status pass3: done, ongoing, done, NA
+// datasets pass3: LHC22q_pass3, LHC22r_pass3_low_rate_subset, LHC22m_pass3_relval_cpu2, LHC22o_pass3_HIR_small
+// runs pass2: 12 runs (all), 529066 + 529067, 523308, 526712
+// runs pass3: 12 runs (all), 529066 + 529067, 523308, 526712
+// Trains pass2: 60333, 70105, 70287, 58982
+// Trains pass3: 64267, 70106, 63492, 70598
+// status pass2: done, done, done, done
+// status pass3: done, done, done, done
 
 void WidthvsInteractionRate(TString OutputDir = "",
                             Float_t PtValue = 1,
                             Int_t ParticleType = 0)
 {
 
-  TString SFileInPass2[numIntRate] = {"LHC22q_pass2/PostProcess_LHC22q_pass2_529039_treno60333.root", "", "", "LHC22o_pass2/PostProcess_qa_LHC22o_pass2_triggersel_Train58982.root"};
-  TString SFileInPass3[numIntRate] = {"", "", "LHC22m_pass3/PostProcess_qa_LHC22m_pass3_relval_cpu2_Train63492.root", ""};
-  TString SFileInMC[numIntRate] = {"LHC21k6_MC_pp/PostProcess_qa_LHC21k6_Train58981.root", "", "", ""};
+  TString SFileInPass2[numIntRate] = {"LHC22q_pass2/PostProcess_LHC22q_pass2_529039_treno60333.root",
+                                      "LHC22r_pass2/PostProcess_qa_LHC22r_pass2_low_rate_subset_Train70105.root",
+                                      "LHC22m_pass2/PostProcess_qa_LHC22m_pass2_test_Train70287.root",
+                                      "LHC22o_pass2/PostProcess_qa_LHC22o_pass2_triggersel_Train58982.root"};
+  TString SFileInPass3[numIntRate] = {"LHC22q_pass3/PostProcess_qa_LHC22q_pass3_Train64263.root",
+                                      "LHC22r_pass3/PostProcess_qa_LHC22r_pass3_low_rate_subset_Train70106.root",
+                                      "LHC22m_pass3/PostProcess_qa_LHC22m_pass3_relval_cpu2_Train63492.root",
+                                      "LHC22o_pass3/PostProcess_qa_LHC22o_pass3_HIR_small_Train70598.root"};
+  TString SFileInMC[numIntRate] = {"LHC21k6_MC_pp/PostProcess_qa_LHC21k6_Train58981.root",
+                                   "",
+                                   "",
+                                   ""};
   Float_t Sigma[numIntRate] = {0};
   Float_t ErrSigma[numIntRate] = {0};
   Int_t Color[numIntRate] = {881, 628, 418, kBlue};
   Int_t Style[numIntRate] = {33, 20, 21, 27};
   TGraphErrors *gvsIR[numRecoTypes];
   TH1F *histoOut[numRecoTypes];
+  TF1 *lineMC = new TF1("pol0", "pol0", 0, 4);
   TH1F *histoIn;
   TFile *fileIn;
-  TCanvas *canvas = new TCanvas("canvas", "canvas", 800, 500);
-  StyleCanvas(canvas, 0.15, 0.05, 0.05, 0.15);
-  TLegend *legend = new TLegend(0.75, 0.7, 0.9, 0.9);
+  TCanvas *canvas = new TCanvas("canvas", "canvas", 800, 600);
+  StyleCanvas(canvas, 0.15, 0.05, 0.05, 0.12);
+  TLegend *legend = new TLegend(0.6, 0.7, 0.9, 0.9);
 
   TString SPass[numRecoTypes] = {"pass2", "pass3", "MC"};
 
   Float_t MinPt = 0;
   Float_t MaxPt = 0;
 
-  for (Int_t recoType = 0; recoType < numRecoTypes; recoType++)
+  for (Int_t recoType = 0; recoType < numRecoTypes; recoType++) // pass2, pass3, MC
   {
     histoOut[recoType] = new TH1F(Form("vsIRPass3_%i", recoType), Form("vsIRPass3_%i", recoType), 4, 0, 4);
     for (Int_t i = 0; i < numIntRate; i++)
     { // loop over interaction rates
       // if (recoType != 2 && i != 0)
       // continue;
-      if (recoType == 0 && (i == 1 || i == 2))
-        continue;
-      if (recoType == 1 && (i == 0 || i == 1 || i == 3))
-        continue;
       if (recoType == 2 && i != 0)
         continue;
       if (recoType == 0)
@@ -144,23 +151,35 @@ void WidthvsInteractionRate(TString OutputDir = "",
       ErrSigma[i] = histoIn->GetBinError(histoIn->GetXaxis()->FindBin(PtValue + 0.001));
       MinPt = histoIn->GetXaxis()->GetBinLowEdge(histoIn->GetXaxis()->FindBin(PtValue + 0.001));
       MaxPt = histoIn->GetXaxis()->GetBinUpEdge(histoIn->GetXaxis()->FindBin(PtValue + 0.001));
+      if (recoType == 2)
+        lineMC->SetParameter(0, Sigma[i]);
       histoOut[recoType]->SetBinContent(i + 1, Sigma[i]);
       histoOut[recoType]->SetBinError(i + 1, ErrSigma[i]);
       histoOut[recoType]->GetXaxis()->SetBinLabel(i + 1, SIntRate[i]);
     }
 
     gvsIR[recoType] = new TGraphErrors(numIntRate, InteractionRate, Sigma, 0, ErrSigma);
-    StyleHisto(histoOut[recoType], YLowSigma[ParticleType], YUpSigma[ParticleType], Color[recoType], Style[recoType], "IR", "Sigma (GeV/c^{2})", "", 0, 0, 0, 1.5, 1.5, 2);
-    histoOut[recoType]->Draw("same");
-    legend->AddEntry(histoOut[recoType], SPass[recoType], "pl");
+    StyleHisto(histoOut[recoType], YLowSigma[ParticleType], YUpSigma[ParticleType], Color[recoType], Style[recoType], "IR", "Sigma (GeV/c^{2})", "", 0, 0, 0, 1.2, 1.5, 2);
+    if (recoType != 2)
+    {
+      legend->AddEntry(histoOut[recoType], SPass[recoType], "pl");
+      histoOut[recoType]->Draw("same");
+    }
+    else
+    {
+      lineMC->SetLineColor(Color[recoType]);
+      legend->AddEntry(lineMC, SPass[recoType], "l");
+      lineMC->Draw("same");
+    }
   }
 
   TLegend *legendParticle = new TLegend(0.2, 0.7, 0.35, 0.9);
   legendParticle->SetMargin(0);
   legendParticle->SetTextSize(0.04);
   legendParticle->AddEntry("", "pp 13 TeV", "");
-  legendParticle->AddEntry("", Spart[ParticleType] + Form(" %.1f < p_{T} < %.1f ", MinPt, MaxPt), "");
+  legendParticle->AddEntry("", SpartLeg[ParticleType] + Form(", %.1f < p_{T} < %.1f GeV/#it{c}", MinPt, MaxPt), "");
   legend->Draw("");
   legendParticle->Draw("");
   canvas->SaveAs(OutputDir + "Sigma" + Spart[ParticleType] + "_vsIR_ " + Form("PtInterval%.1f-%.1f", MinPt, MaxPt) + ".pdf");
+  canvas->SaveAs(OutputDir + "Sigma" + Spart[ParticleType] + "_vsIR_ " + Form("PtInterval%.1f-%.1f", MinPt, MaxPt) + ".png");
 }
