@@ -125,7 +125,7 @@ const Float_t massParticle[numPart] = {1.32171, 1.67245};
 // TString Spart[numPart+2] = {"XiNeg", "XiPos", "OmegaNeg", "OmegaPlus"};
 TString Spart[numPart] = {"Xi", "Omega"};
 
-void PostProcessing_Filters(TString year = "LHC22o_triggsel_Train57049" /*"LHC22m_pass2_Train523186"/*"LHC22m_pass1_Train54926"/*"LHC21k6_Train54362""LHC22m_pass2_Train52781"*/,
+void PostProcessing_Filters(TString year = "LHC22m_pass3_relval_Train69224_CEFP"/*"LHC22m_pass3_relval_Train66676_EvenTighterCutsOmega"/*"LHC22o_triggsel_Train57049" /*"LHC22m_pass2_Train523186"/*"LHC22m_pass1_Train54926"/*"LHC21k6_Train54362""LHC22m_pass2_Train52781"*/,
                             TString SPathIn =
                                 /*"../Run3QA/LHC21k6_MC_pp/AnalysisResults_Filter_Train54362_LHC21k6.root"
                                 /*"../TriggerForRun3/AnalysisResults_FinalTOT_NoTOF.root"*/
@@ -133,8 +133,11 @@ void PostProcessing_Filters(TString year = "LHC22o_triggsel_Train57049" /*"LHC22
                             /*"../Run3QA/LHC22m_pass2/AnalysisResults_Train52781_LHC22m_pass2.root"*/
                             /*"../Run3QA/LHC22m_pass2/AnalysisResults_FilterLHC22m_pass2_Train523186.root"*/
                             /*"../Run3QA/LHC22m_pass1/AnalysisResults_LHC22m_pass1_Train54926.root"*/
-                            "../Run3QA/LHC22o_pass2/AnalysisResults_LHC22o_triggsel_Train57049.root",
-                            TString OutputDir = "../Run3QA/LHC22o_pass2/" /*"../Run3QA/LHC22m_pass1/"/*"../TriggerForRun3/"*/ /*"../Run3QA/LHC21k6_MC_pp/"*/,
+                            /*"../Run3QA/LHC22o_pass2/AnalysisResults_LHC22o_triggsel_Train57049.root"*/
+                            /*"../Run3QA/LHC22m_pass3/AnalysisResults_Filters_LHC22m_pass3_relval_cpu2_Train66676_EvenTighterCutsOmega.root"/*63790.root"*/
+                            /*"../Run3QA/LHC22m_pass3/Filtro_Treno68152_22mpass3relval.root",*/
+                            "../Run3QA/LHC22m_pass3/AnalysisResults_Filters_LHC22m_pass3_relval_cpu2_Train69224_CEFP.root",
+                            TString OutputDir = "../Run3QA/LHC22m_pass3/" /*"../Run3QA/LHC22m_pass1/"/*"../TriggerForRun3/"*/ /*"../Run3QA/LHC21k6_MC_pp/"*/,
                             Float_t ptthr = 5,
                             Bool_t isOldVersionBf2701 = 0)
 {
@@ -151,7 +154,7 @@ void PostProcessing_Filters(TString year = "LHC22o_triggsel_Train57049" /*"LHC22
   dirCascB = (TFile *)filein->Get("cascade-builder");
   if (!dirCascB)
   {
-    cout << "dirCascB not available" << endl;
+    cout << "cascade-builder not available" << endl;
     return;
   }
 
@@ -189,7 +192,7 @@ void PostProcessing_Filters(TString year = "LHC22o_triggsel_Train57049" /*"LHC22
 
   TCanvas *canvasNEvents = new TCanvas("canvasNEvents", "canvasNEvents", 800, 500);
   gPad->SetLogy();
-  hEvents->Draw("");
+  hEvents->Draw("text");
 
   // Z vertex distribution of selected events
   TH1F *hVtxZ = (TH1F *)dirQA->Get("hVtxZ");
