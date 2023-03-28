@@ -44,13 +44,13 @@ float findMaximum(TH1F *lHist, float width);
 float findMaxValue(TH1F *lHist1, TH1F *lHist2);
 Double_t SetEfficiencyError(Int_t k, Int_t n);
 
-void PostProcessV0AndCascQA_AO2D(TString CollType = "PbPb", Bool_t isMC = true, Int_t RebinTPC = 1,
-                                 Int_t SkipCascFits = 0,                                                                                                                                                                                                                                                                           // 0 = don't skip, 1 = skip Omegas, 2 = skip all cascades
-                                 Bool_t TopologyOnly = false,                                                                                                                                                                                                                                                                      // true = only topology analysis, false = complete analysis
-                                 TString PathIn = "../Run3QA/Periods/LHC22s_PbPb/LHC22s_pass4/AnalysisResults_qatask_LHC22s_pass4_Train71128.root" /*"../Run3QA/Periods/LHC22q_pass2/AnalysisResults_qatask_LHC22q_pass2_Train60333.root" /*"../Run3QA/LHC22o_pass2/AnalysisResults_qa_LHC22o_pass2_triggersel_Train58982.root"*/, // input file name
-                                 TString PathOut = "../Run3QA/Periods/LHC22s_PbPb/LHC22s_pass4/PostProcess_qa_LHC22s_pass4_Train71128" /*"../Run3QA/Periods/LHC22q_pass2/PostProcess_qa_LHC22q_pass2_Train60333" /*"../Run3QA/LHC22o_pass2/PostProcess_qa_LHC22o_pass2_triggersel_Train58982"*/,                                   // output file name
-                                 Bool_t CheckOldPass = false,                                                                                                                                                                                                                                                                      // true to compare two passes
-                                 TString OldPassPath = "..",                                                                                                                                                                                                                                                                       // input/output file name (old pass to be compared with)
+void PostProcessV0AndCascQA_AO2D(TString CollType = "pp", Bool_t isMC = false, Int_t RebinTPC = 1,
+                                 Int_t SkipCascFits = 0,                                                                                                                                                                                                                                                       // 0 = don't skip, 1 = skip Omegas, 2 = skip all cascades
+                                 Bool_t TopologyOnly = false,                                                                                                                                                                                                                                                  // true = only topology analysis, false = complete analysis
+                                 TString PathIn = "../Run3QA/Periods/LHC21k6_MC_pp/AnalysisResults_qa_LHC21k6_Train58981.root" /*"../Run3QA/Periods/LHC22q_pass2/AnalysisResults_qatask_LHC22q_pass2_Train60333.root" /*"../Run3QA/LHC22o_pass2/AnalysisResults_qa_LHC22o_pass2_triggersel_Train58982.root"*/, // input file name
+                                 TString PathOut = "../Run3QA/Periods/LHC21k6_MC_pp/PostProcess_qaNew_LHC21k6_Train58981" /*"../Run3QA/Periods/LHC22q_pass2/PostProcess_qa_LHC22q_pass2_Train60333" /*"../Run3QA/LHC22o_pass2/PostProcess_qa_LHC22o_pass2_triggersel_Train58982"*/,                            // output file name
+                                 Bool_t CheckOldPass = false,                                                                                                                                                                                                                                                  // true to compare two passes
+                                 TString OldPassPath = "..",                                                                                                                                                                                                                                                   // input/output file name (old pass to be compared with)
                                  Bool_t isMassvsRadiusPlots = 0)
 {
   // Define pass names
@@ -436,12 +436,14 @@ void PostProcessV0AndCascQA_AO2D(TString CollType = "PbPb", Bool_t isMC = true, 
   Double_t sigmas[numPart][num];
   Double_t sigmab[numPart][num];
   Double_t YieldS[numPart][num];
+  Double_t YieldSBis[numPart][num];
   Double_t YieldB[numPart][num];
   Float_t YieldSNotScaled[numPart][num];
   Float_t YieldBNotScaled[numPart][num];
   Double_t IntegralS[numPart][num];
   Double_t IntegralB[numPart][num];
   Double_t ErrYieldS[numPart][num];
+  Double_t ErrYieldSBis[numPart][num];
   Double_t ErrYieldB[numPart][num];
   Double_t SSB[numPart][num];
   Double_t ErrSSB[numPart][num];
@@ -813,6 +815,9 @@ void PostProcessV0AndCascQA_AO2D(TString CollType = "PbPb", Bool_t isMC = true, 
         SPlusB[part][pt] += fhistoInvMass1D[part][pt]->GetBinContent(b);
       }
 
+      YieldSBis[part][pt] = SPlusB[part][pt] - YieldB[part][pt];
+      ErrYieldSBis[part][pt] = sqrt(SPlusB[part][pt] + pow(ErrYieldB[part][pt], 2));
+
       SB[part][pt] = (SPlusB[part][pt] - YieldB[part][pt]) / YieldB[part][pt];
       ErrSB[part][pt] = SB[part][pt] * sqrt(pow(ErrYieldB[part][pt] / YieldB[part][pt], 2) + 1. / SPlusB[part][pt]);
 
@@ -825,16 +830,18 @@ void PostProcessV0AndCascQA_AO2D(TString CollType = "PbPb", Bool_t isMC = true, 
       YieldBNotScaled[part][pt] = YieldB[part][pt];
 
       YieldS[part][pt] = YieldS[part][pt] / fHistYield[part]->GetBinWidth(pt) / NEvents;
+      YieldSBis[part][pt] = YieldSBis[part][pt] / fHistYield[part]->GetBinWidth(pt) / NEvents;
       YieldB[part][pt] = YieldB[part][pt] / fHistYield[part]->GetBinWidth(pt) / NEvents;
       ErrYieldS[part][pt] = ErrYieldS[part][pt] / fHistYield[part]->GetBinWidth(pt) / NEvents;
+      ErrYieldSBis[part][pt] = ErrYieldSBis[part][pt] / fHistYield[part]->GetBinWidth(pt) / NEvents;
       ErrYieldB[part][pt] = ErrYieldB[part][pt] / fHistYield[part]->GetBinWidth(pt) / NEvents;
 
       fHistMean[part]->SetBinContent(pt, Mean[part][pt]);
       fHistMean[part]->SetBinError(pt, ErrMean[part][pt]);
       fHistSigma[part]->SetBinContent(pt, Sigma[part][pt]);
       fHistSigma[part]->SetBinError(pt, ErrSigma[part][pt]);
-      fHistYield[part]->SetBinContent(pt, YieldS[part][pt]);
-      fHistYield[part]->SetBinError(pt, ErrYieldS[part][pt]);
+      fHistYield[part]->SetBinContent(pt, YieldSBis[part][pt]);
+      fHistYield[part]->SetBinError(pt, ErrYieldSBis[part][pt]);
       fHistSSB[part]->SetBinContent(pt, SSB[part][pt]);
       fHistSSB[part]->SetBinError(pt, ErrSSB[part][pt]);
       fHistSB[part]->SetBinContent(pt, SB[part][pt]);
