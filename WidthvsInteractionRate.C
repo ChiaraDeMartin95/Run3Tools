@@ -73,7 +73,7 @@ Double_t spline(Double_t *x, Double_t *p)
 }
 
 const Int_t numPart = 7;
-const Int_t numChoice = 4; // mean, sigma, purity, yield
+const Int_t numChoice = 5; // mean, sigma, purity, S over B, yield
 Float_t ParticleMassPDG[numPart] = {0.497611, 1.115683, 1.115683, 1.32171, 1.32171, 1.67245, 1.67245};
 TString Spart[numPart] = {"K0S", "Lam", "ALam", "XiMin", "XiPlu", "OmMin", "OmPlu"};
 TString SpartLeg[numPart] = {"K^{0}_{S}", "#Lambda", "#bar{#Lambda}", "#Xi^{-}", "#Xi^{+}", "#Omega^{-}", "#Omega^{+}"};
@@ -87,8 +87,10 @@ Float_t YLowMean[numPart] = {0.485, 1.110, 1.110, 1.316, 1.316, 1.664, 1.664};
 Float_t YUpMean[numPart] = {0.51, 1.130, 1.130, 1.327, 1.327, 1.68, 1.68};
 Float_t YLowSigma[numPart] = {0.0002, 0.0002, 0.0002, 0.0002, 0.0002, 0.0002, 0.0002};
 Float_t YUpSigma[numPart] = {0.03, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015};
-Float_t YLowPurity[numPart] = {0.4, 0, 0, 0, 0, 0, 0};
+Float_t YLowPurity[numPart] = {0.4, 0.4, 0.4, 0, 0, 0, 0};
 Float_t YUpPurity[numPart] = {1, 1, 1, 1, 1, 1, 1};
+Float_t YLowSB[numPart] = {0, 0, 0, 0, 0, 0, 0};
+Float_t YUpSB[numPart] = {10, 10, 10, 5, 5, 5, 5};
 Float_t YLowYield[4] = {0.95, 0.5, 0.9, 0.8};
 Float_t YUpYield[4] = {1.05, 1.5, 1.1, 1.2};
 
@@ -127,8 +129,8 @@ void WidthvsInteractionRate(Int_t PlotType = 0,
   Float_t ErrSigma[numIntRate] = {0};
   Int_t Color[numIntRate] = {881, 628, 418, kBlue};
   Int_t Style[numIntRate] = {33, 20, 21, 27};
-  TString SPlotType[numChoice] = {"Mean", "Sigma", "Purity", "Yield"};
-  TString TitleY[numChoice] = {"Mean (GeV/c^{2})", "Sigma (GeV/c^{2})", "S/(S+B)", "1/N_{evt} dN/dp_{T} [GeV/c]^{-1}"};
+  TString SPlotType[numChoice] = {"Mean", "Sigma", "Purity", "SOverB", "Yield"};
+  TString TitleY[numChoice] = {"Mean (GeV/c^{2})", "Sigma (GeV/c^{2})", "S/(S+B)", "S/B", "1/N_{evt} dN/dp_{T} [GeV/c]^{-1}"};
   TGraphErrors *gvsIR[numRecoTypes];
   TH1F *histoOut[numRecoTypes];
   TF1 *lineMC = new TF1("pol0", "pol0", 0, 4);
@@ -198,7 +200,7 @@ void WidthvsInteractionRate(Int_t PlotType = 0,
       YLow = YLowPurity[ParticleType];
       YUp = 1;
     }
-    else
+    else 
     {
       YLow = 0;
       YUp = 1.2 * histoOut[recoType]->GetBinContent(histoOut[recoType]->GetMaximumBin());
@@ -207,14 +209,14 @@ void WidthvsInteractionRate(Int_t PlotType = 0,
     if (recoType != 2)
     {
       legend->AddEntry(histoOut[recoType], SPass[recoType], "pl");
-      if (PlotType != 3)
+      if (PlotType != 4 && PlotType != 3)
         histoOut[recoType]->Draw("same");
     }
     else
     {
       lineMC->SetLineColor(Color[recoType]);
       legend->AddEntry(lineMC, SPass[recoType], "l");
-      if (PlotType == 3)
+      if (PlotType == 3 || PlotType==4)
       {
         histoOut[0]->GetYaxis()->SetRangeUser(YLow, YUp);
         histoOut[0]->Draw("same");
