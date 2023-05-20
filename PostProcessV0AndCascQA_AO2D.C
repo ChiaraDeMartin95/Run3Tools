@@ -44,13 +44,13 @@ float findMaximum(TH1F *lHist, float width);
 float findMaxValue(TH1F *lHist1, TH1F *lHist2);
 Double_t SetEfficiencyError(Int_t k, Int_t n);
 
-void PostProcessV0AndCascQA_AO2D(TString CollType = "pp", Bool_t isMC = false, Int_t RebinTPC = 1,
-                                 Int_t SkipCascFits = 0,                                                                                                                                                                                                                                                       // 0 = don't skip, 1 = skip Omegas, 2 = skip all cascades
-                                 Bool_t TopologyOnly = false,                                                                                                                                                                                                                                                  // true = only topology analysis, false = complete analysis
-                                 TString PathIn = "../Run3QA/Periods/LHC21k6_MC_pp/AnalysisResults_qa_LHC21k6_Train58981.root" /*"../Run3QA/Periods/LHC22q_pass2/AnalysisResults_qatask_LHC22q_pass2_Train60333.root" /*"../Run3QA/LHC22o_pass2/AnalysisResults_qa_LHC22o_pass2_triggersel_Train58982.root"*/, // input file name
-                                 TString PathOut = "../Run3QA/Periods/LHC21k6_MC_pp/PostProcess_qaNew_LHC21k6_Train58981" /*"../Run3QA/Periods/LHC22q_pass2/PostProcess_qa_LHC22q_pass2_Train60333" /*"../Run3QA/LHC22o_pass2/PostProcess_qa_LHC22o_pass2_triggersel_Train58982"*/,                            // output file name
-                                 Bool_t CheckOldPass = false,                                                                                                                                                                                                                                                  // true to compare two passes
-                                 TString OldPassPath = "..",                                                                                                                                                                                                                                                   // input/output file name (old pass to be compared with)
+void PostProcessV0AndCascQA_AO2D(TString CollType = "pp", Bool_t isMC = true, Int_t RebinTPC = 1,
+                                 Int_t SkipCascFits = 0,                                                                                                                                                                                   // 0 = don't skip, 1 = skip Omegas, 2 = skip all cascades
+                                 Bool_t TopologyOnly = false,                                                                                                                                                                              // true = only topology analysis, false = complete analysis
+                                 TString PathIn = "../Run3QA/Periods/LHC23e1_Test/AnalysisResults_qatask_LHC23e1_Test2.root" /*"../Run3QA/Periods/LHC22q_pass3/AnalysisResults_qatask_LHC22q_pass3_Train64263.root"*/, // input file name
+                                 TString PathOut = "../Run3QA/Periods/LHC23e1_Test/PostProcess_qa_LHC23e1_Test2",                                                                                                      // output file name
+                                 Bool_t CheckOldPass = false,                                                                                                                                                                              // true to compare two passes
+                                 TString OldPassPath = "..",                                                                                                                                                                               // input/output file name (old pass to be compared with)
                                  Bool_t isMassvsRadiusPlots = 0)
 {
   // Define pass names
@@ -305,6 +305,7 @@ void PostProcessV0AndCascQA_AO2D(TString CollType = "pp", Bool_t isMC = false, I
   Int_t numPt = 8;
   Int_t numRadius = 9;
   Int_t numEff = 0;
+  Int_t numEffPart[numPart] = {0};
   if (isMassvsRadiusPlots)
     numEff = numRadius;
   else
@@ -439,6 +440,7 @@ void PostProcessV0AndCascQA_AO2D(TString CollType = "pp", Bool_t isMC = false, I
   Double_t YieldSBis[numPart][num];
   Double_t YieldB[numPart][num];
   Float_t YieldSNotScaled[numPart][num];
+  Float_t YieldSBisNotScaled[numPart][num];
   Float_t YieldBNotScaled[numPart][num];
   Double_t IntegralS[numPart][num];
   Double_t IntegralB[numPart][num];
@@ -450,6 +452,8 @@ void PostProcessV0AndCascQA_AO2D(TString CollType = "pp", Bool_t isMC = false, I
   Double_t SB[numPart][num];
   Double_t ErrSB[numPart][num];
   Double_t SPlusB[numPart][num] = {0};
+  Float_t BinWidth[numPart][num] = {0};
+  TString SPtPart[numPart][num];
 
   TH1F *fHistMean[numPart];
   TH1F *fHistSigma[numPart];
@@ -502,6 +506,7 @@ void PostProcessV0AndCascQA_AO2D(TString CollType = "pp", Bool_t isMC = false, I
       PtVector[3] = 3;
       numEff = 4;
     }
+    numEffPart[part] = numEff;
 
     // yields of generated particles and selected true particles + efficiencis (only in the case of MC)
     if (isMC)
@@ -732,7 +737,7 @@ void PostProcessV0AndCascQA_AO2D(TString CollType = "pp", Bool_t isMC = false, I
       fhistoInvMass1D[part][pt]->SetMarkerColor(1);
       fhistoInvMass1D[part][pt]->SetMarkerStyle(21);
       fhistoInvMass1D[part][pt]->SetLineColor(1);
-      // fhistoInvMass1D[part][pt]->Rebin(2);
+      fhistoInvMass1D[part][pt]->Rebin(2);
       fhistoInvMass1D[part][pt]->Draw("same ep");
 
       // Fit the invariant mass with gaussian + pol
@@ -827,6 +832,7 @@ void PostProcessV0AndCascQA_AO2D(TString CollType = "pp", Bool_t isMC = false, I
       ErrSSB[part][pt] = SSB[part][pt] * sqrt(1. / SPlusB[part][pt] + pow(ErrYieldB[part][pt] / YieldB[part][pt], 2));
 
       YieldSNotScaled[part][pt] = YieldS[part][pt];
+      YieldSBisNotScaled[part][pt] = YieldSBis[part][pt];
       YieldBNotScaled[part][pt] = YieldB[part][pt];
 
       YieldS[part][pt] = YieldS[part][pt] / fHistYield[part]->GetBinWidth(pt) / NEvents;
@@ -835,6 +841,9 @@ void PostProcessV0AndCascQA_AO2D(TString CollType = "pp", Bool_t isMC = false, I
       ErrYieldS[part][pt] = ErrYieldS[part][pt] / fHistYield[part]->GetBinWidth(pt) / NEvents;
       ErrYieldSBis[part][pt] = ErrYieldSBis[part][pt] / fHistYield[part]->GetBinWidth(pt) / NEvents;
       ErrYieldB[part][pt] = ErrYieldB[part][pt] / fHistYield[part]->GetBinWidth(pt) / NEvents;
+
+      BinWidth[part][pt] = fHistYield[part]->GetBinWidth(pt);
+      SPtPart[part][pt] = SPt[pt];
 
       fHistMean[part]->SetBinContent(pt, Mean[part][pt]);
       fHistMean[part]->SetBinError(pt, ErrMean[part][pt]);
@@ -1130,6 +1139,37 @@ void PostProcessV0AndCascQA_AO2D(TString CollType = "pp", Bool_t isMC = false, I
 
   f_out->Close();
   cout << "Mission accomplished! " << endl;
+
+  Float_t RelUnc = 0;
+  cout << "Estimates! " << endl;
+  cout << "How many events do we need for a small statistical uncertainty " << endl;
+  cout << "on the spectrum in the largest pt interval(the one with less counts)? " << endl;
+  cout << " Which uncertainty do you want? " << endl;
+  cin >> RelUnc;
+  Float_t EstimateNevt = 0;
+  Float_t EstimateNevtCorrect = 0;
+  Float_t SvsRelUnc = 0;
+  for (Int_t part = 0; part < numPart; part++)
+  {
+    //if (part != 3 && part != 4 && part!=0 )
+    if (part==5 || part==6 )
+      continue;
+    cout << "\nParticle: " << NamePart[part] << endl;
+    for (Int_t pt = 0; pt < numEffPart[part]; pt++)
+    {
+      if (pt == 0)
+        continue;
+      SvsRelUnc = (1. + 2. / SB[part][pt]) / pow(RelUnc, 2);
+      EstimateNevtCorrect = SvsRelUnc * 1. / BinWidth[part][pt] * 1. / YieldSBis[part][pt];
+      EstimateNevt = 1. / pow(RelUnc, 2) * SB[part][pt] / (SB[part][pt] + 1) * 1. / BinWidth[part][pt] * 1. / YieldSBis[part][pt];
+      cout << "\nPt: " << SPtPart[part][pt] << " (" << BinWidth[part][pt] << ")" << endl;
+      cout << "SigmaN/N " << 1. / sqrt(SPlusB[part][pt]) << " SigmaS/S (correct) " << sqrt(YieldBNotScaled[part][pt] + SPlusB[part][pt]) / YieldSBisNotScaled[part][pt] << endl;
+      cout << "Rel error on yield: " << ErrYieldSBis[part][pt] / YieldSBis[part][pt] << endl;
+      cout << "Ratio (approx / correct) " << 1. / sqrt(SPlusB[part][pt]) / (sqrt(YieldBNotScaled[part][pt] + SPlusB[part][pt]) / YieldSBisNotScaled[part][pt]) << endl;
+      cout << "Number of events needed for " << RelUnc << " uncertainty: " << EstimateNevt << " better: " << EstimateNevtCorrect << endl;
+      cout << "Actual number of events in this period: " << NEvents << endl;
+    }
+  }
 }
 
 void checkExactLimit(TH1F *lHist, Float_t limit, bool isMinLimit, TLatex labels[])
