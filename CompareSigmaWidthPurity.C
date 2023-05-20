@@ -87,18 +87,18 @@ Float_t ParticleMassPDG[numPart] = {0.497611, 1.115683, 1.115683, 1.32171, 1.321
 
 // histo0 -> num
 // histo1 -> denom
-void CompareSigmaWidthPurity(TString year0 = "22m_pass3_final" /*"LHC22o_pass2_triggsel" /*"LHC22m_pass2" /*"LHC22f_pass2" /*"LHC22m_pass1"*/,
-                             TString year1 = "22m_pass3_default" /*"LHC22m_pass2" /*"LHC22s_PbPb" /*"LHC22f_pass2"  "LHC22m_pass2"*/,
-                             TString yearRatioToPub = "22m_pass3_Train63492",
-                             TString Sfilein0 = "../Run3QA/LHC22m_pass3/Yields_Omega_LHC22m_pass3_relval_Train68152_OneGaussFit.root"/*"../Run3QA/LHC22m_pass3/Yields_Xi_LHC22m_pass3_relval_Train63790.root" /*"../Run3QA/LHC22f_pass2/PostProcessing_Train47130_22f.root" /* "../Run3QA/LHC22m_pass1/PostProcessing_Train44413_22m.root"*/,
-                             TString Sfilein1 = "../Run3QA/LHC22m_pass3/Yields_Omega_LHC22m_pass3_relval_Train63790_qa_OneGaussFit.root"/*"../Run3QA/LHC22o_pass2/Yields_Xi_LHC22o_triggsel_Train57049.root" /*"../Run3QA/LHC22f_pass2/PostProcessing_Train47130_22f.root"// "../LHC16k_pass3/PostProcessLHC16k_pass3.root"*/,
-                             TString OutputDir = "../Run3QA/LHC22m_pass3/"/*"../Run3QA/LHC22o_pass2/" /*"../Run3QA/LHC22m_pass2/"*/,
+void CompareSigmaWidthPurity(TString year0 = "22m_pass4" /*"LHC22o_pass2_triggsel" /*"LHC22m_pass2" /*"LHC22f_pass2" /*"LHC22m_pass1"*/,
+                             TString year1 = "22m_pass3" /*"LHC22m_pass2" /*"LHC22s_PbPb" /*"LHC22f_pass2"  "LHC22m_pass2"*/,
+                             TString yearRatioToPub = "22m_pass3_relval_cpu2_Train78545"/*"22m_pass4_tpc_v1_Train78719"/*"22m_pass3_Train63492"/*"21k6_Train58981"*/,
+                             TString Sfilein0 = "../Run3QA/Periods/LHC22m_pass4/PostProcess_qa_LHC22m_pass4_tpc_v1_Train78719.root",
+                             TString Sfilein1 = "../Run3QA/Periods/LHC22m_pass3/PostProcess_qa_LHC22m_pass3_relval_cpu2_Train78545.root",
+                             TString OutputDir = "../Run3QA/Periods/LHC22m_pass4/" /*"../Run3QA/LHC22o_pass2/" /*"../Run3QA/LHC22m_pass2/"*/,
                              Bool_t isPseudoEfficiency = 1,
                              Bool_t isOnlyPseudoEfficiency = 1,
                              TString SPublishedYieldForPseudoEff =                 /*"../PbPbYields5TeV/SpectraAlessandro" /*"../PbPbYields5TeV/SpectraK0sPublished276TeV_2040Cent" */
                              "../PublishedYield13TeV/HEPData-ins1748157-v1-Table", // directory where published yields are stored
                              Bool_t ispp = 1,
-                             Bool_t isYieldFromInvMassPostProcess = 1)
+                             Bool_t isYieldFromInvMassPostProcess = 0)
 {
   // isYieldFromInvMassPostProcess = 1 if files in input are the oputput of the macro Yields_from_invmass.C
   Int_t Choice = 0;
@@ -112,7 +112,7 @@ void CompareSigmaWidthPurity(TString year0 = "22m_pass3_final" /*"LHC22o_pass2_t
   Float_t YLowMean[numPart] = {0.485, 1.110, 1.110, 1.316, 1.316, 1.664, 1.664};
   Float_t YUpMean[numPart] = {0.51, 1.130, 1.130, 1.327, 1.327, 1.68, 1.68};
   Float_t YLowSigma[numPart] = {0.0002, 0.0002, 0.0002, 0.0002, 0.0002, 0.0002, 0.0002};
-  Float_t YUpSigma[numPart] = {0.018, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015};
+  Float_t YUpSigma[numPart] = {0.025, 0.015, 0.015, 0.015, 0.015, 0.015, 0.015};
   Float_t YLowPurity[numPart] = {0, 0, 0, 0, 0, 0, 0};
 
   Float_t YLow[numPart] = {0};
@@ -121,8 +121,8 @@ void CompareSigmaWidthPurity(TString year0 = "22m_pass3_final" /*"LHC22o_pass2_t
   Float_t YLowRatio[4] = {0.95, 0.9, 0.01, 0};
   Float_t YUpRatio[4] = {1.05, 3.0, 1, 0.1};
   */
-  Float_t YLowRatio[4] = {0.95, 0.5, 0.9, 0.8};
-  Float_t YUpRatio[4] = {1.05, 1.5, 1.1, 1.2};
+  Float_t YLowRatio[4] = {0.95, 0, 0.9, 0.5};
+  Float_t YUpRatio[4] = {1.05, 1.2, 1.1, 1.2};
 
   Int_t color0 = kRed + 2;
   Int_t color1 = kBlue + 2;
@@ -172,7 +172,7 @@ void CompareSigmaWidthPurity(TString year0 = "22m_pass3_final" /*"LHC22o_pass2_t
       return;
     }
 
-    Sfileout = OutputDir + "Compare" + TypeHisto[Choice] + "_" + Spart[ChosenType]+ "_" + year0 + "vs" + year1;
+    Sfileout = OutputDir + "Compare" + TypeHisto[Choice] + "_" + Spart[ChosenType] + "_" + year0 + "vs" + year1;
 
     if (year0 == "LHC22f_pass2")
       color0 = kOrange + 2;
@@ -247,7 +247,7 @@ void CompareSigmaWidthPurity(TString year0 = "22m_pass3_final" /*"LHC22o_pass2_t
         if (part > 2)
           // YUpRatio[Choice] = 0.01; 22m_pass1 vs LHC16k
           // YUpRatio[Choice] = 0.2;
-          YUpRatio[Choice] = 1.2;
+          YUpRatio[Choice] = 10;
         else
           YUpRatio[Choice] = 6; // for 22m vs 22f comparison
       }
@@ -268,8 +268,8 @@ void CompareSigmaWidthPurity(TString year0 = "22m_pass3_final" /*"LHC22o_pass2_t
       TLegend *legend;
       if (Spart[part] == "XiPlu" && Choice == 0)
         legend = new TLegend(0.5, 0.25, 0.8, 0.45);
-      else if (Spart[part] == "K0S" && Choice == 1)
-        legend = new TLegend(0.5, 0.5, 0.8, 0.7);
+      //else if (Spart[part] == "K0S" && Choice == 1)
+        //legend = new TLegend(0.5, 0.5, 0.8, 0.7);
       else if (part <= 2 && Choice == 2)
         legend = new TLegend(0.5, 0.25, 0.8, 0.45);
       else
@@ -315,6 +315,7 @@ void CompareSigmaWidthPurity(TString year0 = "22m_pass3_final" /*"LHC22o_pass2_t
         canvas[part]->SaveAs(Sfileout + ".pdf");
     }
   }
+
   // Pseudoefficiency
   TH1F *histoPub[numPart];
   TH1F *histoPubError[numPart];
@@ -334,10 +335,10 @@ void CompareSigmaWidthPurity(TString year0 = "22m_pass3_final" /*"LHC22o_pass2_t
     SfileoutRatioToPub = OutputDir + "PseudoEfficiency_";
   // SfileoutRatioToPub += Spart[3];
   Float_t YLowRatioToPub = 0;
-  //DATA 
-  Float_t YUpRatioToPub[numPart] = {0.1, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05};
-  //MC
-  //Float_t YUpRatioToPub[numPart] = {0.4, 0.3, 0.3, 0.2, 0.2, 0.1, 0.1};
+  // DATA
+  Float_t YUpRatioToPub[numPart] = {0.2, 0.2, 0.2, 0.05, 0.05, 0.05, 0.05};
+  // MC
+  // Float_t YUpRatioToPub[numPart] = {0.4, 0.3, 0.3, 0.2, 0.2, 0.1, 0.1};
   Float_t LowPub[numPart] = {0, 0.4, 0.4, 0.6, 0.6, 0.9, 0.9}; // lower values of published yields
   Float_t UpPub[numPart] = {10, 6.5, 6.5, 5.5, 5.5, 5.5, 5.5}; // upper value of published yields
   Float_t Low[numPart] = {0, 0.4, 0.4, 0.6, 0.6, 0.9, 0.9};
@@ -354,8 +355,8 @@ void CompareSigmaWidthPurity(TString year0 = "22m_pass3_final" /*"LHC22o_pass2_t
       // if (part != 0 && part != 3 && !ispp)
       if (part != 3 && !ispp && isOnlyPseudoEfficiency)
         continue;
-      //if (part != 3 && ispp && isOnlyPseudoEfficiency)
-       //continue;
+      // if (part != 3 && ispp && isOnlyPseudoEfficiency)
+      // continue;
       if (isOnlyPseudoEfficiency) // I take numerator from external file
       {
         if (part == 0)
@@ -367,11 +368,15 @@ void CompareSigmaWidthPurity(TString year0 = "22m_pass3_final" /*"LHC22o_pass2_t
           // SfileTemp = "../Run3QA/LHC21k6_MC_pp/Yields_Xi_LHC21k6_Train54362.root",
           SfileTemp = "../Run3QA/LHC22o_pass2/Yields_XiNeg_LHC22o_triggsel_Train57049.root";
 
-        //SfileTemp = "../Run3QA/LHC22o_pass2/PostProcess_qa_LHC22o_pass2_triggersel_Train58982.root";/*57970.root";*/
-        //SfileTemp = "../Run3QA/LHC21k6_MC_pp/PostProcess_qa_LHC21k6_Train58981.root";
-        //SfileTemp = "../Run3QA/LHC22q_pass2/PostProcess_LHC22q_pass2_529039_treno60333.root";
-        //SfileTemp ="../Run3QA/LHC22m_pass3/Yields_Xi_LHC22m_pass3_relval_Train63790.root";
-        SfileTemp ="../Run3QA/LHC22m_pass3/YieldsQATask_Xi_LHC22m_pass3_relval_Train63492_qa_OneGaussFit.root";
+        // SfileTemp = "../Run3QA/LHC22o_pass2/PostProcess_qa_LHC22o_pass2_triggersel_Train58982.root";/*57970.root";*/
+        // SfileTemp = "../Run3QA/LHC21k6_MC_pp/PostProcess_qa_LHC21k6_Train58981.root";
+        // SfileTemp = "../Run3QA/LHC22q_pass2/PostProcess_LHC22q_pass2_529039_treno60333.root";
+        // SfileTemp ="../Run3QA/LHC22m_pass3/Yields_Xi_LHC22m_pass3_relval_Train63790.root";
+        // SfileTemp ="../Run3QA/LHC22m_pass3/YieldsQATask_Xi_LHC22m_pass3_relval_Train63492_qa_OneGaussFit.root";
+        //SfileTemp = "../Run3QA/Periods/LHC22m_pass3/PostProcess_qa_LHC22m_pass3_relval_cpu2_Train63492.root";
+        //SfileTemp = "../Run3QA/Periods/LHC22m_pass4/PostProcess_qa_LHC22m_pass4_tpc_v1_Train78719.root";
+        SfileTemp = "../Run3QA/Periods/LHC22m_pass3/PostProcess_qa_LHC22m_pass3_relval_cpu2_Train78545.root";
+        //SfileTemp = "../Run3QA/Periods/LHC21k6_MC_pp/PostProcess_qaNew_LHC21k6_Train58981.root";
 
         fileTemp = new TFile(SfileTemp, "");
         if (!fileTemp)
@@ -471,8 +476,10 @@ void CompareSigmaWidthPurity(TString year0 = "22m_pass3_final" /*"LHC22o_pass2_t
       fsplinePub[part] = new TF1("fSpline" + Spart[part], spline, 0, 10);
 
       if (isOnlyPseudoEfficiency)
-        if (isYieldFromInvMassPostProcess) histoNum[part] = (TH1F *)fileTemp->Get("histoYield");
-        else histoNum[part] = (TH1F *)fileTemp->Get("Yield_" + Spart[part]);
+        if (isYieldFromInvMassPostProcess)
+          histoNum[part] = (TH1F *)fileTemp->Get("histoYield");
+        else
+          histoNum[part] = (TH1F *)fileTemp->Get("Yield_" + Spart[part]);
       else
         histoNum[part] = (TH1F *)histo0[part]->Clone("histoNum" + Spart[part]);
 
@@ -497,7 +504,7 @@ void CompareSigmaWidthPurity(TString year0 = "22m_pass3_final" /*"LHC22o_pass2_t
 
         Float_t SplineIntegralError = 0;
         if (part != 0)
-          histoPubError[part]->Scale(1.2);
+          histoPubError[part]->Scale(1./2);
         for (Int_t b = 1; b <= histoPubError[part]->GetNbinsX(); b++)
         {
           if (histoPubError[part]->GetBinCenter(b) < ALow)
@@ -533,8 +540,8 @@ void CompareSigmaWidthPurity(TString year0 = "22m_pass3_final" /*"LHC22o_pass2_t
       StyleHisto(histoRatioToPub[part], YLowRatioToPub, YUpRatioToPub[part], color0, 33, TitleXPt, "Ratio to published yield" + Spart[part], "", 0, 0, 0, 1.5, 1.5, 2);
       if (part == 2 || part == 4 || part == 6)
       {
-        histoRatioToPub[part]->SetLineColor(kBlue+3);
-        histoRatioToPub[part]->SetMarkerColor(kBlue+3);
+        histoRatioToPub[part]->SetLineColor(kBlue + 3);
+        histoRatioToPub[part]->SetMarkerColor(kBlue + 3);
       }
       histoRatioToPub[part]->GetXaxis()->SetRangeUser(Low[part], Up[part]);
       histoRatioToPub[part]->Draw("same");
