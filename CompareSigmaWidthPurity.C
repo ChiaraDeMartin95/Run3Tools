@@ -87,18 +87,19 @@ Float_t ParticleMassPDG[numPart] = {0.497611, 1.115683, 1.115683, 1.32171, 1.321
 
 // histo0 -> num
 // histo1 -> denom
-void CompareSigmaWidthPurity(TString year0 = "22m_pass4" /*"LHC22o_pass2_triggsel" /*"LHC22m_pass2" /*"LHC22f_pass2" /*"LHC22m_pass1"*/,
-                             TString year1 = "22m_pass3" /*"LHC22m_pass2" /*"LHC22s_PbPb" /*"LHC22f_pass2"  "LHC22m_pass2"*/,
-                             TString yearRatioToPub = "22m_pass3_relval_cpu2_Train78545"/*"22m_pass4_tpc_v1_Train78719"/*"22m_pass3_Train63492"/*"21k6_Train58981"*/,
-                             TString Sfilein0 = "../Run3QA/Periods/LHC22m_pass4/PostProcess_qa_LHC22m_pass4_tpc_v1_Train78719.root",
-                             TString Sfilein1 = "../Run3QA/Periods/LHC22m_pass3/PostProcess_qa_LHC22m_pass3_relval_cpu2_Train78545.root",
-                             TString OutputDir = "../Run3QA/Periods/LHC22m_pass4/" /*"../Run3QA/LHC22o_pass2/" /*"../Run3QA/LHC22m_pass2/"*/,
-                             Bool_t isPseudoEfficiency = 1,
-                             Bool_t isOnlyPseudoEfficiency = 1,
+void CompareSigmaWidthPurity(TString year0 = "Run1" /*"23y_cpass0" /*"LHC22o_pass2_triggsel" /*"LHC22m_pass2" /*"LHC22f_pass2" /*"LHC22m_pass1"*/,
+                             TString year1 = "Run2" /*"22o_pass4_pass3TPC" /*"LHC22m_pass2" /*"LHC22s_PbPb" /*"LHC22f_pass2"  "LHC22m_pass2"*/,
+                             TString yearRatioToPub = "" /*"22m_pass3_relval_cpu2_Train78545"/*"22m_pass4_tpc_v1_Train78719"/*"22m_pass3_Train63492"/*"21k6_Train58981"*/,
+                             TString Sfilein0 = "/Users/mbp-cdm-01/Desktop/AssegnoRicerca/Run3Analyses/OmegavsMult/EnrichedMonteCarlos/PostProcessing_TestGapTriggeredMC_Run1.root" /*"../Run3QA/Periods/LHC23y_cpass0/Yields_Omega_LHC23y_cpass0_Train100262_OneGaussFit.root"*/,
+                             TString Sfilein1 = "/Users/mbp-cdm-01/Desktop/AssegnoRicerca/Run3Analyses/OmegavsMult/EnrichedMonteCarlos/PostProcessing_TestGapTriggeredMC_Run2.root" /*"../Run3QA/Periods/LHC22o_pass4/Yields_Omega_LHC22o_pass4_small_pass3TPC_OneGaussFit.root"/*"../Run3QA/Periods/LHC22o_pass4/Yields_Omega_LHC22o_pass4_small_pass2TPC_OneGaussFit.root"*/,
+                             TString OutputDir = "/Users/mbp-cdm-01/Desktop/AssegnoRicerca/Run3Analyses/OmegavsMult/EnrichedMonteCarlos/" /*"../Run3QA/LHC22o_pass2/" /*"../Run3QA/LHC22m_pass2/"*/,
+                             Bool_t isPseudoEfficiency = 0,
+                             Bool_t isOnlyPseudoEfficiency = 0,
                              TString SPublishedYieldForPseudoEff =                 /*"../PbPbYields5TeV/SpectraAlessandro" /*"../PbPbYields5TeV/SpectraK0sPublished276TeV_2040Cent" */
                              "../PublishedYield13TeV/HEPData-ins1748157-v1-Table", // directory where published yields are stored
                              Bool_t ispp = 1,
-                             Bool_t isYieldFromInvMassPostProcess = 0)
+                             Bool_t isYieldFromInvMassPostProcess = 0,
+                             Bool_t isMC=1)
 {
   // isYieldFromInvMassPostProcess = 1 if files in input are the oputput of the macro Yields_from_invmass.C
   Int_t Choice = 0;
@@ -121,8 +122,8 @@ void CompareSigmaWidthPurity(TString year0 = "22m_pass4" /*"LHC22o_pass2_triggse
   Float_t YLowRatio[4] = {0.95, 0.9, 0.01, 0};
   Float_t YUpRatio[4] = {1.05, 3.0, 1, 0.1};
   */
-  Float_t YLowRatio[4] = {0.95, 0, 0.9, 0.5};
-  Float_t YUpRatio[4] = {1.05, 1.2, 1.1, 1.2};
+  Float_t YLowRatio[4] = {0.95, 0, 0.9, 0};
+  Float_t YUpRatio[4] = {1.05, 1.2, 1.1, 2};
 
   Int_t color0 = kRed + 2;
   Int_t color1 = kBlue + 2;
@@ -143,10 +144,17 @@ void CompareSigmaWidthPurity(TString year0 = "22m_pass4" /*"LHC22o_pass2_triggse
     cout << "Do you want to study Xi (=3) or Omega (=5)?" << endl;
     cin >> ChosenType;
   }
+  Bool_t isGen = 0;
   if (!isOnlyPseudoEfficiency)
   {
     cout << "Do you want to compare Mean (=0), Sigma (=1), Purity (=2) or Yield per event (=3)?" << endl;
     cin >> Choice;
+    if (isMC && Choice == 3)
+    {
+      cout << "Do you want the reco yield (0) or gen yield (1) ? " << endl;
+      cin >> isGen;
+      if (isGen) TypeHisto[Choice] = "GeneratedParticles_Rintegrated";
+    }
     cout << Choice << " " << TypeHisto[Choice] << endl;
     if (Choice > (numChoice - 1))
     {
@@ -247,9 +255,9 @@ void CompareSigmaWidthPurity(TString year0 = "22m_pass4" /*"LHC22o_pass2_triggse
         if (part > 2)
           // YUpRatio[Choice] = 0.01; 22m_pass1 vs LHC16k
           // YUpRatio[Choice] = 0.2;
-          YUpRatio[Choice] = 10;
+          YUpRatio[Choice] = 2;
         else
-          YUpRatio[Choice] = 6; // for 22m vs 22f comparison
+          YUpRatio[Choice] = 2; // for 22m vs 22f comparison
       }
       if (Choice != 3)
       {
@@ -268,8 +276,8 @@ void CompareSigmaWidthPurity(TString year0 = "22m_pass4" /*"LHC22o_pass2_triggse
       TLegend *legend;
       if (Spart[part] == "XiPlu" && Choice == 0)
         legend = new TLegend(0.5, 0.25, 0.8, 0.45);
-      //else if (Spart[part] == "K0S" && Choice == 1)
-        //legend = new TLegend(0.5, 0.5, 0.8, 0.7);
+      // else if (Spart[part] == "K0S" && Choice == 1)
+      // legend = new TLegend(0.5, 0.5, 0.8, 0.7);
       else if (part <= 2 && Choice == 2)
         legend = new TLegend(0.5, 0.25, 0.8, 0.45);
       else
@@ -373,10 +381,10 @@ void CompareSigmaWidthPurity(TString year0 = "22m_pass4" /*"LHC22o_pass2_triggse
         // SfileTemp = "../Run3QA/LHC22q_pass2/PostProcess_LHC22q_pass2_529039_treno60333.root";
         // SfileTemp ="../Run3QA/LHC22m_pass3/Yields_Xi_LHC22m_pass3_relval_Train63790.root";
         // SfileTemp ="../Run3QA/LHC22m_pass3/YieldsQATask_Xi_LHC22m_pass3_relval_Train63492_qa_OneGaussFit.root";
-        //SfileTemp = "../Run3QA/Periods/LHC22m_pass3/PostProcess_qa_LHC22m_pass3_relval_cpu2_Train63492.root";
-        //SfileTemp = "../Run3QA/Periods/LHC22m_pass4/PostProcess_qa_LHC22m_pass4_tpc_v1_Train78719.root";
+        // SfileTemp = "../Run3QA/Periods/LHC22m_pass3/PostProcess_qa_LHC22m_pass3_relval_cpu2_Train63492.root";
+        // SfileTemp = "../Run3QA/Periods/LHC22m_pass4/PostProcess_qa_LHC22m_pass4_tpc_v1_Train78719.root";
         SfileTemp = "../Run3QA/Periods/LHC22m_pass3/PostProcess_qa_LHC22m_pass3_relval_cpu2_Train78545.root";
-        //SfileTemp = "../Run3QA/Periods/LHC21k6_MC_pp/PostProcess_qaNew_LHC21k6_Train58981.root";
+        // SfileTemp = "../Run3QA/Periods/LHC21k6_MC_pp/PostProcess_qaNew_LHC21k6_Train58981.root";
 
         fileTemp = new TFile(SfileTemp, "");
         if (!fileTemp)
@@ -504,7 +512,7 @@ void CompareSigmaWidthPurity(TString year0 = "22m_pass4" /*"LHC22o_pass2_triggse
 
         Float_t SplineIntegralError = 0;
         if (part != 0)
-          histoPubError[part]->Scale(1./2);
+          histoPubError[part]->Scale(1. / 2);
         for (Int_t b = 1; b <= histoPubError[part]->GetNbinsX(); b++)
         {
           if (histoPubError[part]->GetBinCenter(b) < ALow)
