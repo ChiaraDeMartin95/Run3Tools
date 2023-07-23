@@ -82,16 +82,16 @@ Double_t spline(Double_t *x, Double_t *p)
 }
 
 const Int_t numPart = 7;
-const Int_t numChoice = 4; // mean, sigma, purity, yield
+const Int_t numChoice = 5; // mean, sigma, purity, yield, efficiency for MC
 Float_t ParticleMassPDG[numPart] = {0.497611, 1.115683, 1.115683, 1.32171, 1.32171, 1.67245, 1.67245};
 
 // histo0 -> num
 // histo1 -> denom
-void CompareSigmaWidthPurity(TString year0 = "Run1" /*"23y_cpass0" /*"LHC22o_pass2_triggsel" /*"LHC22m_pass2" /*"LHC22f_pass2" /*"LHC22m_pass1"*/,
-                             TString year1 = "Run2" /*"22o_pass4_pass3TPC" /*"LHC22m_pass2" /*"LHC22s_PbPb" /*"LHC22f_pass2"  "LHC22m_pass2"*/,
+void CompareSigmaWidthPurity(TString year0 = "Anchored22f"/*"GapTriggered" /*"23y_cpass0" /*"LHC22o_pass2_triggsel" /*"LHC22m_pass2" /*"LHC22f_pass2" /*"LHC22m_pass1"*/,
+                             TString year1 = "Injected" /*"22o_pass4_pass3TPC" /*"LHC22m_pass2" /*"LHC22s_PbPb" /*"LHC22f_pass2"  "LHC22m_pass2"*/,
                              TString yearRatioToPub = "" /*"22m_pass3_relval_cpu2_Train78545"/*"22m_pass4_tpc_v1_Train78719"/*"22m_pass3_Train63492"/*"21k6_Train58981"*/,
-                             TString Sfilein0 = "/Users/mbp-cdm-01/Desktop/AssegnoRicerca/Run3Analyses/OmegavsMult/EnrichedMonteCarlos/PostProcessing_TestGapTriggeredMC_Run1.root" /*"../Run3QA/Periods/LHC23y_cpass0/Yields_Omega_LHC23y_cpass0_Train100262_OneGaussFit.root"*/,
-                             TString Sfilein1 = "/Users/mbp-cdm-01/Desktop/AssegnoRicerca/Run3Analyses/OmegavsMult/EnrichedMonteCarlos/PostProcessing_TestGapTriggeredMC_Run2.root" /*"../Run3QA/Periods/LHC22o_pass4/Yields_Omega_LHC22o_pass4_small_pass3TPC_OneGaussFit.root"/*"../Run3QA/Periods/LHC22o_pass4/Yields_Omega_LHC22o_pass4_small_pass2TPC_OneGaussFit.root"*/,
+                             TString Sfilein0 = "../Run3QA/Periods/LHC23d1f/PostProcess_qa_LHC23d1f_Train97025.root"/*"/Users/mbp-cdm-01/Desktop/AssegnoRicerca/Run3Analyses/OmegavsMult/EnrichedMonteCarlos/PostProcessing_TestGapTriggeredMCBis.root" /*"../Run3QA/Periods/LHC23y_cpass0/Yields_Omega_LHC23y_cpass0_Train100262_OneGaussFit.root"*/,
+                             TString Sfilein1 = "../Run3QA/Periods/LHC23e1b/PostProcess_qa_LHC23e1b_Train103380.root" /*"/Users/mbp-cdm-01/Desktop/AssegnoRicerca/Run3Analyses/OmegavsMult/EnrichedMonteCarlos/PostProcessing_TestGapTriggeredMC_Run2.root" /*"../Run3QA/Periods/LHC22o_pass4/Yields_Omega_LHC22o_pass4_small_pass3TPC_OneGaussFit.root"/*"../Run3QA/Periods/LHC22o_pass4/Yields_Omega_LHC22o_pass4_small_pass2TPC_OneGaussFit.root"*/,
                              TString OutputDir = "/Users/mbp-cdm-01/Desktop/AssegnoRicerca/Run3Analyses/OmegavsMult/EnrichedMonteCarlos/" /*"../Run3QA/LHC22o_pass2/" /*"../Run3QA/LHC22m_pass2/"*/,
                              Bool_t isPseudoEfficiency = 0,
                              Bool_t isOnlyPseudoEfficiency = 0,
@@ -99,15 +99,15 @@ void CompareSigmaWidthPurity(TString year0 = "Run1" /*"23y_cpass0" /*"LHC22o_pas
                              "../PublishedYield13TeV/HEPData-ins1748157-v1-Table", // directory where published yields are stored
                              Bool_t ispp = 1,
                              Bool_t isYieldFromInvMassPostProcess = 0,
-                             Bool_t isMC=1)
+                             Bool_t isMC = 1)
 {
   // isYieldFromInvMassPostProcess = 1 if files in input are the oputput of the macro Yields_from_invmass.C
   Int_t Choice = 0;
   Int_t ChosenType = -1;
-  TString TypeHisto[4] = {"Mean", "Sigma", "Purity", "Yield"};
+  TString TypeHisto[numChoice] = {"Mean", "Sigma", "Purity", "Yield", "EfficiencyvsPt"};
   TString Spart[numPart] = {"K0S", "Lam", "ALam", "XiMin", "XiPlu", "OmMin", "OmPlu"};
   TString NamePart[numPart] = {"K^{0}_{S}", "#Lambda", "#bar{#Lambda}", "#Xi^{-}", "#Xi^{+}", "#Omega^{-}", "#Omega^{+}"};
-  TString TitleY[4] = {"Mean (GeV/#it{c}^{2})", "Sigma (GeV/#it{c}^{2})", "S/(S+B)", "1/#it{N}_{evt} d#it{N}/d#it{p}_{T} (GeV/#it{c})^{-1}"};
+  TString TitleY[numChoice] = {"Mean (GeV/#it{c}^{2})", "Sigma (GeV/#it{c}^{2})", "S/(S+B)", "1/#it{N}_{evt} d#it{N}/d#it{p}_{T} (GeV/#it{c})^{-1}", "Efficiency"};
   TString TitleXPt = "#it{p}_{T} (GeV/#it{c})";
 
   Float_t YLowMean[numPart] = {0.485, 1.110, 1.110, 1.316, 1.316, 1.664, 1.664};
@@ -118,12 +118,8 @@ void CompareSigmaWidthPurity(TString year0 = "Run1" /*"23y_cpass0" /*"LHC22o_pas
 
   Float_t YLow[numPart] = {0};
   Float_t YUp[numPart] = {0};
-  /* default
-  Float_t YLowRatio[4] = {0.95, 0.9, 0.01, 0};
-  Float_t YUpRatio[4] = {1.05, 3.0, 1, 0.1};
-  */
-  Float_t YLowRatio[4] = {0.95, 0, 0.9, 0};
-  Float_t YUpRatio[4] = {1.05, 1.2, 1.1, 2};
+  Float_t YLowRatio[numChoice] = {0.95, 0, 0.9, 0, 0};
+  Float_t YUpRatio[numChoice] = {1.05, 1.2, 1.1, 2, 2};
 
   Int_t color0 = kRed + 2;
   Int_t color1 = kBlue + 2;
@@ -147,13 +143,16 @@ void CompareSigmaWidthPurity(TString year0 = "Run1" /*"23y_cpass0" /*"LHC22o_pas
   Bool_t isGen = 0;
   if (!isOnlyPseudoEfficiency)
   {
-    cout << "Do you want to compare Mean (=0), Sigma (=1), Purity (=2) or Yield per event (=3)?" << endl;
+    cout << "Do you want to compare Mean (=0), Sigma (=1), Purity (=2) or Yield per event (=3) ot efficiency (=4, only MC)?" << endl;
     cin >> Choice;
+    if (!isMC && Choice == 4)
+      return;
     if (isMC && Choice == 3)
     {
       cout << "Do you want the reco yield (0) or gen yield (1) ? " << endl;
       cin >> isGen;
-      if (isGen) TypeHisto[Choice] = "GeneratedParticles_Rintegrated";
+      if (isGen)
+        TypeHisto[Choice] = "GeneratedParticles_Rintegrated";
     }
     cout << Choice << " " << TypeHisto[Choice] << endl;
     if (Choice > (numChoice - 1))
@@ -180,7 +179,12 @@ void CompareSigmaWidthPurity(TString year0 = "Run1" /*"23y_cpass0" /*"LHC22o_pas
       return;
     }
 
-    Sfileout = OutputDir + "Compare" + TypeHisto[Choice] + "_" + Spart[ChosenType] + "_" + year0 + "vs" + year1;
+    // Sfileout = OutputDir + "Compare" + TypeHisto[Choice] + "_" + Spart[ChosenType] + "_" + year0 + "vs" + year1;
+    Sfileout = OutputDir + "Compare" + TypeHisto[Choice] + "_";
+    if (isYieldFromInvMassPostProcess)
+      Sfileout += Spart[ChosenType] + "_";
+    Sfileout += year0 + "vs" + year1;
+    cout << "Output file: " << Sfileout << endl;
 
     if (year0 == "LHC22f_pass2")
       color0 = kOrange + 2;
@@ -203,6 +207,11 @@ void CompareSigmaWidthPurity(TString year0 = "Run1" /*"23y_cpass0" /*"LHC22o_pas
       else if (Choice == 2)
       {
         YLow[part] = YLowPurity[part];
+        YUp[part] = 1;
+      }
+      else if (Choice == 4)
+      {
+        YLow[part] = 0;
         YUp[part] = 1;
       }
 
