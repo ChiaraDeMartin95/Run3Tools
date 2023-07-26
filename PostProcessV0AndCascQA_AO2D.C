@@ -47,8 +47,8 @@ Double_t SetEfficiencyError(Int_t k, Int_t n);
 void PostProcessV0AndCascQA_AO2D(TString CollType = "pp", Bool_t isMC = true, Int_t RebinTPC = 1,
                                  Int_t SkipCascFits = 0,                                                                                                                                                                                                                                                                                                      // 0 = don't skip, 1 = skip partc, 2 = skip all cascades
                                  Bool_t TopologyOnly = false,                                                                                                                                                                                                                                                                                                 // true = only topology analysis, false = complete analysis
-                                 TString PathIn = "/Users/mbp-cdm-01/Desktop/AssegnoRicerca/Run3Analyses/OmegavsMult/EnrichedMonteCarlos/AnalysisResults_TestGapTriggeredMC.root" /*"../Run3QA/Periods/LHC23e1_Test/AnalysisResults_qatask_LHC23e1_Test2.root" /*"../Run3QA/Periods/LHC22q_pass3/AnalysisResults_qatask_LHC22q_pass3_Train64263.root"*/, // input file name
-                                 TString PathOut = "/Users/mbp-cdm-01/Desktop/AssegnoRicerca/Run3Analyses/OmegavsMult/EnrichedMonteCarlos/PostProcessing_TestGapTriggeredMC" /*"../Run3QA/Periods/LHC23e1_Test/PostProcess_qa_LHC23e1_Test2"*/,                                                                                                          // output file name
+                                 TString PathIn = "/Users/mbp-cdm-01/Desktop/AssegnoRicerca/Run3Analyses/OmegavsMult/EnrichedMonteCarlos/AnalysisResults_TestGapTriggeredMCBis_NoTPC.root"/*"../Run3QA/Periods/LHC23e1b/AnalysisResults_qatask_LHC23e1b_Train103380.root" /*"../Run3QA/Periods/LHC23e1_Test/AnalysisResults_qatask_LHC23e1_Test2.root" /*"../Run3QA/Periods/LHC22q_pass3/AnalysisResults_qatask_LHC22q_pass3_Train64263.root"*/, // input file name
+                                 TString PathOut = "/Users/mbp-cdm-01/Desktop/AssegnoRicerca/Run3Analyses/OmegavsMult/EnrichedMonteCarlos/PostProcessing_TestGapTriggeredMCBis_NoTPC"/* "../Run3QA/Periods/LHC23e1b/PostProcess_qa_LHC23e1b_Train103380"/*"../Run3QA/Periods/LHC23e1_Test/PostProcess_qa_LHC23e1_Test2"*/,                                                                                                          // output file name
                                  Bool_t CheckOldPass = false,                                                                                                                                                                                                                                                                                                 // true to compare two passes
                                  TString OldPassPath = "..",                                                                                                                                                                                                                                                                                                  // input/output file name (old pass to be compared with)
                                  Bool_t isMassvsRadiusPlots = 0)
@@ -539,12 +539,12 @@ void PostProcessV0AndCascQA_AO2D(TString CollType = "pp", Bool_t isMC = true, In
       else if (part == 4)
         partGen = 6; // Xi-
       else if (part == 5)
-        partGen = 10; // Omega+
+        partGen = 12; // Omega+
       else if (part == 6)
-        partGen = 12; // Omega-
+        partGen = 10; // Omega-
 
       fHistGen_Rintegrated[part] = (TH1F *)fHistGen2D_Rintegrated->ProjectionY("GeneratedParticles_Rintegrated_" + NamePart[part], fHistGen2D_Rintegrated->GetXaxis()->FindBin(partGen + 0.5), fHistGen2D_Rintegrated->GetXaxis()->FindBin(partGen + 0.5), "e");
-      // fHistGen_Rintegrated[part]->Rebin(4);
+      fHistGen_Rintegrated[part]->Rebin(4);
       if (part == 0)
         fHistGen_Rintegrated[part]->Write();
 
@@ -569,7 +569,7 @@ void PostProcessV0AndCascQA_AO2D(TString CollType = "pp", Bool_t isMC = true, In
       if (part == 0)
         fhistoInvMass2DTrue_Rintegrated[part]->Write();
       fhistoPt1DTrue[part] = (TH1F *)fhistoInvMass2DTrue_Rintegrated[part]->ProjectionX(NamehistoInvMass[part] + "True_PtProj", 0, -1, "E");
-      // fhistoPt1DTrue[part]->Rebin(4);
+      fhistoPt1DTrue[part]->Rebin(4);
       if (part == 0)
         fhistoPt1DTrue[part]->Write();
 
@@ -596,7 +596,7 @@ void PostProcessV0AndCascQA_AO2D(TString CollType = "pp", Bool_t isMC = true, In
         fHistEffvsRadius[part]->SetBinError(b, SetEfficiencyError(fhistoR1DTrue[part]->GetBinContent(b), fHistGen_Rintegrated[part]->GetBinContent(b)));
       }
 
-      fHistEffvsPt[part]->GetXaxis()->SetRangeUser(PtVector[1], PtVector[numPt - 1]);
+      //fHistEffvsPt[part]->GetXaxis()->SetRangeUser(PtVector[1], PtVector[numPt - 1]);
       fHistEffvsRadius[part]->GetXaxis()->SetRangeUser(0, 50);
       fhistoPt1DTrue[part]->Scale(1. / NEvents / fhistoPt1DTrue[part]->GetBinWidth(1));
       fhistoR1DTrue[part]->Scale(1. / NEvents / fhistoR1DTrue[part]->GetBinWidth(1));
@@ -650,7 +650,8 @@ void PostProcessV0AndCascQA_AO2D(TString CollType = "pp", Bool_t isMC = true, In
       cout << "\n\e[35mParticle:\e[39m " << NamePart[part] << endl;
       cout << "Number of events " << NEvents << endl;
       cout << "#particl/event: " << fHistGen_Rintegrated[part]->Integral("width") << " " << fHistGen_ptintegrated[part]->Integral("width") << " " << endl;
-      histoPartPerEvent->SetBinContent(part + 1, fHistGen_Rintegrated[part]->Integral("width"));
+      //histoPartPerEvent->SetBinContent(part + 1, fHistGen_Rintegrated[part]->Integral("width"));
+      histoPartPerEvent->SetBinContent(part + 1, fHistGen_Rintegrated_Unscaled[part]->Integral("")/NEvents);
       histoPartPerEvent->SetBinError(part + 1, sqrt(fHistGen_Rintegrated_Unscaled[part]->Integral())/NEvents);
       histoPartPerEvent->GetXaxis()->SetBinLabel(part + 1, NamePart[part]);
 
