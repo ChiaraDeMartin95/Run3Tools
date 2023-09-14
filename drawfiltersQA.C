@@ -1,7 +1,9 @@
 #include <iostream>
 #include <fstream>
 
-void drawfiltersQA(TString filename = "list.txt")
+const Float_t StrLimit = 4.3E-5;
+
+void drawfiltersQA(TString filename = "listBis.txt", Int_t ChosenPeriod = 4)
 {
 
     std::vector<std::string> name;
@@ -36,7 +38,8 @@ void drawfiltersQA(TString filename = "list.txt")
         std::cerr << "Unable to open file: " << std::endl;
     }
 
-    Int_t colors[20] = {kBlack, kRed, kBlue, kGreen, kMagenta, kCyan, kOrange, kYellow, kMagenta + 3, kAzure, kViolet, kTeal, kSpring, kGray, kBlue + 2, kRed + 4, kGreen + 2, kMagenta + 2, kCyan + 2, kOrange + 2};
+    Int_t colors[14] = {634, 628, kOrange - 4, 797, 815, 418, 429, 867, 856, 601, kViolet, kPink + 9, kPink + 1, 1};
+    Int_t MarkerMult[14] = {20, 21, 33, 34, 29, 20, 21, 33, 34, 29, 20, 21, 33, 34};
     const int nfiles = name.size();
     cout << "Number of files = " << nfiles << endl;
 
@@ -78,11 +81,14 @@ void drawfiltersQA(TString filename = "list.txt")
     }
 
     TCanvas *c = new TCanvas("c", "c", 900, 1000);
-    c->SetLogy();
-    c->SetLeftMargin(0.15);
-    c->SetRightMargin(0.05);
-    c->SetBottomMargin(0.15);
-    c->SetTopMargin(0.05);
+    TPad *pad1 = new TPad("pad1", "pad1", 0, 0.3, 1, 1);
+    pad1->SetBottomMargin(0.01);
+    pad1->SetLeftMargin(0.15);
+    pad1->SetRightMargin(0.05);
+    pad1->SetTopMargin(0.05);
+    pad1->Draw();
+    pad1->cd();
+    pad1->SetLogy();
 
     TH1F *h = new TH1F(Form("h%d", 0), ";;Selectivity", 5, 0, 5);
     h->GetXaxis()->SetBinLabel(1, "Omega #times 0.2");
@@ -99,7 +105,7 @@ void drawfiltersQA(TString filename = "list.txt")
     }
     hEvSel23[0]->Draw("SAME");
 
-    TLine *l = new TLine(0, 4.3E-5, 5, 4.3E-5);
+    TLine *l = new TLine(0, StrLimit, 5, StrLimit);
     l->SetLineStyle(7);
     l->SetLineColor(kAzure + 10);
     l->SetLineWidth(3);
@@ -120,6 +126,48 @@ void drawfiltersQA(TString filename = "list.txt")
     lg->AddEntry(l1, "LF limit", "l");
     lg->SetTextSize(0.03);
     lg->Draw();
+
+    c->cd();
+    TPad *pad2 = new TPad("pad2", "pad2", 0, 0, 1, 0.3);
+    pad2->SetTopMargin(0.01);
+    pad2->SetBottomMargin(0.3);
+    pad2->SetLeftMargin(0.15);
+    pad2->SetRightMargin(0.05);
+    pad2->Draw();
+    pad2->cd();
+
+    TH1F *hRatio = new TH1F(Form("hRatio%d", 0), Form(";;Ratio to %s", name[ChosenPeriod].c_str()), 5, 0, 5);
+    hRatio->GetXaxis()->SetBinLabel(1, "Omega #times 0.2");
+    hRatio->GetXaxis()->SetBinLabel(2, "3Xi");
+    hRatio->GetXaxis()->SetBinLabel(3, "Xi-N");
+    hRatio->GetXaxis()->SetBinLabel(4, "Omega large R");
+    hRatio->GetXaxis()->SetBinLabel(5, "Total");
+    hRatio->GetXaxis()->SetLabelSize(0.1);
+    hRatio->GetYaxis()->SetLabelSize(0.05);
+    hRatio->GetYaxis()->SetTitleSize(0.1);
+    hRatio->GetYaxis()->SetTitleOffset(0.5);
+    hRatio->SetStats(0);
+    hRatio->GetYaxis()->SetRangeUser(0., 2.);
+    hRatio->Draw("");
+
+    TH1F *hRatioToLimit[nfiles];
+    for (int i = 0; i < nfiles; i++)
+    {
+        hRatioToLimit[i] = (TH1F *)hEvSel23[i]->Clone(Form("hRatioToLimit%d", i));
+        hRatioToLimit[i]->Divide(hEvSel23[ChosenPeriod]);
+        hRatioToLimit[i]->SetLineColor(colors[i]);
+        hRatioToLimit[i]->SetMarkerColor(colors[i]);
+        hRatioToLimit[i]->SetMarkerStyle(MarkerMult[i]);
+
+        // hRatioToLimit[i]->Scale(1. / StrLimit);
+        hRatioToLimit[i]->Draw("SAME pl");
+    }
+
+    TF1 *f1 = new TF1("f1", "1", 0, 5);
+    f1->SetLineColor(kBlack);
+    f1->SetLineStyle(10);
+    f1->FixParameter(0, 1);
+    f1->Draw("SAME");
 
     c->SaveAs("images/rejfactors.png");
 }
