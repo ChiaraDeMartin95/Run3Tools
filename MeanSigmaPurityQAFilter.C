@@ -149,21 +149,32 @@ Float_t YLowPurity[numPart] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
 Float_t YLow[numPart] = {0};
 Float_t YUp[numPart] = {0};
 
-Float_t YLowRatio[numChoice] = {0.99, 0.4, 0.5, 0.5, 0.8, 0.8, 0.8};
-Float_t YUpRatio[numChoice] = {1.01, 1.6, 1.5, 1.5, 1.2, 1.2, 1.2};
+Float_t YLowRatio[numChoice] = {0.99, 0.4, 0.5, 0, 0.8, 0.8, 0.8};
+Float_t YUpRatio[numChoice] = {1.01, 1.6, 1.5, 2, 1.2, 1.2, 1.2};
 
-const Int_t numPeriods = 13;
-TString Srun[numPeriods] = {"LHC23f", "LHC23i", "LHC23g", "LHC23j", "LHC23k", "LHC23l", "LHC23m", "LHC23n", "LHC23o", "LHC23q", "LHC23r", "LHC23y", "LHC23z"};
+const Int_t numPeriods = 7;
+//TString Srun[numPeriods] = {"LHC23f", "LHC23i", "LHC23g", "LHC23j", "LHC23k", "LHC23l", "LHC23m", "LHC23n", "LHC23o", "LHC23q", "LHC23r", "LHC23y", "LHC23z"};
+//TString Srun[numPeriods] = {"LHC23p", "LHC23s", "LHC23t", "LHC23u", "LHC23za", "LHC23zc", "LHC23zj", "LHC23zl", "LHC23l"};
+//TString Srun[numPeriods] = {"LHC23v", "LHC23ze", "LHC23zf", "LHC23zg", "LHC23zh", "LHC23zi", "LHC23zk", "LHC23zm", "LHC23zn","LHC23zq","LHC23zr","LHC23zt", "LHC23l"};
+
+//500 kHz periods (11) N.B. zs contains too few events
+//TString Srun[numPeriods] = {"LHC23l", "LHC23p", "LHC23v", "LHC23za", "LHC23zc", "LHC23zj", "LHC23zl","LHC23zt"};
+//low IR periods
+//TString Srun[numPeriods] = {"LHC23i", "LHC23o", "LHC23zg", "LHC23zm", "LHC23n", "LHC23ze", "LHC23zf", "LHC23zk"};
+//TString IRLegend[numPeriods] = {"50 kHz", "50 kHz", "50 kHz", "50 kHz", "10 kHz", "23 kHz", "10 kHz", "10 kHz"};
+//Mixed sample
+TString Srun[numPeriods] = {"LHC23l", "LHC23o", "LHC23i", "LHC23zk", "LHC23zf", "LHC23m", "LHC23t" };
+TString IRLegend[numPeriods] = {"500 kHz", "50 kHz", "50 kHz", "10 kHz", "10 kHz", "250 kHz", "1000 kHz"};
 
 void MeanSigmaPurityQAFilter(Int_t part = 8,
-                             Int_t ChosenRun = 5,
+                             Int_t ChosenRun = 0,
                              Int_t Choice = 0,
                              TString OutputDir = "../TriggerForRun3/EventFiltering2023/",
                              TString year = "")
 {
 
   gStyle->SetOptStat(0);
-  if (ChosenRun > numPeriods)
+  if (ChosenRun > (numPeriods-1))
   {
     cout << "Chosen Mult outside of available range" << endl;
     return;
@@ -237,7 +248,7 @@ void MeanSigmaPurityQAFilter(Int_t part = 8,
   gStyle->SetLegendFillColor(0);
   gStyle->SetLegendBorderSize(0);
 
-  TLegend *legendAllMult = new TLegend(0.22, 0.03, 0.73, 0.28);
+  TLegend *legendAllMult = new TLegend(0.22, 0.03, 0.9, 0.28);
   legendAllMult->SetHeader("Runs");
   legendAllMult->SetNColumns(3);
   legendAllMult->SetFillStyle(0);
@@ -319,6 +330,8 @@ void MeanSigmaPurityQAFilter(Int_t part = 8,
 
   for (Int_t m = numPeriods - 1; m >= 0; m--)
   {
+    cout << "Period: " << m << " " << Srun[m] << endl;
+    if (Srun[m] == "LHC23p" && part==8) continue;
     fHistSpectrumScaled[m] = (TH1F *)fHistSpectrum[m]->Clone("fHistSpectrumScaled_" + Srun[m]);
     for (Int_t b = 1; b <= fHistSpectrum[m]->GetNbinsX(); b++)
     {
@@ -333,7 +346,7 @@ void MeanSigmaPurityQAFilter(Int_t part = 8,
     fHistSpectrumScaled[m]->GetYaxis()->SetRangeUser(YLow[part], YUp[part]);
     fHistSpectrumScaled[m]->Draw("same e0x0");
     sScaleFactorFinal[m] = "";
-    legendAllMult->AddEntry(fHistSpectrumScaled[m], Srun[m] + sScaleFactorFinal[m] + " ", "pef");
+    legendAllMult->AddEntry(fHistSpectrumScaled[m], Srun[m] + sScaleFactorFinal[m] + " " + IRLegend[m] + " ", "pef");
   } // end loop on mult
   LegendTitle->Draw("");
   legendAllMult->Draw("");
@@ -368,14 +381,15 @@ void MeanSigmaPurityQAFilter(Int_t part = 8,
 
   for (Int_t m = numPeriods - 1; m >= 0; m--)
   {
+    if (Srun[m] == "LHC23p" && part==8) continue;
     fHistSpectrumMultRatio[m] = (TH1F *)fHistSpectrum[m]->Clone("fHistSpectrumMultRatio_" + Srun[m]);
     fHistSpectrumMultRatio[m]->Divide(fHistSpectrum[ChosenRun]);
     ErrRatioCorr(fHistSpectrum[m], fHistSpectrum[ChosenRun], fHistSpectrumMultRatio[m], 0);
     for (Int_t b = 1; b <= fHistSpectrum[m]->GetNbinsX(); b++)
     {
-      // cout << "bin " << b << " " << fHistSpectrum[m]->GetBinContent(b) << endl;
-      // cout << "bin " << b << " " << fHistSpectrum[ChosenRun]->GetBinContent(b) << endl;
-      // cout << "bin " << b << " " << fHistSpectrumMultRatio[m]->GetBinContent(b) << endl;
+       cout << "binR " << b << " " << fHistSpectrum[m]->GetBinContent(b) << endl;
+       cout << "binR " << b << " " << fHistSpectrum[ChosenRun]->GetBinContent(b) << endl;
+       cout << "binR " << b << " " << fHistSpectrumMultRatio[m]->GetBinContent(b) << endl;
     }
     fHistSpectrumMultRatio[m]->SetMarkerColor(ColorMult[m]);
     fHistSpectrumMultRatio[m]->SetLineColor(ColorMult[m]);
