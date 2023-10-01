@@ -3,13 +3,14 @@
 
 const Float_t StrLimit = 4.3E-5;
 
-void drawfiltersQA(TString filename = "listBis.txt", Int_t ChosenPeriod = 4)
+void drawfiltersQA(TString filename = "listGoodvsBad.txt", Int_t ChosenPeriod = 1)
 {
 
     std::vector<std::string> name;
     std::ifstream file(Form("%s", filename.Data()));
-    std::string remove = "/Users/mbp-cdm-01/Desktop/dottorato/1Anno/QAStrangeness/TriggerForRun3/EventFiltering2023/AnalysisResults_merged_";
-    std::string remove2 = "_round2.root";
+    // std::string remove = "/Users/mbp-cdm-01/Desktop/dottorato/1Anno/QAStrangeness/TriggerForRun3/EventFiltering2023/AnalysisResults_merged_";
+    std::string remove = "/Users/mbp-cdm-01/Desktop/dottorato/1Anno/QAStrangeness/TriggerForRun3/EventFiltering2023/AnalysisResults_";
+    std::string remove2 = ".root";
 
     cout << filename.Data() << endl;
     if (file.is_open())
@@ -47,14 +48,25 @@ void drawfiltersQA(TString filename = "listBis.txt", Int_t ChosenPeriod = 4)
     for (int i = 0; i < nfiles; i++)
     {
         cout << "name " << name[i].c_str() << endl;
-        f[i] = TFile::Open(Form("%s%s_round2.root", remove.c_str(), name[i].c_str()));
+        // f[i] = TFile::Open(Form("%s%s_round2.root", remove.c_str(), name[i].c_str()));
+        f[i] = TFile::Open(Form("%s%s.root", remove.c_str(), name[i].c_str()));
     }
 
     TH1F *hEvSel[nfiles];
+    Float_t RelError = 0;
+    Int_t TotEvt = 0;
     for (int i = 0; i < nfiles; i++)
     {
+        RelError = 0;
         hEvSel[i] = (TH1F *)f[i]->Get("lf-strangeness-filter/hProcessedEvents");
-        hEvSel[i]->Scale(1. / hEvSel[i]->GetBinContent(1));
+        TotEvt = hEvSel[i]->GetBinContent(1);
+        for (int j = 1; j <= hEvSel[i]->GetNbinsX(); j++)
+        {
+            RelError = sqrt(1. / hEvSel[i]->GetBinContent(j) + 1. / TotEvt);
+            hEvSel[i]->SetBinContent(j, hEvSel[i]->GetBinContent(j) / TotEvt);
+            hEvSel[i]->SetBinError(j, hEvSel[i]->GetBinContent(j) * RelError);
+            if (j==1) hEvSel[i]->SetBinError(j, 0);
+        }
         hEvSel[i]->SetLineColor(colors[i]);
     }
 
@@ -76,6 +88,12 @@ void drawfiltersQA(TString filename = "listBis.txt", Int_t ChosenPeriod = 4)
         hEvSel23[i]->SetBinContent(4, hEvSel[i]->GetBinContent(hEvSel[i]->GetXaxis()->FindBin("#Omega high radius")));
         double tot = hEvSel[i]->GetBinContent(hEvSel[i]->GetXaxis()->FindBin("#Omega")) * 0.2 + hEvSel[i]->GetBinContent(hEvSel[i]->GetXaxis()->FindBin("3#Xi")) + hEvSel[i]->GetBinContent(hEvSel[i]->GetXaxis()->FindBin("#Xi-YN") + hEvSel[i]->GetBinContent(hEvSel[i]->GetXaxis()->FindBin("#Omega high radius")));
         hEvSel23[i]->SetBinContent(5, tot);
+
+        hEvSel23[i]->SetBinError(1, hEvSel[i]->GetBinError(hEvSel[i]->GetXaxis()->FindBin("#Omega")) * 0.2);
+        hEvSel23[i]->SetBinError(2, hEvSel[i]->GetBinError(hEvSel[i]->GetXaxis()->FindBin("3#Xi")));
+        hEvSel23[i]->SetBinError(3, hEvSel[i]->GetBinError(hEvSel[i]->GetXaxis()->FindBin("#Xi-YN")));
+        hEvSel23[i]->SetBinError(4, hEvSel[i]->GetBinError(hEvSel[i]->GetXaxis()->FindBin("#Omega high radius")));
+        hEvSel23[i]->SetBinError(5, 0);
 
         cout << "Total rejection factor " << name[i].c_str() << " = " << tot << endl;
     }
@@ -101,9 +119,9 @@ void drawfiltersQA(TString filename = "listBis.txt", Int_t ChosenPeriod = 4)
     h->Draw();
     for (int i = 0; i < nfiles; i++)
     {
-        hEvSel23[i]->Draw("SAME");
+        hEvSel23[i]->Draw("SAME e");
     }
-    hEvSel23[0]->Draw("SAME");
+    hEvSel23[0]->Draw("SAME e");
 
     TLine *l = new TLine(0, StrLimit, 5, StrLimit);
     l->SetLineStyle(7);
@@ -154,6 +172,7 @@ void drawfiltersQA(TString filename = "listBis.txt", Int_t ChosenPeriod = 4)
     for (int i = 0; i < nfiles; i++)
     {
         hRatioToLimit[i] = (TH1F *)hEvSel23[i]->Clone(Form("hRatioToLimit%d", i));
+        hRatioToLimit[i]->Sumw2();
         hRatioToLimit[i]->Divide(hEvSel23[ChosenPeriod]);
         hRatioToLimit[i]->SetLineColor(colors[i]);
         hRatioToLimit[i]->SetMarkerColor(colors[i]);
