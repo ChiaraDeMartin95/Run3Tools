@@ -87,19 +87,19 @@ Float_t ParticleMassPDG[numPart] = {0.497611, 1.115683, 1.115683, 1.32171, 1.321
 
 // histo0 -> num
 // histo1 -> denom
-void CompareSigmaWidthPurity(TString year0 = "Anchored22f"/*"GapTriggered" /*"23y_cpass0" /*"LHC22o_pass2_triggsel" /*"LHC22m_pass2" /*"LHC22f_pass2" /*"LHC22m_pass1"*/,
-                             TString year1 = "Injected" /*"22o_pass4_pass3TPC" /*"LHC22m_pass2" /*"LHC22s_PbPb" /*"LHC22f_pass2"  "LHC22m_pass2"*/,
-                             TString yearRatioToPub = "" /*"22m_pass3_relval_cpu2_Train78545"/*"22m_pass4_tpc_v1_Train78719"/*"22m_pass3_Train63492"/*"21k6_Train58981"*/,
-                             TString Sfilein0 = "../Run3QA/Periods/LHC23d1f/PostProcess_qa_LHC23d1f_Train97025.root"/*"/Users/mbp-cdm-01/Desktop/AssegnoRicerca/Run3Analyses/OmegavsMult/EnrichedMonteCarlos/PostProcessing_TestGapTriggeredMCBis.root" /*"../Run3QA/Periods/LHC23y_cpass0/Yields_Omega_LHC23y_cpass0_Train100262_OneGaussFit.root"*/,
-                             TString Sfilein1 = "../Run3QA/Periods/LHC23e1b/PostProcess_qa_LHC23e1b_Train103380.root" /*"/Users/mbp-cdm-01/Desktop/AssegnoRicerca/Run3Analyses/OmegavsMult/EnrichedMonteCarlos/PostProcessing_TestGapTriggeredMC_Run2.root" /*"../Run3QA/Periods/LHC22o_pass4/Yields_Omega_LHC22o_pass4_small_pass3TPC_OneGaussFit.root"/*"../Run3QA/Periods/LHC22o_pass4/Yields_Omega_LHC22o_pass4_small_pass2TPC_OneGaussFit.root"*/,
-                             TString OutputDir = "/Users/mbp-cdm-01/Desktop/AssegnoRicerca/Run3Analyses/OmegavsMult/EnrichedMonteCarlos/" /*"../Run3QA/LHC22o_pass2/" /*"../Run3QA/LHC22m_pass2/"*/,
+void CompareSigmaWidthPurity(TString year0 = "LHC23zs_Good",
+                             TString year1 = "LHC23zs_Bad",
+                             TString yearRatioToPub = "",
+                             TString Sfilein0 = "../TriggerForRun3/EventFiltering2023/Yields_Omega_LHC23zs_First10Min_OneGaussFit.root",
+                             TString Sfilein1 = "../TriggerForRun3/EventFiltering2023/Yields_Omega_LHC23zs_Middle10Min_OneGaussFit.root",
+                             TString OutputDir = "../TriggerForRun3/EventFiltering2023/",
                              Bool_t isPseudoEfficiency = 0,
                              Bool_t isOnlyPseudoEfficiency = 0,
-                             TString SPublishedYieldForPseudoEff =                 /*"../PbPbYields5TeV/SpectraAlessandro" /*"../PbPbYields5TeV/SpectraK0sPublished276TeV_2040Cent" */
+                             TString SPublishedYieldForPseudoEff =                 
                              "../PublishedYield13TeV/HEPData-ins1748157-v1-Table", // directory where published yields are stored
                              Bool_t ispp = 1,
-                             Bool_t isYieldFromInvMassPostProcess = 0,
-                             Bool_t isMC = 1)
+                             Bool_t isYieldFromInvMassPostProcess = 1,
+                             Bool_t isMC = 0)
 {
   // isYieldFromInvMassPostProcess = 1 if files in input are the oputput of the macro Yields_from_invmass.C
   Int_t Choice = 0;
@@ -118,8 +118,8 @@ void CompareSigmaWidthPurity(TString year0 = "Anchored22f"/*"GapTriggered" /*"23
 
   Float_t YLow[numPart] = {0};
   Float_t YUp[numPart] = {0};
-  Float_t YLowRatio[numChoice] = {0.95, 0, 0.9, 0, 0};
-  Float_t YUpRatio[numChoice] = {1.05, 1.2, 1.1, 2, 2};
+  Float_t YLowRatio[numChoice] = {0.95, 0, 0.9, 0.8, 0};
+  Float_t YUpRatio[numChoice] = {1.05, 1.2, 1.1, 1.2, 2};
 
   Int_t color0 = kRed + 2;
   Int_t color1 = kBlue + 2;
@@ -260,13 +260,6 @@ void CompareSigmaWidthPurity(TString year0 = "Anchored22f"/*"GapTriggered" /*"23
         {
           YUp[part] = 1.2 * histo0[part]->GetBinContent(histo0[part]->GetMaximumBin());
         }
-
-        if (part > 2)
-          // YUpRatio[Choice] = 0.01; 22m_pass1 vs LHC16k
-          // YUpRatio[Choice] = 0.2;
-          YUpRatio[Choice] = 2;
-        else
-          YUpRatio[Choice] = 2; // for 22m vs 22f comparison
       }
       if (Choice != 3)
       {
@@ -303,10 +296,15 @@ void CompareSigmaWidthPurity(TString year0 = "Anchored22f"/*"GapTriggered" /*"23
       histoRatio[part]->GetYaxis()->SetTitleSize(0.08);
       histoRatio[part]->GetYaxis()->SetTitleOffset(0.8);
 
-      TF1 *lineMass = new TF1("pol0", "pol0", 0, 8);
+      TF1 *lineMass = new TF1("lineMass", "pol0", 0, 8);
       lineMass->SetParameter(0, ParticleMassPDG[part]);
       lineMass->SetLineColor(kBlack);
       lineMass->SetLineStyle(7);
+
+      TF1* lineAt1 = new TF1("lineAt1", "pol0", 0, 8);
+      lineAt1->SetParameter(0, 1);
+      lineAt1->SetLineColor(kBlack);
+      lineAt1->SetLineStyle(7);
 
       canvas[part]->cd();
       pad1[part]->Draw();
@@ -323,6 +321,7 @@ void CompareSigmaWidthPurity(TString year0 = "Anchored22f"/*"GapTriggered" /*"23
       pad2[part]->Draw();
       pad2[part]->cd();
       histoRatio[part]->Draw("same");
+      lineAt1->Draw("same");
 
       if (part == 0)
         canvas[part]->SaveAs(Sfileout + ".pdf(");
