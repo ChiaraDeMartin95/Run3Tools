@@ -44,13 +44,16 @@ float findMaximum(TH1F *lHist, float width);
 float findMaxValue(TH1F *lHist1, TH1F *lHist2);
 Double_t SetEfficiencyError(Int_t k, Int_t n);
 
-void PostProcessV0AndCascQA_AO2D(TString CollType = "pp", Bool_t isMC = true, Int_t RebinTPC = 1,
-                                 Int_t SkipCascFits = 0,                                                                                                                                                                                                                                                                                                      // 0 = don't skip, 1 = skip partc, 2 = skip all cascades
-                                 Bool_t TopologyOnly = false,                                                                                                                                                                                                                                                                                                 // true = only topology analysis, false = complete analysis
-                                 TString PathIn = "/Users/mbp-cdm-01/Desktop/AssegnoRicerca/Run3Analyses/OmegavsMult/EnrichedMonteCarlos/AnalysisResults_TestGapTriggeredMCBis_NoTPC.root"/*"../Run3QA/Periods/LHC23e1b/AnalysisResults_qatask_LHC23e1b_Train103380.root" /*"../Run3QA/Periods/LHC23e1_Test/AnalysisResults_qatask_LHC23e1_Test2.root" /*"../Run3QA/Periods/LHC22q_pass3/AnalysisResults_qatask_LHC22q_pass3_Train64263.root"*/, // input file name
-                                 TString PathOut = "/Users/mbp-cdm-01/Desktop/AssegnoRicerca/Run3Analyses/OmegavsMult/EnrichedMonteCarlos/PostProcessing_TestGapTriggeredMCBis_NoTPC"/* "../Run3QA/Periods/LHC23e1b/PostProcess_qa_LHC23e1b_Train103380"/*"../Run3QA/Periods/LHC23e1_Test/PostProcess_qa_LHC23e1_Test2"*/,                                                                                                          // output file name
-                                 Bool_t CheckOldPass = false,                                                                                                                                                                                                                                                                                                 // true to compare two passes
-                                 TString OldPassPath = "..",                                                                                                                                                                                                                                                                                                  // input/output file name (old pass to be compared with)
+void PostProcessV0AndCascQA_AO2D(TString CollType = "PbPb",
+                                 Bool_t isMC = false,
+                                 Bool_t isSel8 = 1,
+                                 Int_t RebinTPC = 1,
+                                 Int_t SkipCascFits = 0,      // 0 = don't skip, 1 = skip partc, 2 = skip all cascades
+                                 Bool_t TopologyOnly = false, // true = only topology analysis, false = complete analysis
+                                 TString PathIn = "../Run3QA/Periods/PbPb2023/LHC23zx_cpass0/AnalysisResults_PbPb_2023_Test2.root",
+                                 TString PathOut = "../Run3QA/Periods/PbPb2023/LHC23zx_cpass0/PostProcess_PbPb_2023_Test2",
+                                 Bool_t CheckOldPass = false, // true to compare two passes
+                                 TString OldPassPath = "..",  // input/output file name (old pass to be compared with)
                                  Bool_t isMassvsRadiusPlots = 0)
 {
   // Define pass names
@@ -123,7 +126,9 @@ void PostProcessV0AndCascQA_AO2D(TString CollType = "pp", Bool_t isMC = true, In
     cout << "henum histo not found! " << endl;
     return;
   }
-  Double_t NEvents = henum->GetEntries();
+  Double_t NEvents = 0;
+  if (isSel8) NEvents = henum->GetBinContent(2);
+  else NEvents = henum->GetBinContent(1);
 
   if (isMC)
   {
@@ -596,12 +601,12 @@ void PostProcessV0AndCascQA_AO2D(TString CollType = "pp", Bool_t isMC = true, In
         fHistEffvsRadius[part]->SetBinError(b, SetEfficiencyError(fhistoR1DTrue[part]->GetBinContent(b), fHistGen_Rintegrated[part]->GetBinContent(b)));
       }
 
-      //fHistEffvsPt[part]->GetXaxis()->SetRangeUser(PtVector[1], PtVector[numPt - 1]);
+      // fHistEffvsPt[part]->GetXaxis()->SetRangeUser(PtVector[1], PtVector[numPt - 1]);
       fHistEffvsRadius[part]->GetXaxis()->SetRangeUser(0, 50);
       fhistoPt1DTrue[part]->Scale(1. / NEvents / fhistoPt1DTrue[part]->GetBinWidth(1));
       fhistoR1DTrue[part]->Scale(1. / NEvents / fhistoR1DTrue[part]->GetBinWidth(1));
-      fHistGen_Rintegrated_Unscaled[part] = (TH1F*)fHistGen_Rintegrated[part]->Clone("fHistGen_Rintegrated_Unscaled_" + NamePart[part]);
-      fHistGen_ptintegrated_Unscaled[part] = (TH1F*)fHistGen_ptintegrated[part]->Clone("fHistGen_ptintegrated_Unscaled_" + NamePart[part]);
+      fHistGen_Rintegrated_Unscaled[part] = (TH1F *)fHistGen_Rintegrated[part]->Clone("fHistGen_Rintegrated_Unscaled_" + NamePart[part]);
+      fHistGen_ptintegrated_Unscaled[part] = (TH1F *)fHistGen_ptintegrated[part]->Clone("fHistGen_ptintegrated_Unscaled_" + NamePart[part]);
       fHistGen_Rintegrated[part]->Scale(1. / NEvents / fHistGen_Rintegrated[part]->GetBinWidth(1));
       fHistGen_ptintegrated[part]->Scale(1. / NEvents / fHistGen_ptintegrated[part]->GetBinWidth(1));
 
@@ -650,9 +655,9 @@ void PostProcessV0AndCascQA_AO2D(TString CollType = "pp", Bool_t isMC = true, In
       cout << "\n\e[35mParticle:\e[39m " << NamePart[part] << endl;
       cout << "Number of events " << NEvents << endl;
       cout << "#particl/event: " << fHistGen_Rintegrated[part]->Integral("width") << " " << fHistGen_ptintegrated[part]->Integral("width") << " " << endl;
-      //histoPartPerEvent->SetBinContent(part + 1, fHistGen_Rintegrated[part]->Integral("width"));
-      histoPartPerEvent->SetBinContent(part + 1, fHistGen_Rintegrated_Unscaled[part]->Integral("")/NEvents);
-      histoPartPerEvent->SetBinError(part + 1, sqrt(fHistGen_Rintegrated_Unscaled[part]->Integral())/NEvents);
+      // histoPartPerEvent->SetBinContent(part + 1, fHistGen_Rintegrated[part]->Integral("width"));
+      histoPartPerEvent->SetBinContent(part + 1, fHistGen_Rintegrated_Unscaled[part]->Integral("") / NEvents);
+      histoPartPerEvent->SetBinError(part + 1, sqrt(fHistGen_Rintegrated_Unscaled[part]->Integral()) / NEvents);
       histoPartPerEvent->GetXaxis()->SetBinLabel(part + 1, NamePart[part]);
 
       canvasMC_Rdependence[part]->cd(1);
