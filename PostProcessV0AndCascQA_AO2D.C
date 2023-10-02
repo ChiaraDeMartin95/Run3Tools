@@ -46,7 +46,6 @@ Double_t SetEfficiencyError(Int_t k, Int_t n);
 
 void PostProcessV0AndCascQA_AO2D(TString CollType = "PbPb",
                                  Bool_t isMC = false,
-                                 Bool_t isSel8 = 1,
                                  Int_t RebinTPC = 1,
                                  Int_t SkipCascFits = 0,      // 0 = don't skip, 1 = skip partc, 2 = skip all cascades
                                  Bool_t TopologyOnly = false, // true = only topology analysis, false = complete analysis
@@ -127,8 +126,7 @@ void PostProcessV0AndCascQA_AO2D(TString CollType = "PbPb",
     return;
   }
   Double_t NEvents = 0;
-  if (isSel8) NEvents = henum->GetBinContent(2);
-  else NEvents = henum->GetBinContent(1);
+  NEvents = henum->GetBinContent(2);
 
   if (isMC)
   {
