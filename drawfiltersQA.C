@@ -3,7 +3,7 @@
 
 const Float_t StrLimit = 4.3E-5;
 
-void drawfiltersQA(TString filename = "listGoodvsBad.txt", Int_t ChosenPeriod = 1)
+void drawfiltersQA(TString filename = "listGoodvsBadBis.txt", Int_t ChosenPeriod = 1)
 {
 
     std::vector<std::string> name;
@@ -65,9 +65,75 @@ void drawfiltersQA(TString filename = "listGoodvsBad.txt", Int_t ChosenPeriod = 
             RelError = sqrt(1. / hEvSel[i]->GetBinContent(j) + 1. / TotEvt);
             hEvSel[i]->SetBinContent(j, hEvSel[i]->GetBinContent(j) / TotEvt);
             hEvSel[i]->SetBinError(j, hEvSel[i]->GetBinContent(j) * RelError);
-            if (j==1) hEvSel[i]->SetBinError(j, 0);
+            if (j == 1)
+                hEvSel[i]->SetBinError(j, 0);
         }
         hEvSel[i]->SetLineColor(colors[i]);
+    }
+    TCanvas *cfull = new TCanvas("cfull", "cfull", 900, 1000);
+    TPad *pad1f = new TPad("pad1f", "pad1f", 0, 0.3, 1, 1);
+    pad1f->SetBottomMargin(0.01);
+    pad1f->SetLeftMargin(0.15);
+    pad1f->SetRightMargin(0.05);
+    pad1f->SetTopMargin(0.05);
+    pad1f->Draw();
+    pad1f->cd();
+    pad1f->SetLogy();
+
+    TH1F *h1 = new TH1F(Form("h1%d", 0), ";;Selectivity", 10, 0, 10);
+    h1->GetXaxis()->SetBinLabel(1, "Events");
+    h1->GetXaxis()->SetBinLabel(2, "Events w/ high-pT hadron");
+    h1->GetXaxis()->SetBinLabel(3, "Omegas");
+    h1->GetXaxis()->SetBinLabel(4, "high-pT + Xi");
+    h1->GetXaxis()->SetBinLabel(5, "2Xi");
+    h1->GetXaxis()->SetBinLabel(6, "3Xi");
+    h1->GetXaxis()->SetBinLabel(7, "4Xi");
+    h1->GetXaxis()->SetBinLabel(8, "Xi-N");
+    h1->GetXaxis()->SetBinLabel(9, "Omega large R");
+    h1->GetXaxis()->SetBinLabel(10, "Xi");
+    h1->SetStats(0);
+    h1->GetYaxis()->SetRangeUser(1E-8, 1E-1);
+    h1->Draw();
+    for (int i = 0; i < nfiles; i++)
+    {
+        hEvSel[i]->Draw("SAME e");
+    }
+    hEvSel[0]->Draw("SAME e");
+
+    cfull->cd();
+    TPad *pad2f = new TPad("pad2f", "pad2f", 0, 0, 1, 0.3);
+    pad2f->SetTopMargin(0.01);
+    pad2f->SetBottomMargin(0.3);
+    pad2f->SetLeftMargin(0.15);
+    pad2f->SetRightMargin(0.05);
+    pad2f->Draw();
+    pad2f->cd();
+
+    TH1F *r1 = (TH1F *)h1->Clone("r1");
+    r1->GetYaxis()-> SetTitle("Ratio");
+    r1->GetYaxis()->SetRangeUser(0., 2.);
+    r1->GetXaxis()->SetLabelSize(0.1);
+    r1->GetYaxis()->SetLabelSize(0.05);
+    r1->GetYaxis()->SetTitleSize(0.2);
+    r1->Draw();
+
+    TF1* fr1 = new TF1("fr1", "1", 0, 10);
+    fr1->SetLineColor(kBlack);
+    fr1->SetLineStyle(10);
+    fr1->FixParameter(0, 1);
+    fr1->Draw("SAME");
+
+    TH1F *hRatiof[nfiles];
+    for (int i = 0; i < nfiles; i++)
+    {
+        hRatiof[i] = (TH1F *)hEvSel[i]->Clone(Form("hRatiof_%i", i));
+        hRatiof[i]->Sumw2();
+        hRatiof[i]->Divide(hEvSel[ChosenPeriod]);
+        hRatiof[i]->SetLineColor(colors[i]);
+        hRatiof[i]->SetMarkerColor(colors[i]);
+        hRatiof[i]->SetMarkerStyle(MarkerMult[i]);
+        if (i != ChosenPeriod)
+            hRatiof[i]->Draw("SAME pl");
     }
 
     TH1F *hEvSel23[nfiles];
