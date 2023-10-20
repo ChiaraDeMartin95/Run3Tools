@@ -87,11 +87,11 @@ Float_t ParticleMassPDG[numPart] = {0.497611, 1.115683, 1.115683, 1.32171, 1.321
 
 // histo0 -> num
 // histo1 -> denom
-void CompareSigmaWidthPurity(TString year0 = "LHC23zs_Good",
-                             TString year1 = "LHC23zs_Bad",
+void CompareSigmaWidthPurity(TString year0 = "LHC23zc_ITSTPCmap",
+                             TString year1 = "LHC23zc_wDriftTPC",
                              TString yearRatioToPub = "",
-                             TString Sfilein0 = "../TriggerForRun3/EventFiltering2023/Yields_Omega_LHC23zs_First10Min_OneGaussFit.root",
-                             TString Sfilein1 = "../TriggerForRun3/EventFiltering2023/Yields_Omega_LHC23zs_Middle10Min_OneGaussFit.root",
+                             TString Sfilein0 = "../TriggerForRun3/EventFiltering2023/Yields_Omega_LHC23zc_ITSTPCmap_OneGaussFit.root",
+                             TString Sfilein1 = "../TriggerForRun3/EventFiltering2023/Yields_Omega_LHC23zc_wDriftTPC_OneGaussFit.root",
                              TString OutputDir = "../TriggerForRun3/EventFiltering2023/",
                              Bool_t isPseudoEfficiency = 0,
                              Bool_t isOnlyPseudoEfficiency = 0,
@@ -368,32 +368,9 @@ void CompareSigmaWidthPurity(TString year0 = "LHC23zs_Good",
     cout << "\n\n\e[35mComputation of pseudoefficiency \e[39m" << endl;
     for (Int_t part = 0; part < numPart; part++)
     {
-      // if (part != 0 && part != 3 && !ispp)
-      if (part != 3 && !ispp && isOnlyPseudoEfficiency)
-        continue;
-      // if (part != 3 && ispp && isOnlyPseudoEfficiency)
-      // continue;
       if (isOnlyPseudoEfficiency) // I take numerator from external file
       {
-        if (part == 0)
-          SfileTemp = "../Run3QA/LHC22s_PbPb/Yields_K0s_LHC22s_PbPb_FrancescaBin.root";
-        else if (part == 3)
-          SfileTemp = "../Run3QA/LHC22s_PbPb/Yields_XiNeg_LHC22s_PbPb.root";
-        if (ispp && part == 3)
-          // SfileTemp = "../Run3QA/LHC22m_pass2/Yields_XiNeg_LHC22m_pass2_Train52782_hasTOF.root";
-          // SfileTemp = "../Run3QA/LHC21k6_MC_pp/Yields_Xi_LHC21k6_Train54362.root",
-          SfileTemp = "../Run3QA/LHC22o_pass2/Yields_XiNeg_LHC22o_triggsel_Train57049.root";
-
-        // SfileTemp = "../Run3QA/LHC22o_pass2/PostProcess_qa_LHC22o_pass2_triggersel_Train58982.root";/*57970.root";*/
-        // SfileTemp = "../Run3QA/LHC21k6_MC_pp/PostProcess_qa_LHC21k6_Train58981.root";
-        // SfileTemp = "../Run3QA/LHC22q_pass2/PostProcess_LHC22q_pass2_529039_treno60333.root";
-        // SfileTemp ="../Run3QA/LHC22m_pass3/Yields_Xi_LHC22m_pass3_relval_Train63790.root";
-        // SfileTemp ="../Run3QA/LHC22m_pass3/YieldsQATask_Xi_LHC22m_pass3_relval_Train63492_qa_OneGaussFit.root";
-        // SfileTemp = "../Run3QA/Periods/LHC22m_pass3/PostProcess_qa_LHC22m_pass3_relval_cpu2_Train63492.root";
-        // SfileTemp = "../Run3QA/Periods/LHC22m_pass4/PostProcess_qa_LHC22m_pass4_tpc_v1_Train78719.root";
         SfileTemp = "../Run3QA/Periods/LHC22m_pass3/PostProcess_qa_LHC22m_pass3_relval_cpu2_Train78545.root";
-        // SfileTemp = "../Run3QA/Periods/LHC21k6_MC_pp/PostProcess_qaNew_LHC21k6_Train58981.root";
-
         fileTemp = new TFile(SfileTemp, "");
         if (!fileTemp)
           return;
