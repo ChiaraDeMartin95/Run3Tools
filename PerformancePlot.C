@@ -57,15 +57,22 @@ void StyleHisto(TH1F *histo, Float_t Low, Float_t Up, Int_t color, Int_t style, 
     histo->SetMarkerStyle(style);
     histo->SetMarkerSize(mSize);
     histo->GetXaxis()->SetTitle(titleX);
-    histo->GetXaxis()->SetLabelSize(0.05);
-    histo->GetXaxis()->SetTitleSize(0.05);
+    histo->GetXaxis()->SetLabelSize(0.04); // 0.05
+    histo->GetXaxis()->SetTitleSize(0.05); // 0.05
     histo->GetXaxis()->SetTitleOffset(xOffset);
     histo->GetYaxis()->SetTitle(titleY);
     histo->GetYaxis()->SetTitleSize(0.05);
-    histo->GetYaxis()->SetLabelSize(0.05);
+    histo->GetYaxis()->SetLabelSize(0.04);
     histo->GetYaxis()->SetTitleOffset(yOffset);
     histo->SetTitle(title);
 }
+
+const Float_t UpperLimitLSBOmega = 1.655;  // upper limit of fit of left sidebands for omega
+const Float_t LowerLimitRSBOmega = 1.689;  // lower limit of fit of right sidebands for omega
+const Float_t UpperLimitLSBXi = 1.302;     // upper limit of fit of left sidebands for Xi
+const Float_t LowerLimitRSBXi = 1.34;      // lower limit of fit of right sidebands for Xi
+const Float_t UpperLimitLSBLambda = 1.107; // upper limit of fit of left sidebands for Lambda
+const Float_t LowerLimitRSBLambda = 1.123; // lower limit of fit of right sidebands for Lambda
 
 Bool_t reject;
 Double_t fparab(Double_t *x, Double_t *par)
@@ -77,10 +84,20 @@ Double_t fparab(Double_t *x, Double_t *par)
         LimInf = 0.474;
         LimSup = 0.520;
     }
-    else if (par[3] == 4 || par[3] == 5 || par[3] == 8)
+    else if (par[2] == 1 || par[2] == 2)
     {
-        LimInf = 1.310;
-        LimSup = 1.335;
+        LimInf = UpperLimitLSBLambda; //
+        LimSup = LowerLimitRSBLambda; //
+    }
+    else if (par[3] == 3 || par[3] == 4)
+    {
+        LimInf = UpperLimitLSBXi; // 1.31
+        LimSup = LowerLimitRSBXi; // 1.335
+    }
+    else if (par[3] == 5 || par[3] == 6)
+    {
+        LimInf = UpperLimitLSBOmega; // 1.66
+        LimSup = LowerLimitRSBOmega; // 1.692
     }
     if (reject && x[0] > LimInf && x[0] < LimSup)
     {
@@ -99,10 +116,20 @@ Double_t fretta(Double_t *x, Double_t *par)
         LimInf = 0.47;
         LimSup = 0.530;
     }
-    else if (par[2] == 4 || par[2] == 5 || par[2] == 8)
+    else if (par[2] == 1 || par[2] == 2)
     {
-        LimInf = 1.310;
-        LimSup = 1.335;
+        LimInf = UpperLimitLSBLambda; //
+        LimSup = LowerLimitRSBLambda; //
+    }
+    else if (par[2] == 3 || par[2] == 4)
+    {
+        LimInf = UpperLimitLSBXi; // 1.31
+        LimSup = LowerLimitRSBXi; // 1.335
+    }
+    else if (par[2] == 5 || par[2] == 6)
+    {
+        LimInf = UpperLimitLSBOmega; // 1.65
+        LimSup = LowerLimitRSBOmega; // 1.69
     }
     if (reject && x[0] > LimInf && x[0] < LimSup)
     {
@@ -118,31 +145,34 @@ TString titleYield = "1/N_{ev} dN/dp_{T}";
 const Int_t numPart = 7;
 TString TitleInvMass[numPart] = {"(#pi^{+}, #pi^{-}) invariant mass (GeV/#it{c}^{2})", "(p, #pi^{-}) invariant mass (GeV/#it{c}^{2})", "(#bar{p}, #pi^{-}) invariant mass (GeV/#it{c}^{2})", "(#Lambda, #pi^{-}) invariant mass (GeV/#it{c}^{2})"};
 TString namehisto[numPart] = {"h3dMassK0Short", "", "", "h2dMassXiMinus", "h2dMassXiPlus", "h2dMassOmegaMinus", "h2dMassOmegaPlus"};
-Float_t LowLimitMass[numPart] = {0.42, 1.09, 1.09, 1.29, 1.29, 1.62, 1.62}; // 0.44
-Float_t UpLimitMass[numPart] = {0.57, 1.14, 1.14, 1.35, 1.35, 1.72, 1.72};  // 0.55
+Float_t LowLimitMass[numPart] = {0.458, 1.102, 1.102, 1.29, 1.29, 1.65, 1.65}; // 0.44
+Float_t UpLimitMass[numPart] = {0.538, 1.129, 1.129, 1.35, 1.35, 1.7, 1.7};    // 0.55
 Float_t LowMassRange[numPart] = {0.48, 1.09, 1.09, 1.31};
 Float_t UpMassRange[numPart] = {0.51, 1.14, 1.14, 1.33};
 
 Float_t min_range_signal[numPart] = {0.46, 1.105, 1.105, 1.31, 1.31, 1.655, 1.655}; // estremi region fit segnale (gaussiane)
 Float_t max_range_signal[numPart] = {0.535, 1.125, 1.125, 1.334, 1.334, 1.685, 1.685};
-Float_t min_histo[numPart] = {0.42, 1.09, 1.09, 1.30, 1.30, 1.63, 1.63}; // estremi del range degli istogrammi
-Float_t max_histo[numPart] = {0.57, 1.14, 1.14, 1.342, 1.342, 1.71, 1.71};
-Float_t liminf[numPart] = {0.45, 1.1153, 1.1153, 1.30, 1.30, 1.64, 1.64}; // estremi regione fit del bkg e total
+Float_t min_histo[numPart] = {0.42, 1.1, 1.1, 1.30, 1.30, 1.63, 1.63}; // estremi del range degli istogrammi
+Float_t max_histo[numPart] = {0.57, 1.13, 1.13, 1.342, 1.342, 1.71, 1.71};
+Float_t liminf[numPart] = {0.45, 1.1, 1.1, 1.30, 1.30, 1.64, 1.64}; // estremi regione fit del bkg e total
 // Float_t liminf[numPart] = {0.45, 1.1153, 1.1153, 1.29, 1.29, 1.66, 1.66}; // estremi regione fit del bkg e total
-Float_t limsup[numPart] = {0.545, 1.1168, 1.1168, 1.342, 1.342, 1.7, 1.7};
+Float_t limsup[numPart] = {0.545, 1.13, 1.13, 1.342, 1.342, 1.7, 1.7};
 // Float_t limsup[numPart] = {0.545, 1.1168, 1.1168, 1.35, 1.35, 1.685, 1.685};
 
 const Float_t massParticle[numPart] = {0.497611, 1.115683, 1.115683, 1.32171, 1.32171, 1.67245, 1.67245};
-TString Spart[numPart] = {"K0s", "Lambda", "AntiLambda", "XiMinus", "XiPlus", "OmegaMinus", "OmegaPlus"};
+TString Spart[numPart] = {"K0S", "Lambda", "AntiLambda", "XiMinus", "XiPlus", "OmegaMinus", "OmegaPlus"};
+TString SpartLegend[numPart] = {"K0S", "Lambda", "AntiLambda", "XiMinus", "XiPlus", "OmegaMinus", "OmegaPlus"};
 
-void PerformancePlot(Float_t PtMin = 0.9,
+void PerformancePlot(Int_t part = 0,
+                     Float_t PtMin = 0.9,
                      Float_t PtMax = 10,
                      Bool_t UseOneGauss = 1,
-                     TString SPathIn = "../Run3QA/LHC22o_pass2/AnalysisResults_qa_LHC22o_pass2_triggersel_Train58982.root" /*"../TriggerForRun3/AnalysisResults_FinalTOT_NoTOF.root"*/,
-                     TString PathOut = "../Run3QA/LHC22o_pass2/InvMassPlot",
-                     Int_t part = 5,
+                     TString SPeriod = "LHC23zy_cpass0",
+                     TString SPathIn = "../Run3QA/Periods/PbPb2023/LHC23zy_cpass0/AnalysisResults_qatask_LHC23zy_cpass0.root" /*"../TriggerForRun3/AnalysisResults_FinalTOT_NoTOF.root"*/,
+                     TString PathOut = "../Run3QA/Periods/PbPb2023/LHC23zy_cpass0/InvMassPlot",
+                     Bool_t ispp = 0,
                      Bool_t UseTwoGauss = 1,
-                     Bool_t isBkgParab = 0,
+                     Bool_t isBkgParab = 1,
                      Bool_t isMeanFixedPDG = 0,
                      Float_t sigmacentral = 4)
 {
@@ -161,27 +191,42 @@ void PerformancePlot(Float_t PtMin = 0.9,
     // histo->Scale(1. / histo->GetIntegral() / histo->GetXaxis()->GetBinWidth(1));
     histo->Scale(1. / histo->Integral());
 
-    TCanvas *canvas = new TCanvas("canvas", "canvas", 1400, 1400);
-    StyleCanvas(canvas, 0.15, 0.03, 0.02, 0.14); // L, R, T, B
+    TCanvas *canvas = new TCanvas("canvas", "canvas", 800, 800);
+    StyleCanvas(canvas, 0.18, 0.03, 0.02, 0.14); // L, R, T, B
 
-    TLegend *legend = new TLegend(0.19, 0.69, 0.74, 0.96);
+    TLegend *legend = new TLegend(0.23, 0.65, 0.75, 0.96);
     legend->SetFillStyle(0);
     legend->SetMargin(0);
     legend->SetTextSize(0.04);
     legend->SetTextAlign(12);
-    legend->AddEntry("", "#bf{This work}", "");
-    legend->AddEntry("", "Run 3, pp #sqrt{#it{s}} = 13.6 TeV", "");
+    // legend->AddEntry("", "#bf{This work}", "");
+    legend->AddEntry("", "#bf{ALICE Work in progress}", "");
+    if (ispp)
+        legend->AddEntry("", "Run 3, pp #sqrt{#it{s}} = 13.6 TeV", "");
+    else
+        legend->AddEntry("", "Run 3, Pb-Pb #sqrt{#it{s}_{NN}} = 5.36 TeV", "");
+    legend->AddEntry("", SPeriod, "");
     legend->AddEntry("", Form("%.1f < #it{p}_{T} < %.1f GeV/#it{c}", PtMin, PtMax), "");
     legend->AddEntry("", "|y| < 0.5", "");
-    if (part == 3)
+    if (part == 0)
+        legend->AddEntry("", "K^{0}_{S} #rightarrow #pi^{+} #pi^{-}", "");
+    else if (part == 1)
+        legend->AddEntry("", "#Lambda #rightarrow p #pi^{-}", "");
+    else if (part == 2)
+        legend->AddEntry("", "#bar{#Lambda} #rightarrow #bar{p} #pi^{+}", "");
+    else if (part == 3)
         legend->AddEntry("", "#Xi^{-} #rightarrow #Lambda #pi^{-} #rightarrow p #pi^{-} #pi^{-}", "");
+    else if (part == 4)
+        legend->AddEntry("", "#Xi^{+} #rightarrow #bar{#Lambda} #pi^{+} #rightarrow #bar{p} #pi^{+} #pi^{+}", "");
     else if (part == 5)
-        legend->AddEntry("", "#Omega^{-} #rightarrow #bar{#Lambda} #pi^{+} #rightarrow #bar{p} #pi^{+} #pi^{+}", "");
+        legend->AddEntry("", "#Omega^{-} #rightarrow #Lambda K^{-} #rightarrow p #pi^{-} K^{-}", "");
+    else if (part == 6)
+        legend->AddEntry("", "#Omega^{+} #rightarrow #bar{#Lambda} K^{+} #rightarrow #bar{p} #pi^{+} K^{+}", "");
 
-    TLegend *legendfit = new TLegend(0.19, 0.56, 0.74, 0.64);
+    TLegend *legendfit = new TLegend(0.21, 0.56, 0.74, 0.64);
     legendfit->SetFillStyle(0);
     legendfit->SetMargin(0.1);
-    legendfit->SetTextSize(0.035);
+    legendfit->SetTextSize(0.03);
     legendfit->SetTextAlign(12);
 
     // Fit 1
@@ -311,7 +356,7 @@ void PerformancePlot(Float_t PtMin = 0.9,
                 total->FixParameter(4, massParticle[part]);
             }
         }
-         if (Spart[part] == "OmegaMinus" || Spart[part] == "OmegaPlus")
+        if (Spart[part] == "OmegaMinus" || Spart[part] == "OmegaPlus")
         {
             total->SetParLimits(0, 0.08 * histo->GetBinContent(histo->GetMaximumBin()), histo->GetBinContent(histo->GetMaximumBin()));
             total->SetParLimits(1, 1.66, 1.68);
@@ -322,10 +367,23 @@ void PerformancePlot(Float_t PtMin = 0.9,
                 total->FixParameter(4, massParticle[part]);
             }
         }
-        if (Spart[part] == "K0s")
+        if (Spart[part] == "K0S")
         {
             total->SetParLimits(0, 0.08 * histo->GetBinContent(histo->GetMaximumBin()), histo->GetBinContent(histo->GetMaximumBin()));
             total->SetParLimits(1, 0.485, 0.505);
+            total->SetParLimits(2, 0.001, 0.01);
+            bkgretta->SetParameter(1, 0);
+            if (isMeanFixedPDG)
+            {
+                total->FixParameter(1, massParticle[part]);
+                total->FixParameter(4, massParticle[part]);
+            }
+            cout << "max value " << histo->GetBinContent(histo->GetMaximumBin()) << endl;
+        }
+        else if (Spart[part] == "Lambda")
+        {
+            total->SetParLimits(0, 0.08 * histo->GetBinContent(histo->GetMaximumBin()), histo->GetBinContent(histo->GetMaximumBin()));
+            total->SetParLimits(1, 1.11, 1.12);
             total->SetParLimits(2, 0.001, 0.01);
             bkgretta->SetParameter(1, 0);
             if (isMeanFixedPDG)
@@ -428,7 +486,7 @@ void PerformancePlot(Float_t PtMin = 0.9,
                 total->FixParameter(4, massParticle[part]);
             }
         }
-        if (Spart[part] == "K0s")
+        if (Spart[part] == "K0S")
         {
             total->SetParLimits(0, 0.08 * histo->GetBinContent(histo->GetMaximumBin()), histo->GetBinContent(histo->GetMaximumBin()));
             total->SetParLimits(1, 0.485, 0.505);
@@ -484,9 +542,16 @@ void PerformancePlot(Float_t PtMin = 0.9,
         }
     }
     canvas->cd();
-    StyleHisto(histo, 0.0001, 1.2 * histo->GetBinContent(histo->GetMaximumBin()), 1, 20,
-               "#it{m} (GeV/#it{c}^{2})", "Normalized counts" /* per 1.0 MeV/#it{c}^{2}"*/, "", 1, LowLimitMass[part] + 0.001, UpLimitMass[part] - 0.001, 1.2, 1.4, 1.2);
-    if (part==5) histo->GetYaxis()->SetTitleOffset(1.6);
+    Float_t UpperCutHisto = 1.4;
+    if (part == 3 || part == 4)
+        UpperCutHisto = 1.7;
+    else if (part >= 5)
+        UpperCutHisto = 1.8;
+
+    StyleHisto(histo, 0.0001, UpperCutHisto * histo->GetBinContent(histo->GetMaximumBin()), 1, 20,
+               "#it{m} (GeV/#it{c}^{2})", "Normalized counts" /* per 1.0 MeV/#it{c}^{2}"*/, "", 1, LowLimitMass[part] + 0.001, UpLimitMass[part] - 0.001, 1.2, 1.8, 1.2);
+    if (part == 5)
+        histo->GetYaxis()->SetTitleOffset(1.6);
     histo->Draw("pe");
     legendfit->AddEntry(total, "Gaussian fits + bkg.", "l");
     if (isBkgParab)
@@ -512,4 +577,5 @@ void PerformancePlot(Float_t PtMin = 0.9,
     legendfit->Draw("");
 
     canvas->SaveAs(PathOut + Spart[part] + ".pdf");
+    canvas->SaveAs(PathOut + Spart[part] + ".png");
 }
