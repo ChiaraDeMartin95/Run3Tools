@@ -2,14 +2,16 @@
 #include <fstream>
 
 const Float_t StrLimit = 4.3E-5;
+const Float_t LFLimit = 5E-5;
+Int_t numBins = 7;
 
-void drawfiltersQA(TString filename = "listGoodvsBadBis.txt", Int_t ChosenPeriod = 1)
+void drawfiltersQA(TString filename = "listTPCITSMAP.txt", Int_t ChosenPeriod = 1)
 {
 
     std::vector<std::string> name;
     std::ifstream file(Form("%s", filename.Data()));
     // std::string remove = "/Users/mbp-cdm-01/Desktop/dottorato/1Anno/QAStrangeness/TriggerForRun3/EventFiltering2023/AnalysisResults_merged_";
-    std::string remove = "/Users/mbp-cdm-01/Desktop/dottorato/1Anno/QAStrangeness/TriggerForRun3/EventFiltering2023/AnalysisResults_";
+    std::string remove = "/Users/mbp-cdm-01/Desktop/dottorato/1Anno/QAStrangeness/TriggerForRun3/EventFiltering2023/AnalysisResults/AnalysisResults_";
     std::string remove2 = ".root";
 
     cout << filename.Data() << endl;
@@ -80,7 +82,7 @@ void drawfiltersQA(TString filename = "listGoodvsBadBis.txt", Int_t ChosenPeriod
     pad1f->cd();
     pad1f->SetLogy();
 
-    TH1F *h1 = new TH1F(Form("h1%d", 0), ";;Selectivity", 10, 0, 10);
+    TH1F *h1 = new TH1F(Form("h1%d", 0), ";;Selectivity", 12, 0, 12);
     h1->GetXaxis()->SetBinLabel(1, "Events");
     h1->GetXaxis()->SetBinLabel(2, "Events w/ high-pT hadron");
     h1->GetXaxis()->SetBinLabel(3, "Omegas");
@@ -91,6 +93,8 @@ void drawfiltersQA(TString filename = "listGoodvsBadBis.txt", Int_t ChosenPeriod
     h1->GetXaxis()->SetBinLabel(8, "Xi-N");
     h1->GetXaxis()->SetBinLabel(9, "Omega large R");
     h1->GetXaxis()->SetBinLabel(10, "Xi");
+    h1->GetXaxis()->SetBinLabel(11, "Tracked Xi");
+    h1->GetXaxis()->SetBinLabel(12, "Tracked Omega");
     h1->SetStats(0);
     h1->GetYaxis()->SetRangeUser(1E-8, 1E-1);
     h1->Draw();
@@ -110,14 +114,14 @@ void drawfiltersQA(TString filename = "listGoodvsBadBis.txt", Int_t ChosenPeriod
     pad2f->cd();
 
     TH1F *r1 = (TH1F *)h1->Clone("r1");
-    r1->GetYaxis()-> SetTitle("Ratio");
+    r1->GetYaxis()->SetTitle("Ratio");
     r1->GetYaxis()->SetRangeUser(0., 2.);
     r1->GetXaxis()->SetLabelSize(0.1);
     r1->GetYaxis()->SetLabelSize(0.05);
     r1->GetYaxis()->SetTitleSize(0.2);
     r1->Draw();
 
-    TF1* fr1 = new TF1("fr1", "1", 0, 10);
+    TF1 *fr1 = new TF1("fr1", "1", 0, 12);
     fr1->SetLineColor(kBlack);
     fr1->SetLineStyle(10);
     fr1->FixParameter(0, 1);
@@ -139,12 +143,7 @@ void drawfiltersQA(TString filename = "listGoodvsBadBis.txt", Int_t ChosenPeriod
     TH1F *hEvSel23[nfiles];
     for (int i = 0; i < nfiles; i++)
     {
-        hEvSel23[i] = new TH1F(Form("hEvSel23_%d", i), ";;Selectivity", 5, 0, 5);
-        hEvSel23[i]->GetXaxis()->SetBinLabel(1, "Omega #times 0.2");
-        hEvSel23[i]->GetXaxis()->SetBinLabel(2, "3Xi");
-        hEvSel23[i]->GetXaxis()->SetBinLabel(3, "Xi-N");
-        hEvSel23[i]->GetXaxis()->SetBinLabel(4, "Omega large R");
-        hEvSel23[i]->GetXaxis()->SetBinLabel(5, "Total");
+        hEvSel23[i] = new TH1F(Form("hEvSel23_%d", i), ";;Selectivity", numBins, 0, numBins);
         hEvSel23[i]->SetLineColor(colors[i]);
         hEvSel23[i]->SetLineWidth(2);
 
@@ -152,14 +151,23 @@ void drawfiltersQA(TString filename = "listGoodvsBadBis.txt", Int_t ChosenPeriod
         hEvSel23[i]->SetBinContent(2, hEvSel[i]->GetBinContent(hEvSel[i]->GetXaxis()->FindBin("3#Xi")));
         hEvSel23[i]->SetBinContent(3, hEvSel[i]->GetBinContent(hEvSel[i]->GetXaxis()->FindBin("#Xi-YN")));
         hEvSel23[i]->SetBinContent(4, hEvSel[i]->GetBinContent(hEvSel[i]->GetXaxis()->FindBin("#Omega high radius")));
-        double tot = hEvSel[i]->GetBinContent(hEvSel[i]->GetXaxis()->FindBin("#Omega")) * 0.2 + hEvSel[i]->GetBinContent(hEvSel[i]->GetXaxis()->FindBin("3#Xi")) + hEvSel[i]->GetBinContent(hEvSel[i]->GetXaxis()->FindBin("#Xi-YN") + hEvSel[i]->GetBinContent(hEvSel[i]->GetXaxis()->FindBin("#Omega high radius")));
-        hEvSel23[i]->SetBinContent(5, tot);
+        hEvSel23[i]->SetBinContent(5, hEvSel[i]->GetBinContent(hEvSel[i]->GetXaxis()->FindBin("trk. #Xi")));
+        hEvSel23[i]->SetBinContent(6, hEvSel[i]->GetBinContent(hEvSel[i]->GetXaxis()->FindBin("trk. #Omega")));
+        double tot = hEvSel[i]->GetBinContent(hEvSel[i]->GetXaxis()->FindBin("#Omega")) * 0.2 +
+                     hEvSel[i]->GetBinContent(hEvSel[i]->GetXaxis()->FindBin("3#Xi")) +
+                     hEvSel[i]->GetBinContent(hEvSel[i]->GetXaxis()->FindBin("#Xi-YN")) +
+                     hEvSel[i]->GetBinContent(hEvSel[i]->GetXaxis()->FindBin("#Omega high radius")) +
+                     hEvSel[i]->GetBinContent(hEvSel[i]->GetXaxis()->FindBin("trk. #Xi")) +
+                     hEvSel[i]->GetBinContent(hEvSel[i]->GetXaxis()->FindBin("trk. #Omega"));
+        hEvSel23[i]->SetBinContent(numBins, tot);
 
         hEvSel23[i]->SetBinError(1, hEvSel[i]->GetBinError(hEvSel[i]->GetXaxis()->FindBin("#Omega")) * 0.2);
         hEvSel23[i]->SetBinError(2, hEvSel[i]->GetBinError(hEvSel[i]->GetXaxis()->FindBin("3#Xi")));
         hEvSel23[i]->SetBinError(3, hEvSel[i]->GetBinError(hEvSel[i]->GetXaxis()->FindBin("#Xi-YN")));
         hEvSel23[i]->SetBinError(4, hEvSel[i]->GetBinError(hEvSel[i]->GetXaxis()->FindBin("#Omega high radius")));
-        hEvSel23[i]->SetBinError(5, 0);
+        hEvSel23[i]->SetBinError(5, hEvSel[i]->GetBinError(hEvSel[i]->GetXaxis()->FindBin("trk. #Xi")));
+        hEvSel23[i]->SetBinError(6, hEvSel[i]->GetBinError(hEvSel[i]->GetXaxis()->FindBin("trk. #Omega")));
+        hEvSel23[i]->SetBinError(numBins, 0);
 
         cout << "Total rejection factor " << name[i].c_str() << " = " << tot << endl;
     }
@@ -174,12 +182,14 @@ void drawfiltersQA(TString filename = "listGoodvsBadBis.txt", Int_t ChosenPeriod
     pad1->cd();
     pad1->SetLogy();
 
-    TH1F *h = new TH1F(Form("h%d", 0), ";;Selectivity", 5, 0, 5);
+    TH1F *h = new TH1F(Form("h%d", 0), ";;Selectivity", numBins, 0, numBins);
     h->GetXaxis()->SetBinLabel(1, "Omega #times 0.2");
     h->GetXaxis()->SetBinLabel(2, "3Xi");
     h->GetXaxis()->SetBinLabel(3, "Xi-N");
     h->GetXaxis()->SetBinLabel(4, "Omega large R");
-    h->GetXaxis()->SetBinLabel(5, "Total");
+    h->GetXaxis()->SetBinLabel(5, "Tracked Xi");
+    h->GetXaxis()->SetBinLabel(6, "Tracked Omega");
+    h->GetXaxis()->SetBinLabel(numBins, "Total");
     h->SetStats(0);
     h->GetYaxis()->SetRangeUser(1E-8, 1E-1);
     h->Draw();
@@ -189,12 +199,12 @@ void drawfiltersQA(TString filename = "listGoodvsBadBis.txt", Int_t ChosenPeriod
     }
     hEvSel23[0]->Draw("SAME e");
 
-    TLine *l = new TLine(0, StrLimit, 5, StrLimit);
+    TLine *l = new TLine(0, StrLimit, numBins, StrLimit);
     l->SetLineStyle(7);
     l->SetLineColor(kAzure + 10);
     l->SetLineWidth(3);
     l->Draw();
-    TLine *l1 = new TLine(0, 5E-5, 5, 5E-5);
+    TLine *l1 = new TLine(0, LFLimit, numBins, LFLimit);
     l1->SetLineStyle(7);
     l1->SetLineColor(kOrange + 7);
     l1->SetLineWidth(3);
@@ -220,12 +230,7 @@ void drawfiltersQA(TString filename = "listGoodvsBadBis.txt", Int_t ChosenPeriod
     pad2->Draw();
     pad2->cd();
 
-    TH1F *hRatio = new TH1F(Form("hRatio%d", 0), Form(";;Ratio to %s", name[ChosenPeriod].c_str()), 5, 0, 5);
-    hRatio->GetXaxis()->SetBinLabel(1, "Omega #times 0.2");
-    hRatio->GetXaxis()->SetBinLabel(2, "3Xi");
-    hRatio->GetXaxis()->SetBinLabel(3, "Xi-N");
-    hRatio->GetXaxis()->SetBinLabel(4, "Omega large R");
-    hRatio->GetXaxis()->SetBinLabel(5, "Total");
+    TH1F * hRatio = (TH1F*)h->Clone("hRatio");
     hRatio->GetXaxis()->SetLabelSize(0.1);
     hRatio->GetYaxis()->SetLabelSize(0.05);
     hRatio->GetYaxis()->SetTitleSize(0.1);
