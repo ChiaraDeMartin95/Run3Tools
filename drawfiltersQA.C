@@ -5,7 +5,7 @@ const Float_t StrLimit = 4.3E-5;
 const Float_t LFLimit = 5E-5;
 Int_t numBins = 7;
 
-void drawfiltersQA(TString filename = "listTPCITSMAP.txt", Int_t ChosenPeriod = 1)
+void drawfiltersQA(TString filename = "listTPCITSMAPNew.txt", Int_t ChosenPeriod = 1)
 {
 
     std::vector<std::string> name;
@@ -231,6 +231,7 @@ void drawfiltersQA(TString filename = "listTPCITSMAP.txt", Int_t ChosenPeriod = 
     pad2->cd();
 
     TH1F * hRatio = (TH1F*)h->Clone("hRatio");
+    hRatio->GetYaxis()->SetTitle("Ratio");
     hRatio->GetXaxis()->SetLabelSize(0.1);
     hRatio->GetYaxis()->SetLabelSize(0.05);
     hRatio->GetYaxis()->SetTitleSize(0.1);
