@@ -125,20 +125,10 @@ const Float_t massParticle[numPart] = {1.32171, 1.67245};
 // TString Spart[numPart+2] = {"XiNeg", "XiPos", "OmegaNeg", "OmegaPlus"};
 TString Spart[numPart] = {"Xi", "Omega"};
 
-void PostProcessing_Filters(TString year = "LHC22m_pass3_relval_Train69224_CEFP"/*"LHC22m_pass3_relval_Train66676_EvenTighterCutsOmega"/*"LHC22o_triggsel_Train57049" /*"LHC22m_pass2_Train523186"/*"LHC22m_pass1_Train54926"/*"LHC21k6_Train54362""LHC22m_pass2_Train52781"*/,
-                            TString SPathIn =
-                                /*"../Run3QA/LHC21k6_MC_pp/AnalysisResults_Filter_Train54362_LHC21k6.root"
-                                /*"../TriggerForRun3/AnalysisResults_FinalTOT_NoTOF.root"*/
-                            /*"../TriggerForRun3/AnalysisResults_22mpass2_New_8_NoGlobalTrackHC_Eta0.9.root"*/
-                            /*"../Run3QA/LHC22m_pass2/AnalysisResults_Train52781_LHC22m_pass2.root"*/
-                            /*"../Run3QA/LHC22m_pass2/AnalysisResults_FilterLHC22m_pass2_Train523186.root"*/
-                            /*"../Run3QA/LHC22m_pass1/AnalysisResults_LHC22m_pass1_Train54926.root"*/
-                            /*"../Run3QA/LHC22o_pass2/AnalysisResults_LHC22o_triggsel_Train57049.root"*/
-                            /*"../Run3QA/LHC22m_pass3/AnalysisResults_Filters_LHC22m_pass3_relval_cpu2_Train66676_EvenTighterCutsOmega.root"/*63790.root"*/
-                            /*"../Run3QA/LHC22m_pass3/Filtro_Treno68152_22mpass3relval.root",*/
-                            "../Run3QA/LHC22m_pass3/AnalysisResults_Filters_LHC22m_pass3_relval_cpu2_Train69224_CEFP.root",
-                            TString OutputDir = "../Run3QA/LHC22m_pass3/" /*"../Run3QA/LHC22m_pass1/"/*"../TriggerForRun3/"*/ /*"../Run3QA/LHC21k6_MC_pp/"*/,
-                            Float_t ptthr = 5,
+void PostProcessing_Filters(TString year = "23h_PIDpass3",
+                            TString SPathIn = "../TriggerForRun3/EventFiltering2023/LHC23h/AnalysisResults_LHC23h_apass4_PIDapass3_CEFP.root",
+                            TString OutputDir = "../TriggerForRun3/EventFiltering2023/LHC23h/",
+                            Float_t ptthr = 7,
                             Bool_t isOldVersionBf2701 = 0)
 {
 
@@ -269,7 +259,8 @@ void PostProcessing_Filters(TString year = "LHC22m_pass3_relval_Train69224_CEFP"
 
   const Int_t numPtTrigg = 6;
   // Float_t binptTrigg[numPtTrigg + 1] = {0, 0.5, 1, 1.5, 2, 3, 10};
-  Float_t binptTrigg[numPtTrigg + 1] = {5, 5.5, 6.0, 6.5, 7, 8, 10};
+  // Float_t binptTrigg[numPtTrigg + 1] = {5, 5.5, 6.0, 6.5, 7, 8, 10};
+  Float_t binptTrigg[numPtTrigg + 1] = {7, 7.5, 8, 8.5, 9, 9.5, 10};
   Int_t ColorPtTrigg[numPtTrigg + 1] = {634, 628, 797, 815, 418, 429, 867};
   Int_t MarkerPtTrigg[numPtTrigg + 1] = {20, 21, 22, 33, 20, 21, 22};
 
@@ -377,11 +368,15 @@ void PostProcessing_Filters(TString year = "LHC22m_pass3_relval_Train69224_CEFP"
   TString SPtDau[numPtDau] = {""};
   TH1F *hNSigmaTPC[12][numPtDau];
   TCanvas *canvasTPC[12];
+  TH1F *hNSigmaSummary[12];
+  TCanvas *cNSigmaSummary = new TCanvas("cNSigmaSummary", "cNSigmaSummary", 800, 500);
+  cNSigmaSummary->Divide(6, 2);
 
   for (Int_t dau = 0; dau < 12; dau++)
   {
     if (isOldVersionBf2701 && dau > 3)
       continue;
+
     canvasTPC[dau] = new TCanvas(Form("canvasTPC_dau%i", dau), Form("canvasTPC_dau%i", dau), 1800, 1400);
     canvasTPC[dau]->Divide(numPtDau / 2, 2);
     StyleCanvas(canvasTPC[dau], 0.15, 0.05, 0.05, 0.15);
@@ -410,6 +405,8 @@ void PostProcessing_Filters(TString year = "LHC22m_pass3_relval_Train69224_CEFP"
       }
     }
 
+    hNSigmaSummary[dau] = new TH1F(Form("hNSigmaSummary_dau%i", dau), Form("hNSigmaSummary_dau%i", dau), numPtDau, binptDau);
+
     for (Int_t pt = 0; pt < numPtDau; pt++)
     {
       SPtDau[pt] = Form("%.1f < p_{T} < %.1f", binptDau[pt], binptDau[pt + 1]);
@@ -425,7 +422,14 @@ void PostProcessing_Filters(TString year = "LHC22m_pass3_relval_Train69224_CEFP"
       gPad->SetRightMargin(0.1);
       gPad->SetBottomMargin(0.2);
       hNSigmaTPC[dau][pt]->DrawClone("e same");
+      hNSigmaSummary[dau]->SetBinContent(pt + 1, hNSigmaTPC[dau][pt]->GetMean());
+      hNSigmaSummary[dau]->SetBinError(pt + 1, hNSigmaTPC[dau][pt]->GetMeanError());
     }
+    // summary plot
+    cNSigmaSummary->cd(dau + 1);
+    hNSigmaSummary[dau]->SetTitle(SNSigmaTPCvsPt[dau]);
+    hNSigmaSummary[dau]->GetYaxis()->SetRangeUser(-4, 4);
+    hNSigmaSummary[dau]->Draw("same");
   }
 
   // Cascade topological variables (after all topo sleections, for the time being)
@@ -480,7 +484,7 @@ void PostProcessing_Filters(TString year = "LHC22m_pass3_relval_Train69224_CEFP"
       hTopVar[var] = (TH1F *)dirCascVar->Get(prefix + TopVarCascInput[var] + SXiorOmega[XiorOmega]);
       if (!hTopVar[var])
       {
-        cout << prefix << TopVarCascInput[var] << SXiorOmega[XiorOmega]<< " not available" << endl;
+        cout << prefix << TopVarCascInput[var] << SXiorOmega[XiorOmega] << " not available" << endl;
         return;
       }
       hTopVar[var]->Scale(1. / NEvents);
@@ -518,8 +522,10 @@ void PostProcessing_Filters(TString year = "LHC22m_pass3_relval_Train69224_CEFP"
   {
     if (isOldVersionBf2701 && var > 5)
       continue;
-    if (isOldVersionBf2701 || (KineVarCascInput[var]!="hProperLifetimeXi" && KineVarCascInput[var]!= "hProperLifetimeOmega")) hKineVar[var] = (TH1F *)dirQA->Get(KineVarCascInput[var]);
-    else hKineVar[var] = (TH1F *)dirCascVar->Get(KineVarCascInput[var]);
+    if (isOldVersionBf2701 || (KineVarCascInput[var] != "hProperLifetimeXi" && KineVarCascInput[var] != "hProperLifetimeOmega"))
+      hKineVar[var] = (TH1F *)dirQA->Get(KineVarCascInput[var]);
+    else
+      hKineVar[var] = (TH1F *)dirCascVar->Get(KineVarCascInput[var]);
     if (!hKineVar[var])
     {
       cout << KineVarCascInput[var] << " not available" << endl;
@@ -639,6 +645,14 @@ void PostProcessing_Filters(TString year = "LHC22m_pass3_relval_Train69224_CEFP"
   outputfile->WriteTObject(hCascCandidates);
   outputfile->WriteTObject(hTriggerParticles);
   outputfile->WriteTObject(canvasTrackQA);
+  for (Int_t dau = 0; dau < 12; dau++)
+  {
+    for (Int_t pt = 0; pt < numPtDau; pt++)
+    {
+      outputfile->WriteTObject(hNSigmaTPC[dau][pt]);
+    }
+  }
+
   outputfile->Close();
   cout << "Ho creato il file: " << Soutputfile << " (.pdf and .root)" << endl;
 
