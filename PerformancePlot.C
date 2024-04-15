@@ -147,8 +147,8 @@ TString TitleInvMass[numPart] = {"(#pi^{+}, #pi^{-}) invariant mass (GeV/#it{c}^
 TString namehisto[numPart] = {"h3dMassK0Short", "", "", "h2dMassXiMinus", "h2dMassXiPlus", "h2dMassOmegaMinus", "h2dMassOmegaPlus"};
 Float_t LowLimitMass[numPart] = {0.458, 1.102, 1.102, 1.29, 1.29, 1.65, 1.65}; // 0.44
 Float_t UpLimitMass[numPart] = {0.538, 1.129, 1.129, 1.35, 1.35, 1.7, 1.7};    // 0.55
-Float_t LowMassRange[numPart] = {0.48, 1.09, 1.09, 1.31};
-Float_t UpMassRange[numPart] = {0.51, 1.14, 1.14, 1.33};
+Float_t XRangeMin[numPart] = {0.48, 1.09, 1.09, 1.3, 1.3, 1.655, 1.655}; //lower inv mass limit of histogram
+Float_t XRangeMax[numPart] = {0.51, 1.14, 1.14, 1.343, 1.343, 1.69, 1.69}; //upper inv mass limit of histogram
 
 Float_t min_range_signal[numPart] = {0.46, 1.105, 1.105, 1.31, 1.31, 1.655, 1.655}; // estremi region fit segnale (gaussiane)
 Float_t max_range_signal[numPart] = {0.535, 1.125, 1.125, 1.334, 1.334, 1.685, 1.685};
@@ -167,9 +167,9 @@ void PerformancePlot(Int_t part = 0,
                      Float_t PtMin = 0.9,
                      Float_t PtMax = 10,
                      Bool_t UseOneGauss = 1,
-                     TString SPeriod = "LHC23zy_cpass0",
-                     TString SPathIn = "../Run3QA/Periods/PbPb2023/LHC23zy_cpass0/AnalysisResults_qatask_LHC23zy_cpass0.root" /*"../TriggerForRun3/AnalysisResults_FinalTOT_NoTOF.root"*/,
-                     TString PathOut = "../Run3QA/Periods/PbPb2023/LHC23zy_cpass0/InvMassPlot",
+                     TString SPeriod = "LHC23zzh_cpass2",
+                     TString SPathIn = "../Run3QA/Periods/PbPb2023/LHC23zzh_cpass2/AnalysisResults_qatask_LHC23zzh_cpass2_Train134933.root" /*"../TriggerForRun3/AnalysisResults_FinalTOT_NoTOF.root"*/,
+                     TString PathOut = "../Run3QA/Periods/PbPb2023/LHC23zzh_cpass2/InvMassPlot",
                      Bool_t ispp = 0,
                      Bool_t UseTwoGauss = 1,
                      Bool_t isBkgParab = 1,
@@ -550,6 +550,7 @@ void PerformancePlot(Int_t part = 0,
 
     StyleHisto(histo, 0.0001, UpperCutHisto * histo->GetBinContent(histo->GetMaximumBin()), 1, 20,
                "#it{m} (GeV/#it{c}^{2})", "Normalized counts" /* per 1.0 MeV/#it{c}^{2}"*/, "", 1, LowLimitMass[part] + 0.001, UpLimitMass[part] - 0.001, 1.2, 1.8, 1.2);
+    histo->GetXaxis()->SetRangeUser(XRangeMin[part], XRangeMax[part]);
     if (part == 5)
         histo->GetYaxis()->SetTitleOffset(1.6);
     histo->Draw("pe");
