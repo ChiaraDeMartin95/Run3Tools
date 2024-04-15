@@ -87,12 +87,12 @@ Float_t ParticleMassPDG[numPart] = {0.497611, 1.115683, 1.115683, 1.32171, 1.321
 
 // histo0 -> num
 // histo1 -> denom
-void CompareSigmaWidthPurity(TString year0 = "LHC23zc_ITSTPCmap",
-                             TString year1 = "LHC23zc_wDriftTPC",
+void CompareSigmaWidthPurity(TString year0 = "LHC22o_apass6_skimmed",
+                             TString year1 = "LHC22o_apass6",
                              TString yearRatioToPub = "",
-                             TString Sfilein0 = "../TriggerForRun3/EventFiltering2023/Yields_Omega_LHC23zc_ITSTPCmap_OneGaussFit.root",
-                             TString Sfilein1 = "../TriggerForRun3/EventFiltering2023/Yields_Omega_LHC23zc_wDriftTPC_OneGaussFit.root",
-                             TString OutputDir = "../TriggerForRun3/EventFiltering2023/",
+                             TString Sfilein0 = "../TriggerForRun3/EventFiltering2022_skimmedDATA/Yields_Omega_AnalysisResults_22o_apass6_skimmed_Train172545_OneGaussFit.root",
+                             TString Sfilein1 = "../TriggerForRun3/EventFiltering2022_skimmedDATA/Yields_Omega_AnalysisResults_22o_apass6_QC1_sampling_Train172541_OneGaussFit.root",
+                             TString OutputDir = "../TriggerForRun3/EventFiltering2022_skimmedDATA/",
                              Bool_t isPseudoEfficiency = 0,
                              Bool_t isOnlyPseudoEfficiency = 0,
                              TString SPublishedYieldForPseudoEff =                 
@@ -153,6 +153,13 @@ void CompareSigmaWidthPurity(TString year0 = "LHC23zc_ITSTPCmap",
       cin >> isGen;
       if (isGen)
         TypeHisto[Choice] = "GeneratedParticles_Rintegrated";
+    }
+    Bool_t YieldNorm = 0;
+    if (Choice==3) {
+      cout << "Do you want the yield normalised per event or not?";
+      cin >> YieldNorm;
+      if (YieldNorm==1) TypeHisto[Choice] = "Yield";
+      else TypeHisto[Choice] = "YieldNotNorm";
     }
     cout << Choice << " " << TypeHisto[Choice] << endl;
     if (Choice > (numChoice - 1))
