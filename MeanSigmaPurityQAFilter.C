@@ -113,7 +113,7 @@ void StylePad(TPad *pad, Float_t LMargin, Float_t RMargin, Float_t TMargin, Floa
 // produces ratio of spectra wrt 0-100% multiplciity class
 
 const Int_t numPart = 9;
-const Int_t numChoice = 7;
+const Int_t numChoice = 8;
 
 Int_t ColorMult[] = {634, 628, 807, kOrange - 4, 797, 815, 418, 429, 867, 856, 601, kViolet, kPink + 9, kPink + 1, 1};
 Float_t SizeMult[] = {2, 2, 2.8, 2.5, 2.8, 2, 2, 2.8, 2.5, 2.8, 2, 2, 2.8, 2.5, 2.8};
@@ -130,8 +130,8 @@ TString IsOneOrTwoGauss[2] = {"_OneGaussFit", ""};
 
 TString SIsBkgParab[2] = {"_BkgRetta", "_BkgParab"};
 
-TString TypeHisto[numChoice] = {"Mean", "Sigma", "Purity", "Yield", "Significance", "Efficiency", "YieldCorr"};
-TString TitleY[numChoice] = {"Mean (GeV/#it{c}^{2})", "Sigma (GeV/#it{c}^{2})", "S/(S+B)", "1/#it{N}_{evt} d#it{N}/d#it{p}_{T} (GeV/#it{c})^{-1}", "Yield/#sigma_{Yield}", "Efficiency x acceptance", "1/#it{N}_{evt} d#it{N}/d#it{p}_{T} (GeV/#it{c})^{-1}"};
+TString TypeHisto[numChoice] = {"Mean", "Sigma", "Purity", "Yield", "Significance", "Efficiency", "YieldCorr", "hNSigmaSummaryGaus_hTPCNsigma"};
+TString TitleY[numChoice] = {"Mean (GeV/#it{c}^{2})", "Sigma (GeV/#it{c}^{2})", "S/(S+B)", "1/#it{N}_{evt} d#it{N}/d#it{p}_{T} (GeV/#it{c})^{-1}", "Yield/#sigma_{Yield}", "Efficiency x acceptance", "1/#it{N}_{evt} d#it{N}/d#it{p}_{T} (GeV/#it{c})^{-1}", "NSigmaTPC"};
 
 TString TitleXPt = "#it{p}_{T} (GeV/#it{c})";
 TString TitleYYield = "1/#it{N}_{evt} d#it{N}/d#it{p}_{T} (GeV/#it{c})^{-1}";
@@ -149,32 +149,34 @@ Float_t YLowPurity[numPart] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
 Float_t YLow[numPart] = {0};
 Float_t YUp[numPart] = {0};
 
-Float_t YLowRatio[numChoice] = {0.99, 0.4, 0.5, 0, 0.8, 0.8, 0.8};
-Float_t YUpRatio[numChoice] = {1.01, 1.6, 1.5, 2, 1.2, 1.2, 1.2};
+Float_t YLowRatio[numChoice] = {0.99, 0.4, 0.5, 0, 0.8, 0.8, 0.8, 0.8};
+Float_t YUpRatio[numChoice] = {1.01, 1.6, 1.5, 2, 1.2, 1.2, 1.2, 1.2};
 
 const Int_t numPeriods = 7;
-//TString Srun[numPeriods] = {"LHC23f", "LHC23i", "LHC23g", "LHC23j", "LHC23k", "LHC23l", "LHC23m", "LHC23n", "LHC23o", "LHC23q", "LHC23r", "LHC23y", "LHC23z"};
-//TString Srun[numPeriods] = {"LHC23p", "LHC23s", "LHC23t", "LHC23u", "LHC23za", "LHC23zc", "LHC23zj", "LHC23zl", "LHC23l"};
-//TString Srun[numPeriods] = {"LHC23v", "LHC23ze", "LHC23zf", "LHC23zg", "LHC23zh", "LHC23zi", "LHC23zk", "LHC23zm", "LHC23zn","LHC23zq","LHC23zr","LHC23zt", "LHC23l"};
+// TString Srun[numPeriods] = {"LHC23f", "LHC23i", "LHC23g", "LHC23j", "LHC23k", "LHC23l", "LHC23m", "LHC23n", "LHC23o", "LHC23q", "LHC23r", "LHC23y", "LHC23z"};
+// TString Srun[numPeriods] = {"LHC23p", "LHC23s", "LHC23t", "LHC23u", "LHC23za", "LHC23zc", "LHC23zj", "LHC23zl", "LHC23l"};
+// TString Srun[numPeriods] = {"LHC23v", "LHC23ze", "LHC23zf", "LHC23zg", "LHC23zh", "LHC23zi", "LHC23zk", "LHC23zm", "LHC23zn","LHC23zq","LHC23zr","LHC23zt", "LHC23l"};
 
-//500 kHz periods (11) N.B. zs contains too few events
-//TString Srun[numPeriods] = {"LHC23l", "LHC23p", "LHC23v", "LHC23za", "LHC23zc", "LHC23zj", "LHC23zl","LHC23zt"};
-//low IR periods
-//TString Srun[numPeriods] = {"LHC23i", "LHC23o", "LHC23zg", "LHC23zm", "LHC23n", "LHC23ze", "LHC23zf", "LHC23zk"};
-//TString IRLegend[numPeriods] = {"50 kHz", "50 kHz", "50 kHz", "50 kHz", "10 kHz", "23 kHz", "10 kHz", "10 kHz"};
-//Mixed sample
-TString Srun[numPeriods] = {"LHC23l", "LHC23o", "LHC23i", "LHC23zk", "LHC23zf", "LHC23m", "LHC23t" };
-TString IRLegend[numPeriods] = {"500 kHz", "50 kHz", "50 kHz", "10 kHz", "10 kHz", "250 kHz", "1000 kHz"};
+// 500 kHz periods (11) N.B. zs contains too few events
+// TString Srun[numPeriods] = {"LHC23l", "LHC23p", "LHC23v", "LHC23za", "LHC23zc", "LHC23zj", "LHC23zl","LHC23zt"};
+// low IR periods
+// TString Srun[numPeriods] = {"LHC23i", "LHC23o", "LHC23zg", "LHC23zm", "LHC23n", "LHC23ze", "LHC23zf", "LHC23zk"};
+// TString IRLegend[numPeriods] = {"50 kHz", "50 kHz", "50 kHz", "50 kHz", "10 kHz", "23 kHz", "10 kHz", "10 kHz"};
+// Mixed sample
+// TString Srun[numPeriods] = {"LHC23l", "LHC23o", "LHC23i", "LHC23zk", "LHC23zf", "LHC23m", "LHC23t" };
+// TString IRLegend[numPeriods] = {"500 kHz", "50 kHz", "50 kHz", "10 kHz", "10 kHz", "250 kHz", "1000 kHz"};
+TString Srun[numPeriods] = {"537505", "537511", "537531", "537546", "537547", "537551", "537553"};
+TString IRLegend[numPeriods] = {""};
 
 void MeanSigmaPurityQAFilter(Int_t part = 8,
                              Int_t ChosenRun = 0,
                              Int_t Choice = 0,
-                             TString OutputDir = "../TriggerForRun3/EventFiltering2023/",
+                             TString OutputDir = "../TriggerForRun3/EventFiltering2023/LHC23v_pass4/",
                              TString year = "")
 {
 
   gStyle->SetOptStat(0);
-  if (ChosenRun > (numPeriods-1))
+  if (ChosenRun > (numPeriods - 1))
   {
     cout << "Chosen Mult outside of available range" << endl;
     return;
@@ -213,6 +215,12 @@ void MeanSigmaPurityQAFilter(Int_t part = 8,
       YLow[part] = 1e-7;
     }
   }
+  else if (Choice == 7)
+  {
+    YLow[part] = -5;
+    YUp[part] = 5;
+    TitleXPt = "p(GeV/c)";
+  }
 
   TString SErrorSpectrum[3] = {"stat.", "syst. uncorr.", "syst. corr."};
 
@@ -221,10 +229,43 @@ void MeanSigmaPurityQAFilter(Int_t part = 8,
   TFile *fileIn[numPeriods];
 
   // fileout name
+  Float_t MaxTPC = 1.2;
+  Int_t dauparticle = 0;
+  TString TypeHistoSuffix = "";
   TString stringout;
   TString stringoutpdf;
   stringout = OutputDir + "PlotRatios_" + year;
   stringout += "_" + TypeHisto[Choice];
+  if (Choice == 7)
+  {
+    cout << "which particle?" << endl;
+    if (part == 5)
+      cout << "0: V0PiPlus, 1:V0PiMinus, 2:V0Proton, 3:V0AntiProton " << endl;
+    else if (part == 8)
+      cout << "0: BachKaMinus, 1:BachKaPlus" << endl;
+    cin >> dauparticle;
+    if (part == 5)
+    {
+      if (dauparticle == 0)
+        TypeHistoSuffix = "XiV0PiPlus";
+      else if (dauparticle == 1)
+        TypeHistoSuffix = "XiV0PiMinus";
+      else if (dauparticle == 2)
+        TypeHistoSuffix = "XiV0Proton";
+      else if (dauparticle == 3)
+        TypeHistoSuffix = "XiV0AntiProton";
+    }
+    else if (part == 8)
+    {
+      MaxTPC = 0.7;
+      if (dauparticle == 0)
+        TypeHistoSuffix = "OmegaBachKaMinus";
+      else if (dauparticle == 1)
+        TypeHistoSuffix = "OmegaBachKaPlus";
+    }
+    TypeHisto[Choice] += TypeHistoSuffix;
+    stringout += TypeHistoSuffix;
+  }
   stringout += "_" + Spart[part];
   stringoutpdf = stringout;
   stringout += ".root";
@@ -234,10 +275,14 @@ void MeanSigmaPurityQAFilter(Int_t part = 8,
   TCanvas *canvasPtSpectra = new TCanvas("canvasPtSpectra", "canvasPtSpectra", 700, 900);
   Float_t LLUpperPad = 0.33;
   Float_t ULLowerPad = 0.33;
+  if (Choice == 7)
+    LLUpperPad = 0.;
   TPad *pad1 = new TPad("pad1", "pad1", 0, LLUpperPad, 1, 1); // xlow, ylow, xup, yup
   TPad *padL1 = new TPad("padL1", "padL1", 0, 0, 1, ULLowerPad);
 
-  StylePad(pad1, 0.18, 0.01, 0.03, 0.);   // L, R, T, B
+  StylePad(pad1, 0.18, 0.01, 0.03, 0.); // L, R, T, B
+  if (Choice == 7)
+    StylePad(pad1, 0.18, 0.02, 0.03, 0.15);
   StylePad(padL1, 0.18, 0.01, 0.02, 0.3); // L, R, T, B
 
   TH1F *fHistSpectrum[numPeriods];
@@ -249,6 +294,7 @@ void MeanSigmaPurityQAFilter(Int_t part = 8,
   gStyle->SetLegendBorderSize(0);
 
   TLegend *legendAllMult = new TLegend(0.22, 0.03, 0.9, 0.28);
+  if (Choice==7) legendAllMult = new TLegend(0.22, 0.2, 0.9, 0.4);
   legendAllMult->SetHeader("Runs");
   legendAllMult->SetNColumns(3);
   legendAllMult->SetFillStyle(0);
@@ -256,8 +302,10 @@ void MeanSigmaPurityQAFilter(Int_t part = 8,
   lheaderAllMult->SetTextSize(0.04);
 
   TLegend *LegendTitle;
-  if (part==5 && Choice==2) LegendTitle = new TLegend(0.54, 0.55, 0.95, 0.72);
-  else LegendTitle = new TLegend(0.54, 0.75, 0.95, 0.92);
+  if (part == 5 && Choice == 2)
+    LegendTitle = new TLegend(0.54, 0.55, 0.95, 0.72);
+  else
+    LegendTitle = new TLegend(0.54, 0.75, 0.95, 0.92);
   LegendTitle->SetFillStyle(0);
   LegendTitle->SetTextAlign(33);
   LegendTitle->SetTextSize(0.04);
@@ -280,17 +328,26 @@ void MeanSigmaPurityQAFilter(Int_t part = 8,
   // get spectra in multiplicity classes
   for (Int_t m = numPeriods - 1; m >= 0; m--)
   {
-    PathIn = "../TriggerForRun3/EventFiltering2023/Yields_";
+    PathIn = "../TriggerForRun3/EventFiltering2023/LHC23v_pass4/Yields_";
     PathIn += Spart[part];
     PathIn += "_" + year;
     // PathIn += "_Run" + Srun[m];
     PathIn += Srun[m];
     PathIn += "_OneGaussFit";
     PathIn += ".root";
+    if (Choice == 7)
+    {
+      PathIn = "../TriggerForRun3/EventFiltering2023/LHC23v_pass4/FilterPostProcessing_";
+      PathIn += Srun[m] + ".root";
+    }
+
     cout << "Path in : " << PathIn << endl;
 
     fileIn[m] = TFile::Open(PathIn);
-    fHistSpectrum[m] = (TH1F *)fileIn[m]->Get("histo" + TypeHisto[Choice]);
+    if (Choice == 7)
+      fHistSpectrum[m] = (TH1F *)fileIn[m]->Get(TypeHisto[Choice]);
+    else
+      fHistSpectrum[m] = (TH1F *)fileIn[m]->Get("histo" + TypeHisto[Choice]);
     fHistSpectrum[m]->SetName("histoSpectrum_" + Srun[m]);
     if (!fHistSpectrum[m])
     {
@@ -322,6 +379,8 @@ void MeanSigmaPurityQAFilter(Int_t part = 8,
   SetHistoTextSize(hDummy, xTitle, xLabel, xOffset, xLabelOffset, yTitle, yLabel, yOffset, yLabelOffset);
   SetTickLength(hDummy, tickX, tickY);
   hDummy->GetXaxis()->SetRangeUser(0, 4);
+  if (Choice == 7)
+    hDummy->GetXaxis()->SetRangeUser(0, MaxTPC);
   pad1->Draw();
   pad1->cd();
   if (Choice == 3)
@@ -331,7 +390,8 @@ void MeanSigmaPurityQAFilter(Int_t part = 8,
   for (Int_t m = numPeriods - 1; m >= 0; m--)
   {
     cout << "Period: " << m << " " << Srun[m] << endl;
-    if (Srun[m] == "LHC23p" && part==8) continue;
+    if (Srun[m] == "LHC23p" && part == 8)
+      continue;
     fHistSpectrumScaled[m] = (TH1F *)fHistSpectrum[m]->Clone("fHistSpectrumScaled_" + Srun[m]);
     for (Int_t b = 1; b <= fHistSpectrum[m]->GetNbinsX(); b++)
     {
@@ -374,29 +434,35 @@ void MeanSigmaPurityQAFilter(Int_t part = 8,
   SetHistoTextSize(hDummyRatio, xTitleR, xLabelR, xOffsetR, xLabelOffsetR, yTitleR, yLabelR, yOffsetR, yLabelOffsetR);
   SetTickLength(hDummyRatio, tickX, tickY);
   hDummyRatio->GetXaxis()->SetRangeUser(0, 4);
-  canvasPtSpectra->cd();
-  padL1->Draw();
-  padL1->cd();
-  hDummyRatio->Draw("same");
+  if (Choice == 7)
+    hDummyRatio->GetXaxis()->SetRangeUser(0, MaxTPC);
+  if (Choice != 7)
+  {
+    canvasPtSpectra->cd();
+    padL1->Draw();
+    padL1->cd();
+    hDummyRatio->Draw("same");
+  }
 
   for (Int_t m = numPeriods - 1; m >= 0; m--)
   {
-    if (Srun[m] == "LHC23p" && part==8) continue;
+    if (Srun[m] == "LHC23p" && part == 8)
+      continue;
     fHistSpectrumMultRatio[m] = (TH1F *)fHistSpectrum[m]->Clone("fHistSpectrumMultRatio_" + Srun[m]);
     fHistSpectrumMultRatio[m]->Divide(fHistSpectrum[ChosenRun]);
     ErrRatioCorr(fHistSpectrum[m], fHistSpectrum[ChosenRun], fHistSpectrumMultRatio[m], 0);
     for (Int_t b = 1; b <= fHistSpectrum[m]->GetNbinsX(); b++)
     {
-       cout << "binR " << b << " " << fHistSpectrum[m]->GetBinContent(b) << endl;
-       cout << "binR " << b << " " << fHistSpectrum[ChosenRun]->GetBinContent(b) << endl;
-       cout << "binR " << b << " " << fHistSpectrumMultRatio[m]->GetBinContent(b) << endl;
+      cout << "binR " << b << " " << fHistSpectrum[m]->GetBinContent(b) << endl;
+      cout << "binR " << b << " " << fHistSpectrum[ChosenRun]->GetBinContent(b) << endl;
+      cout << "binR " << b << " " << fHistSpectrumMultRatio[m]->GetBinContent(b) << endl;
     }
     fHistSpectrumMultRatio[m]->SetMarkerColor(ColorMult[m]);
     fHistSpectrumMultRatio[m]->SetLineColor(ColorMult[m]);
     fHistSpectrumMultRatio[m]->SetMarkerStyle(MarkerMult[m]);
     fHistSpectrumMultRatio[m]->SetMarkerSize(SizeMultRatio[m]);
 
-    if (m != ChosenRun)
+    if (m != ChosenRun && Choice != 7)
     {
       fHistSpectrumMultRatio[m]->Draw("same e0x0");
       lineat1Mult->Draw("same");

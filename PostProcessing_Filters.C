@@ -333,7 +333,7 @@ void PostProcessing_Filters(TString year = "23h_PIDpass3",
   hRejFactorshXi->GetYaxis()->SetTitle("Rejection factor");
   hRejFactorshXi->Draw("text");
 
-  // TPC nsigma distributions for all cascade candidates before selections
+  // TPC nsigma distributions for all cascade candidates after selections
   TH2F *hNSigmaTPCvsPt[12];
   TString SNSigmaTPCvsPt[12] = {"hTPCNsigmaXiBachPiPlus", "hTPCNsigmaXiV0PiPlus", "hTPCNsigmaXiV0AntiProton",
                                 "hTPCNsigmaXiBachPiMinus", "hTPCNsigmaXiV0PiMinus", "hTPCNsigmaXiV0Proton",
@@ -369,6 +369,7 @@ void PostProcessing_Filters(TString year = "23h_PIDpass3",
   TH1F *hNSigmaTPC[12][numPtDau];
   TCanvas *canvasTPC[12];
   TH1F *hNSigmaSummary[12];
+  TH1F *hNSigmaSummaryGaus[12];
   TCanvas *cNSigmaSummary = new TCanvas("cNSigmaSummary", "cNSigmaSummary", 800, 500);
   cNSigmaSummary->Divide(6, 2);
 
@@ -405,7 +406,8 @@ void PostProcessing_Filters(TString year = "23h_PIDpass3",
       }
     }
 
-    hNSigmaSummary[dau] = new TH1F(Form("hNSigmaSummary_dau%i", dau), Form("hNSigmaSummary_dau%i", dau), numPtDau, binptDau);
+    hNSigmaSummary[dau] = new TH1F("hNSigmaSummary_" + SNSigmaTPCvsPt[dau], "hNSigmaSummary_" + SNSigmaTPCvsPt[dau], numPtDau, binptDau);
+    hNSigmaSummaryGaus[dau] = new TH1F("hNSigmaSummaryGaus_" + SNSigmaTPCvsPt[dau], "hNSigmaSummaryGaus_" + SNSigmaTPCvsPt[dau], numPtDau, binptDau);
 
     for (Int_t pt = 0; pt < numPtDau; pt++)
     {
@@ -416,6 +418,9 @@ void PostProcessing_Filters(TString year = "23h_PIDpass3",
       StyleHisto(hNSigmaTPC[dau][pt], 0, 1.2 * hNSigmaTPC[dau][pt]->GetBinContent(hNSigmaTPC[dau][pt]->GetMaximumBin()), 1, 20, "Nsigma", "Counts", SNSigmaTPCvsPt[dau] + " " + SPtDau[pt], 1, -6, 6, 1.4, 1.4, 1.2);
       hNSigmaTPC[dau][pt]->GetXaxis()->SetRangeUser(-6, 6);
       hNSigmaTPC[dau][pt]->GetYaxis()->SetRangeUser(0, 1.2 * hNSigmaTPC[dau][pt]->GetBinContent(hNSigmaTPC[dau][pt]->GetMaximumBin()));
+      TF1* gaussTPC = new TF1("gaussTPC", "gaus", -2.5, 2.5);
+      gaussTPC->SetLineColor(2);
+      hNSigmaTPC[dau][pt]->Fit("gaussTPC", "R+");
       canvasTPC[dau]->cd(pt + 1);
       gPad->SetTopMargin(0.08);
       gPad->SetLeftMargin(0.15);
@@ -423,7 +428,9 @@ void PostProcessing_Filters(TString year = "23h_PIDpass3",
       gPad->SetBottomMargin(0.2);
       hNSigmaTPC[dau][pt]->DrawClone("e same");
       hNSigmaSummary[dau]->SetBinContent(pt + 1, hNSigmaTPC[dau][pt]->GetMean());
-      hNSigmaSummary[dau]->SetBinError(pt + 1, hNSigmaTPC[dau][pt]->GetMeanError());
+      hNSigmaSummary[dau]->SetBinError(pt + 1, hNSigmaTPC[dau][pt]->GetRMS());
+      hNSigmaSummaryGaus[dau]->SetBinContent(pt + 1, gaussTPC->GetParameter(1));
+      hNSigmaSummaryGaus[dau]->SetBinError(pt + 1, gaussTPC->GetParameter(2));
     }
     // summary plot
     cNSigmaSummary->cd(dau + 1);
@@ -645,8 +652,11 @@ void PostProcessing_Filters(TString year = "23h_PIDpass3",
   outputfile->WriteTObject(hCascCandidates);
   outputfile->WriteTObject(hTriggerParticles);
   outputfile->WriteTObject(canvasTrackQA);
+
   for (Int_t dau = 0; dau < 12; dau++)
   {
+    outputfile->WriteTObject(hNSigmaSummary[dau]);
+    outputfile->WriteTObject(hNSigmaSummaryGaus[dau]);
     for (Int_t pt = 0; pt < numPtDau; pt++)
     {
       outputfile->WriteTObject(hNSigmaTPC[dau][pt]);
