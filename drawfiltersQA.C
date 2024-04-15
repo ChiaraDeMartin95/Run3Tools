@@ -4,15 +4,16 @@
 const Float_t StrLimit = 4.3E-5;
 const Float_t LFLimit = 5E-5;
 Int_t numBins = 6;
+Int_t iscale = 0; //0 if input file has no mistakes. At some point axis labels where shifted by one bin and in those cases iscale = 1 should be set.
 
-void drawfiltersQA(TString filename = "list2023PID.txt", Int_t ChosenPeriod = 2)
+void drawfiltersQA(TString filename = "list2023NN.txt", Int_t ChosenPeriod = 2)
 {
 
     std::vector<std::string> name;
     std::ifstream file(Form("%s", filename.Data()));
     // std::string remove = "/Users/mbp-cdm-01/Desktop/dottorato/1Anno/QAStrangeness/TriggerForRun3/EventFiltering2023/AnalysisResults_merged_";
     // std::string remove = "/Users/mbp-cdm-01/Desktop/dottorato/1Anno/QAStrangeness/TriggerForRun3/EventFiltering2023/AnalysisResults/AnalysisResults_";
-    std::string remove = "/Users/mbp-cdm-01/Desktop/ResearchTeachingActivity/QAStrangeness/TriggerForRun3/EventFiltering2023/LHC23h/AnalysisResults_";
+    std::string remove = "/Users/mbp-cdm-01/Desktop/ResearchTeachingActivity/QAStrangeness/TriggerForRun3/EventFiltering2023/LHC23v_pass4/AnalysisResults_LHC23v_pass4_CEFP_";
     std::string remove2 = ".root";
 
     cout << filename.Data() << endl;
@@ -64,13 +65,13 @@ void drawfiltersQA(TString filename = "list2023PID.txt", Int_t ChosenPeriod = 2)
         RelError = 0;
         hEvSel[i] = (TH1F *)f[i]->Get("lf-strangeness-filter/hProcessedEvents");
         TotEvt = hEvSel[i]->GetBinContent(1);
+        cout << "Total events " << name[i].c_str() << " = " << TotEvt << endl;
     }
     for (int i = 0; i < nfiles; i++)
     {
         hEvSelFinal[i] = (TH1F *)hEvSel[0]->Clone(Form("hEvSelFinal_%d", i));
         for (int j = 1; j <= hEvSelFinal[i]->GetNbinsX(); j++)
         {
-            // cout << hEvSel[i]->GetBinContent(1) << endl;
             RelError = sqrt(1. / hEvSel[i]->GetBinContent(j) + 1. / hEvSel[i]->GetBinContent(1));
             cout << "i " << i << " j " << j << " RelError " << RelError << " hEvSel[i]->GetBinContent(j) " << hEvSel[i]->GetBinContent(j) << endl;
             hEvSelFinal[i]->SetBinContent(j, hEvSel[i]->GetBinContent(j) / hEvSel[i]->GetBinContent(1));
@@ -91,27 +92,33 @@ void drawfiltersQA(TString filename = "list2023PID.txt", Int_t ChosenPeriod = 2)
     pad1f->cd();
     pad1f->SetLogy();
 
-    TH1F *h1 = new TH1F(Form("h1%d", 0), ";;Selectivity", 12, 0, 12);
-    h1->GetXaxis()->SetBinLabel(1, "Events");
-    h1->GetXaxis()->SetBinLabel(2, "Events w/ high-pT hadron");
-    h1->GetXaxis()->SetBinLabel(3, "Omegas");
-    h1->GetXaxis()->SetBinLabel(4, "high-pT + Xi");
-    h1->GetXaxis()->SetBinLabel(5, "2Xi");
-    h1->GetXaxis()->SetBinLabel(6, "3Xi");
-    h1->GetXaxis()->SetBinLabel(7, "4Xi");
-    h1->GetXaxis()->SetBinLabel(8, "Xi-N");
-    h1->GetXaxis()->SetBinLabel(9, "Omega large R");
-    h1->GetXaxis()->SetBinLabel(10, "Xi");
-    h1->GetXaxis()->SetBinLabel(11, "Tracked Xi");
-    h1->GetXaxis()->SetBinLabel(12, "Tracked Omega");
+    TH1F *h1 = new TH1F(Form("h1%d", 0), ";;Selectivity", 13, -1, 12);
+    h1->GetXaxis()->SetBinLabel(1, "All events");
+    h1->GetXaxis()->SetBinLabel(2, "Processed events");
+    h1->GetXaxis()->SetBinLabel(3, "Events w/ high-pT hadron");
+    h1->GetXaxis()->SetBinLabel(4, "Omegas");
+    h1->GetXaxis()->SetBinLabel(5, "high-pT + Xi");
+    h1->GetXaxis()->SetBinLabel(6, "2Xi");
+    h1->GetXaxis()->SetBinLabel(7, "3Xi");
+    h1->GetXaxis()->SetBinLabel(8, "4Xi");
+    h1->GetXaxis()->SetBinLabel(9, "Xi-N");
+    h1->GetXaxis()->SetBinLabel(10, "Omega large R");
+    h1->GetXaxis()->SetBinLabel(11, "Xi");
+    h1->GetXaxis()->SetBinLabel(12, "Tracked Xi");
+    h1->GetXaxis()->SetBinLabel(13, "Tracked Omega");
     h1->SetStats(0);
     h1->GetYaxis()->SetRangeUser(1E-10, 1E-1);
     h1->Draw();
     for (int i = 0; i < nfiles; i++)
     {
-        hEvSel[i]->Draw("SAME e");
+        for (Int_t j = 1; j <= hEvSelFinal[i]->GetNbinsX(); j++)
+        {
+            hEvSelFinal[i]->GetXaxis()->SetBinLabel(j, h1->GetXaxis()->GetBinLabel(j));
+        }
+        hEvSelFinal[i]->GetYaxis()->SetRangeUser(1E-10, 1E-1);
+        hEvSelFinal[i]->DrawCopy("SAME e");
     }
-    hEvSel[0]->Draw("SAME e");
+    //hEvSelFinal[0]->Draw("SAME e");
 
     cfull->cd();
     TPad *pad2f = new TPad("pad2f", "pad2f", 0, 0, 1, 0.3);
@@ -156,23 +163,23 @@ void drawfiltersQA(TString filename = "list2023PID.txt", Int_t ChosenPeriod = 2)
         hEvSel23[i]->SetLineColor(colors[i]);
         hEvSel23[i]->SetLineWidth(2);
 
-        hEvSel23[i]->SetBinContent(1, hEvSelFinal[i]->GetBinContent(hEvSelFinal[i]->GetXaxis()->FindBin("#Omega")) * 0.2);
-        hEvSel23[i]->SetBinContent(2, hEvSelFinal[i]->GetBinContent(hEvSelFinal[i]->GetXaxis()->FindBin("3#Xi")));
-        hEvSel23[i]->SetBinContent(3, hEvSelFinal[i]->GetBinContent(hEvSelFinal[i]->GetXaxis()->FindBin("#Xi-YN")));
-        hEvSel23[i]->SetBinContent(4, hEvSelFinal[i]->GetBinContent(hEvSelFinal[i]->GetXaxis()->FindBin("#Omega high radius")));
-        hEvSel23[i]->SetBinContent(5, hEvSelFinal[i]->GetBinContent(hEvSelFinal[i]->GetXaxis()->FindBin("trk. #Omega")));
-        double tot = hEvSelFinal[i]->GetBinContent(hEvSelFinal[i]->GetXaxis()->FindBin("#Omega")) * 0.2 +
-                     hEvSelFinal[i]->GetBinContent(hEvSelFinal[i]->GetXaxis()->FindBin("3#Xi")) +
-                     hEvSelFinal[i]->GetBinContent(hEvSelFinal[i]->GetXaxis()->FindBin("#Xi-YN")) +
-                     hEvSelFinal[i]->GetBinContent(hEvSelFinal[i]->GetXaxis()->FindBin("#Omega high radius")) +
-                     hEvSelFinal[i]->GetBinContent(hEvSelFinal[i]->GetXaxis()->FindBin("trk. #Omega"));
+        hEvSel23[i]->SetBinContent(1, hEvSelFinal[i]->GetBinContent(hEvSelFinal[i]->GetXaxis()->FindBin("Omegas")+ iscale) * 0.2);
+        hEvSel23[i]->SetBinContent(2, hEvSelFinal[i]->GetBinContent(hEvSelFinal[i]->GetXaxis()->FindBin("3Xi")+ iscale));
+        hEvSel23[i]->SetBinContent(3, hEvSelFinal[i]->GetBinContent(hEvSelFinal[i]->GetXaxis()->FindBin("Xi-N")+ iscale));
+        hEvSel23[i]->SetBinContent(4, hEvSelFinal[i]->GetBinContent(hEvSelFinal[i]->GetXaxis()->FindBin("Omega large R")+ iscale));
+        hEvSel23[i]->SetBinContent(5, hEvSelFinal[i]->GetBinContent(hEvSelFinal[i]->GetXaxis()->FindBin("Tracked Omega")+ iscale));
+        double tot = hEvSelFinal[i]->GetBinContent(hEvSelFinal[i]->GetXaxis()->FindBin("Omegas")+ iscale) * 0.2 +
+                     hEvSelFinal[i]->GetBinContent(hEvSelFinal[i]->GetXaxis()->FindBin("3Xi")+ iscale) +
+                     hEvSelFinal[i]->GetBinContent(hEvSelFinal[i]->GetXaxis()->FindBin("Xi-N")+ iscale) +
+                     hEvSelFinal[i]->GetBinContent(hEvSelFinal[i]->GetXaxis()->FindBin("Omega large R")+ iscale) +
+                     hEvSelFinal[i]->GetBinContent(hEvSelFinal[i]->GetXaxis()->FindBin("Tracked Omega")+ iscale);
         hEvSel23[i]->SetBinContent(numBins, tot);
 
-        hEvSel23[i]->SetBinError(1, hEvSelFinal[i]->GetBinError(hEvSelFinal[i]->GetXaxis()->FindBin("#Omega")) * 0.2);
-        hEvSel23[i]->SetBinError(2, hEvSelFinal[i]->GetBinError(hEvSelFinal[i]->GetXaxis()->FindBin("3#Xi")));
-        hEvSel23[i]->SetBinError(3, hEvSelFinal[i]->GetBinError(hEvSelFinal[i]->GetXaxis()->FindBin("#Xi-YN")));
-        hEvSel23[i]->SetBinError(4, hEvSelFinal[i]->GetBinError(hEvSelFinal[i]->GetXaxis()->FindBin("#Omega high radius")));
-        hEvSel23[i]->SetBinError(5, hEvSelFinal[i]->GetBinError(hEvSelFinal[i]->GetXaxis()->FindBin("trk. #Omega")));
+        hEvSel23[i]->SetBinError(1, hEvSelFinal[i]->GetBinError(hEvSelFinal[i]->GetXaxis()->FindBin("Omegas")+ iscale) * 0.2);
+        hEvSel23[i]->SetBinError(2, hEvSelFinal[i]->GetBinError(hEvSelFinal[i]->GetXaxis()->FindBin("3Xi")+ iscale));
+        hEvSel23[i]->SetBinError(3, hEvSelFinal[i]->GetBinError(hEvSelFinal[i]->GetXaxis()->FindBin("Xi-N")+ iscale));
+        hEvSel23[i]->SetBinError(4, hEvSelFinal[i]->GetBinError(hEvSelFinal[i]->GetXaxis()->FindBin("Omega large R")+ iscale));
+        hEvSel23[i]->SetBinError(5, hEvSelFinal[i]->GetBinError(hEvSelFinal[i]->GetXaxis()->FindBin("Tracked Omega")+ iscale));
         hEvSel23[i]->SetBinError(numBins, 0);
 
         cout << "Total rejection factor " << name[i].c_str() << " = " << tot << endl;
@@ -203,7 +210,7 @@ void drawfiltersQA(TString filename = "list2023PID.txt", Int_t ChosenPeriod = 2)
         hEvSel23[i]->Draw("SAME e");
         for (Int_t j = 1; j <= numBins; j++)
         {
-            cout << "Bin content : " <<  h->GetXaxis()->GetBinLabel(j) << " " << hEvSel23[i]->GetBinContent(j) << endl;
+            cout << "Bin content : " << h->GetXaxis()->GetBinLabel(j) << " " << hEvSel23[i]->GetBinContent(j) << endl;
         }
     }
     // hEvSel23[0]->Draw("SAME e");
