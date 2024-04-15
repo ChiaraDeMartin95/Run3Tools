@@ -128,17 +128,17 @@ TString titleYield = "1/N_{ev} dN/dp_{T}";
 const Int_t numPart = 7;
 TString TitleInvMass[numPart] = {"(#pi^{+}, #pi^{-}) invariant mass (GeV/#it{c}^{2})", "(p, #pi^{-}) invariant mass (GeV/#it{c}^{2})", "(#bar{p}, #pi^{-}) invariant mass (GeV/#it{c}^{2})", "(#Lambda, #pi^{-}) invariant mass (GeV/#it{c}^{2})"};
 TString namehisto[numPart] = {"h3dMassK0Short", "", "", "h2dMassXiMinus", "h2dMassXiPlus", "h2dMassOmegaMinus", "h2dMassOmegaPlus"};
-Float_t LowLimitMass[numPart] = {0.42, 1.09, 1.09, 1.29, 1.29, 1.64, 1.64}; // 0.44, 1.62 for omegas
-Float_t UpLimitMass[numPart] = {0.57, 1.14, 1.14, 1.35, 1.35, 1.7, 1.7};    // 0.55, 1.72 for omegas
-Float_t LowMassRange[numPart] = {0.48, 1.09, 1.09, 1.31, 1.31, 1.655, 1.655};
+Float_t LowLimitMass[numPart] = {0.42, 1.09, 1.09, 1.307, 1.307, 1.657, 1.655}; // 0.44, 1.62 for omegas
+Float_t UpLimitMass[numPart] = {0.57, 1.14, 1.14, 1.335, 1.335, 1.685, 1.685};    // 0.55, 1.72 for omegas
+Float_t LowMassRange[numPart] = {0.48, 1.09, 1.09, 1.31, 1.31, 1.657, 1.655};
 Float_t UpMassRange[numPart] = {0.51, 1.14, 1.14, 1.33, 1.33, 1.685, 1.685};
 
 Float_t min_range_signal[numPart] = {0.46, 1.105, 1.105, 1.31, 1.31, 1.65, 1.65}; // estremi region fit segnale (gaussiane)
 Float_t max_range_signal[numPart] = {0.535, 1.125, 1.125, 1.334, 1.334, 1.69, 1.69};
 Float_t min_histo[numPart] = {0.42, 1.09, 1.09, 1.30, 1.30, 1.64, 1.64}; // estremi del range degli istogrammi
 Float_t max_histo[numPart] = {0.57, 1.14, 1.14, 1.342, 1.342, 1.7, 1.7};
-Float_t liminf[numPart] = {0.45, 1.1153, 1.1153, 1.29, 1.29, 1.64, 1.64}; // estremi regione fit del bkg e total
-Float_t limsup[numPart] = {0.545, 1.1168, 1.1168, 1.35, 1.35, 1.7, 1.7};
+Float_t liminf[numPart] = {0.45, 1.1153, 1.1153, 1.31, 1.31, /*1.29, 1.29*/ 1.66, 1.66 /*1.64*/ /*1.64*/}; // estremi regione fit del bkg e total
+Float_t limsup[numPart] = {0.545, 1.1168, 1.1168, 1.335, 1.335, /*1.35, 1.35*/ 1.685, 1.685 /*1.7, 1.7*/};
 // in the past (before LHC22m_pass3) they were: 1.3 and 1.342
 
 const Float_t massParticle[numPart] = {0.497611, 1.115683, 1.115683, 1.32171, 1.32171, 1.67245, 1.67245};
@@ -148,10 +148,9 @@ TString IsOneOrTwoGauss[2] = {"_OneGaussFit", ""};
 
 void Yields_from_invmass(Int_t part = 3,
                          Bool_t isTrackedCasc = 0,
-                         TString year = "LHC23zc_ITSTPCmap_Train135760" /*"LHC23zc_woDriftTPC"*/,
-                         TString OutputDir = "../TriggerForRun3/EventFiltering2023/",
-                         TString SPathIn =
-                             "../TriggerForRun3/EventFiltering2023/AnalysisResults/AnalysisResults_LHC23zc_pass1_relval_itstpcmap_1_Train135760.root",
+                         TString SPathIn = "../TriggerForRun3/EventFiltering2022_skimmedDATA/AnalysisResults_22o_apass6_QC1_sampling_Train172541.root",
+                         TString OutputDir = "../TriggerForRun3/EventFiltering2022_skimmedDATA/",
+                         TString year = "LHC23v_pass4",
                          Bool_t UseTwoGauss = 0,
                          Bool_t isBkgParab = 0,
                          Bool_t isMeanFixedPDG = 0,
@@ -354,7 +353,9 @@ void Yields_from_invmass(Int_t part = 3,
   TH1F *histoMean = new TH1F("histoMean", "histoMean", numPt, binpt);
   TH1F *histoSigma = new TH1F("histoSigma", "histoSigma", numPt, binpt);
   TH1F *histoPurity = new TH1F("histoPurity", "histoPurity", numPt, binpt);
+  TH1F *histoGlobalPurity = new TH1F("histoGlobalPurity", "histoGlobalPurity", numPt, binpt);
   TH1F *histoYield = new TH1F("histoYield", "histoYield", numPt, binpt);
+  TH1F *histoYieldNotNorm = new TH1F("histoYieldNotNorm", "histoYieldNotNorm", numPt, binpt);
 
   Float_t counts = 0;
   Float_t errcount = 0;
@@ -391,7 +392,6 @@ void Yields_from_invmass(Int_t part = 3,
   }
 
   // fits
-
   TF1 **functionsFirst = new TF1 *[numPt];
   TF1 **functionsSecond = new TF1 *[numPt];
   TF1 **functions1 = new TF1 *[numPt];
@@ -417,8 +417,13 @@ void Yields_from_invmass(Int_t part = 3,
   Float_t errsigma[numPt] = {0};
   Float_t b[numPt] = {0};
   Float_t errb[numPt] = {0};
+  Float_t totalb[numPt] = {0};
+  Float_t errtotalb[numPt] = {0};
+  Float_t totalCounts[numPt] = {0};
   Float_t SSB[numPt] = {0};
   Float_t errSSB[numPt] = {0};
+  Float_t GlobalSSB[numPt] = {0};
+  Float_t errGlobalSSB[numPt] = {0};
   Float_t entries_range[numPt] = {0};
   Float_t Yield[numPt] = {0};
   Float_t ErrYield[numPt] = {0};
@@ -782,15 +787,28 @@ void Yields_from_invmass(Int_t part = 3,
       b[pt] = bkg2[pt]->Integral(mean[pt] - sigmacentral * sigma[pt], mean[pt] + sigmacentral * sigma[pt]);
       errb[pt] = totalbis[pt]->IntegralError(mean[pt] - sigmacentral * sigma[pt], mean[pt] + sigmacentral * sigma[pt], fFitResultPtr1[pt]->GetParams(),
                                              (fFitResultPtr1[pt]->GetCovarianceMatrix()).GetMatrixArray());
+      //totalb[pt] = bkg2[pt]->Integral(min_histo[part], max_histo[part]);
+      //errtotalb[pt] = totalbis[pt]->IntegralError(min_histo[part], max_histo[part], fFitResultPtr1[pt]->GetParams(),
+                                                  //(fFitResultPtr1[pt]->GetCovarianceMatrix()).GetMatrixArray());
     }
     else
     {
       b[pt] = bkg1[pt]->Integral(mean[pt] - sigmacentral * sigma[pt], mean[pt] + sigmacentral * sigma[pt]);
       errb[pt] = totalbis[pt]->IntegralError(mean[pt] - sigmacentral * sigma[pt], mean[pt] + sigmacentral * sigma[pt], fFitResultPtr1[pt]->GetParams(),
                                              (fFitResultPtr1[pt]->GetCovarianceMatrix()).GetMatrixArray());
+      //totalb[pt] = bkg1[pt]->Integral(min_histo[part], max_histo[part]);
+      //errtotalb[pt] = totalbis[pt]->IntegralError(min_histo[part], max_histo[part], fFitResultPtr1[pt]->GetParams(),
+                                                  //(fFitResultPtr1[pt]->GetCovarianceMatrix()).GetMatrixArray());
     }
+
+    //totalCounts[pt]= hInvMass[pt]->Integral();
+    totalCounts[pt]= hInvMass[pt]->GetEntries();
+    //cout << "total " << totalCounts[pt] << endl;
+    //cout << hInvMass[pt]->GetEntries() << endl;
     b[pt] = b[pt] / hInvMass[pt]->GetBinWidth(1);
+    totalb[pt] = totalb[pt] / hInvMass[pt]->GetBinWidth(1);
     errb[pt] = errb[pt] / hInvMass[pt]->GetBinWidth(1);
+    errtotalb[pt] = errtotalb[pt] / hInvMass[pt]->GetBinWidth(1);
 
     entries_range[pt] = 0;
     for (Int_t l = hInvMass[pt]->GetXaxis()->FindBin(mean[pt] - sigmacentral * sigma[pt]); l <= hInvMass[pt]->GetXaxis()->FindBin(mean[pt] + sigmacentral * sigma[pt]); l++)
@@ -806,8 +824,14 @@ void Yields_from_invmass(Int_t part = 3,
     SSB[pt] = (entries_range[pt] - b[pt]) / entries_range[pt];
     errSSB[pt] = SSB[pt] * sqrt(1. / entries_range[pt] + pow(errb[pt] / b[pt], 2));
 
+    GlobalSSB[pt] = Yield[pt] / totalCounts[pt];
+    errGlobalSSB[pt] = GlobalSSB[pt] * sqrt(1. / Yield[pt] + 1./totalCounts[pt]);
+
     histoYield->SetBinContent(pt + 1, Yield[pt] / NEvents / histoYield->GetBinWidth(pt + 1));
     histoYield->SetBinError(pt + 1, ErrYield[pt] / NEvents / histoCountsPerEvent->GetBinWidth(pt + 1));
+
+    histoYieldNotNorm->SetBinContent(pt + 1, Yield[pt] / histoYield->GetBinWidth(pt + 1));
+    histoYieldNotNorm->SetBinError(pt + 1, ErrYield[pt] / histoCountsPerEvent->GetBinWidth(pt + 1));
 
     histoMean->SetBinContent(pt + 1, mean[pt]);
     histoMean->SetBinError(pt + 1, errmean[pt]);
@@ -817,6 +841,9 @@ void Yields_from_invmass(Int_t part = 3,
 
     histoPurity->SetBinContent(pt + 1, SSB[pt]);
     histoPurity->SetBinError(pt + 1, errSSB[pt]);
+
+    histoGlobalPurity->SetBinContent(pt + 1, GlobalSSB[pt]);
+    histoGlobalPurity->SetBinError(pt + 1, errGlobalSSB[pt]);
   }
 
   TotYield = TotYield / NEvents;
@@ -834,7 +861,7 @@ void Yields_from_invmass(Int_t part = 3,
   legendYield->Draw("");
 
   TCanvas *canvasSummary = new TCanvas("canvasSummary", "canvasSummary", 1000, 800);
-  canvasSummary->Divide(2, 2);
+  canvasSummary->Divide(3, 2);
 
   canvasSummary->cd(1);
   gPad->SetBottomMargin(0.14);
@@ -858,6 +885,11 @@ void Yields_from_invmass(Int_t part = 3,
   gPad->SetLeftMargin(0.14);
   StyleHisto(histoYield, 0, 1.2 * histoYield->GetBinContent(histoYield->GetMaximumBin()), 1, 1, titlePt, titleYield, "histoYield", 0, 0, 0, 1.4, 1.4, 1.2);
   histoYield->Draw("same");
+  canvasSummary->cd(5);
+  gPad->SetBottomMargin(0.14);
+  gPad->SetLeftMargin(0.14);
+  StyleHisto(histoGlobalPurity, 0, 1, 1, 1, titlePt, "global S / (S+B)", "histoGlobalPurity", 0, 0, 0, 1.4, 1.4, 1.2);
+  histoGlobalPurity->Draw("");
 
   TString Soutputfile;
   if (isV0CascadeAnalysis)
@@ -865,11 +897,11 @@ void Yields_from_invmass(Int_t part = 3,
   else if (isFilter)
     Soutputfile = OutputDir + "Yields_" + Spart[part] + "_" + year;
   else if (isPostProcess)
-    Soutputfile = OutputDir + "YieldsQATask_" + SpartType[part] + "_" + year;  
+    Soutputfile = OutputDir + "YieldsQATask_" + SpartType[part] + "_" + year;
 
   Soutputfile += IsOneOrTwoGauss[UseTwoGauss];
-  if (isTrackedCasc) Soutputfile += "_TrackedCascades";
-
+  if (isTrackedCasc)
+    Soutputfile += "_TrackedCascades";
   // save canvases
   canvas->SaveAs(Soutputfile + ".pdf(");
   canvasYield->SaveAs(Soutputfile + ".pdf");
@@ -878,9 +910,11 @@ void Yields_from_invmass(Int_t part = 3,
   TFile *outputfile = new TFile(Soutputfile + ".root", "RECREATE");
   outputfile->WriteTObject(histoCountsPerEvent);
   outputfile->WriteTObject(histoYield);
+  outputfile->WriteTObject(histoYieldNotNorm);
   outputfile->WriteTObject(histoMean);
   outputfile->WriteTObject(histoSigma);
   outputfile->WriteTObject(histoPurity);
+  outputfile->WriteTObject(histoGlobalPurity);
   outputfile->Close();
   cout << "Ho creato il file: " << Soutputfile << endl;
 
