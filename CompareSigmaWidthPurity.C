@@ -87,16 +87,16 @@ Float_t ParticleMassPDG[numPart] = {0.497611, 1.115683, 1.115683, 1.32171, 1.321
 
 // histo0 -> num
 // histo1 -> denom
-void CompareSigmaWidthPurity(TString year0 = "LHC22o_apass6_skimmed",
-                             TString year1 = "LHC22o_apass6",
+void CompareSigmaWidthPurity(TString year0 = "LHC24l_run553588_skimmed",
+                             TString year1 = "LHC24l_run553588",
                              TString yearRatioToPub = "",
-                             TString Sfilein0 = "../TriggerForRun3/EventFiltering2022_skimmedDATA/Yields_Omega_AnalysisResults_22o_apass6_skimmed_Train172545_OneGaussFit.root",
-                             TString Sfilein1 = "../TriggerForRun3/EventFiltering2022_skimmedDATA/Yields_Omega_AnalysisResults_22o_apass6_QC1_sampling_Train172541_OneGaussFit.root",
-                             TString OutputDir = "../TriggerForRun3/EventFiltering2022_skimmedDATA/",
+                             TString Sfilein0 = "../TriggerForRun3/EventFiltering2024_skimmedDATA/Yields_Omega_LHC24al_run553588_skimmed_OneGaussFit_TrackedCascades.root",
+                             TString Sfilein1 = "../TriggerForRun3/EventFiltering2024_skimmedDATA/Yields_Omega_LHC24al_run553588_OneGaussFit_TrackedCascades.root",
+                             TString OutputDir = "../TriggerForRun3/EventFiltering2024_skimmedDATA/",
                              Bool_t isPseudoEfficiency = 0,
                              Bool_t isOnlyPseudoEfficiency = 0,
-                             TString SPublishedYieldForPseudoEff =                 
-                             "../PublishedYield13TeV/HEPData-ins1748157-v1-Table", // directory where published yields are stored
+                             TString SPublishedYieldForPseudoEff =
+                                 "../PublishedYield13TeV/HEPData-ins1748157-v1-Table", // directory where published yields are stored
                              Bool_t ispp = 1,
                              Bool_t isYieldFromInvMassPostProcess = 1,
                              Bool_t isMC = 0)
@@ -118,7 +118,7 @@ void CompareSigmaWidthPurity(TString year0 = "LHC22o_apass6_skimmed",
 
   Float_t YLow[numPart] = {0};
   Float_t YUp[numPart] = {0};
-  Float_t YLowRatio[numChoice] = {0.95, 0, 0.9, 0.8, 0};
+  Float_t YLowRatio[numChoice] = {0.95, 0.8, 0.9, 0.8, 0};
   Float_t YUpRatio[numChoice] = {1.05, 1.2, 1.1, 1.2, 2};
 
   Int_t color0 = kRed + 2;
@@ -155,11 +155,14 @@ void CompareSigmaWidthPurity(TString year0 = "LHC22o_apass6_skimmed",
         TypeHisto[Choice] = "GeneratedParticles_Rintegrated";
     }
     Bool_t YieldNorm = 0;
-    if (Choice==3) {
+    if (Choice == 3)
+    {
       cout << "Do you want the yield normalised per event or not?";
       cin >> YieldNorm;
-      if (YieldNorm==1) TypeHisto[Choice] = "Yield";
-      else TypeHisto[Choice] = "YieldNotNorm";
+      if (YieldNorm == 1)
+        TypeHisto[Choice] = "Yield";
+      else
+        TypeHisto[Choice] = "YieldNotNorm";
     }
     cout << Choice << " " << TypeHisto[Choice] << endl;
     if (Choice > (numChoice - 1))
@@ -171,6 +174,14 @@ void CompareSigmaWidthPurity(TString year0 = "LHC22o_apass6_skimmed",
     {
       cout << "To compute pseudoefficiency you must compare Yields" << endl;
       return;
+    }
+
+    Float_t ScalingFactorUnskimmed = 1;
+    if (Choice == 3)
+    {
+      cout << "Do you want to scale the denominator of the ratio? Write down the scalign factor (float)" << endl;
+      cout << "Usage case: you are comparing omega yields in skimmed / unskimmed files and you need to multiply the skimmed ratio by the downscaling factor (in 2024 is 0.2)" << endl;
+      cin >> ScalingFactorUnskimmed;
     }
 
     TFile *filein0 = new TFile(Sfilein0, "");
@@ -191,6 +202,7 @@ void CompareSigmaWidthPurity(TString year0 = "LHC22o_apass6_skimmed",
     if (isYieldFromInvMassPostProcess)
       Sfileout += Spart[ChosenType] + "_";
     Sfileout += year0 + "vs" + year1;
+    //Sfileout += "_IsTrackedCascades";
     cout << "Output file: " << Sfileout << endl;
 
     if (year0 == "LHC22f_pass2")
@@ -241,6 +253,7 @@ void CompareSigmaWidthPurity(TString year0 = "LHC22o_apass6_skimmed",
       histo1[part]->SetName(inputName + "_file1");
 
       // Ratios
+      histo1[part]->Scale(ScalingFactorUnskimmed);
       histoRatio[part] = (TH1F *)histo0[part]->Clone(inputName + "_Ratio");
       if (histo0[part]->GetNbinsX() != histo1[part]->GetNbinsX())
       {
@@ -308,7 +321,7 @@ void CompareSigmaWidthPurity(TString year0 = "LHC22o_apass6_skimmed",
       lineMass->SetLineColor(kBlack);
       lineMass->SetLineStyle(7);
 
-      TF1* lineAt1 = new TF1("lineAt1", "pol0", 0, 8);
+      TF1 *lineAt1 = new TF1("lineAt1", "pol0", 0, 8);
       lineAt1->SetParameter(0, 1);
       lineAt1->SetLineColor(kBlack);
       lineAt1->SetLineStyle(7);
@@ -330,12 +343,8 @@ void CompareSigmaWidthPurity(TString year0 = "LHC22o_apass6_skimmed",
       histoRatio[part]->Draw("same");
       lineAt1->Draw("same");
 
-      if (part == 0)
-        canvas[part]->SaveAs(Sfileout + ".pdf(");
-      else if (part == numPart - 1)
-        canvas[part]->SaveAs(Sfileout + ".pdf)");
-      else
-        canvas[part]->SaveAs(Sfileout + ".pdf");
+      canvas[part]->SaveAs(Sfileout + ".pdf");
+      canvas[part]->SaveAs(Sfileout + ".png");
     }
   }
 
