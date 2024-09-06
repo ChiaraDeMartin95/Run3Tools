@@ -87,11 +87,11 @@ Float_t ParticleMassPDG[numPart] = {0.497611, 1.115683, 1.115683, 1.32171, 1.321
 
 // histo0 -> num
 // histo1 -> denom
-void CompareSigmaWidthPurity(TString year0 = "LHC24l_run553588_skimmed",
-                             TString year1 = "LHC24l_run553588",
+void CompareSigmaWidthPurity(TString year0 = "LHC24l_batch5_skimmed",
+                             TString year1 = "LHC24l_batch5",
                              TString yearRatioToPub = "",
-                             TString Sfilein0 = "../TriggerForRun3/EventFiltering2024_skimmedDATA/Yields_Omega_LHC24al_run553588_skimmed_OneGaussFit_TrackedCascades.root",
-                             TString Sfilein1 = "../TriggerForRun3/EventFiltering2024_skimmedDATA/Yields_Omega_LHC24al_run553588_OneGaussFit_TrackedCascades.root",
+                             TString Sfilein0 = "../TriggerForRun3/EventFiltering2024_skimmedDATA/Yields_Omega_LHC24al_batch5_skimmed_OneGaussFit_TrackedCascades.root",
+                             TString Sfilein1 = "../TriggerForRun3/EventFiltering2024_skimmedDATA/Yields_Omega_LHC24al_batch5_OneGaussFit_TrackedCascades.root",
                              TString OutputDir = "../TriggerForRun3/EventFiltering2024_skimmedDATA/",
                              Bool_t isPseudoEfficiency = 0,
                              Bool_t isOnlyPseudoEfficiency = 0,
@@ -120,6 +120,11 @@ void CompareSigmaWidthPurity(TString year0 = "LHC24l_run553588_skimmed",
   Float_t YUp[numPart] = {0};
   Float_t YLowRatio[numChoice] = {0.95, 0.8, 0.9, 0.8, 0};
   Float_t YUpRatio[numChoice] = {1.05, 1.2, 1.1, 1.2, 2};
+  if (Sfilein0.Index("Tracked") == -1)
+  {
+    YLowRatio[3] = 0.5;
+    YUpRatio[3] = 2;
+  }
 
   Int_t color0 = kRed + 2;
   Int_t color1 = kBlue + 2;
@@ -157,7 +162,7 @@ void CompareSigmaWidthPurity(TString year0 = "LHC24l_run553588_skimmed",
     Bool_t YieldNorm = 0;
     if (Choice == 3)
     {
-      cout << "Do you want the yield normalised per event or not?";
+      cout << "Do you want the yield normalised per event or not? 0 or 1 " << endl;
       cin >> YieldNorm;
       if (YieldNorm == 1)
         TypeHisto[Choice] = "Yield";
@@ -202,7 +207,8 @@ void CompareSigmaWidthPurity(TString year0 = "LHC24l_run553588_skimmed",
     if (isYieldFromInvMassPostProcess)
       Sfileout += Spart[ChosenType] + "_";
     Sfileout += year0 + "vs" + year1;
-    //Sfileout += "_IsTrackedCascades";
+    if (Sfilein0.Index("Tracked") != -1)
+      Sfileout += "_IsTrackedCascades";
     cout << "Output file: " << Sfileout << endl;
 
     if (year0 == "LHC22f_pass2")
