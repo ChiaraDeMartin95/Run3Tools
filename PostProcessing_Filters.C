@@ -125,11 +125,10 @@ const Float_t massParticle[numPart] = {1.32171, 1.67245};
 // TString Spart[numPart+2] = {"XiNeg", "XiPos", "OmegaNeg", "OmegaPlus"};
 TString Spart[numPart] = {"Xi", "Omega"};
 
-void PostProcessing_Filters(TString year = "23h_PIDpass3",
-                            TString SPathIn = "../TriggerForRun3/EventFiltering2023/LHC23h/AnalysisResults_LHC23h_apass4_PIDapass3_CEFP.root",
-                            TString OutputDir = "../TriggerForRun3/EventFiltering2023/LHC23h/",
-                            Float_t ptthr = 7,
-                            Bool_t isOldVersionBf2701 = 0)
+void PostProcessing_Filters(TString year = "",
+                            TString SPathIn = "../TriggerForRun3/EventFiltering2025/AnalysisResults_LHC25ac_pass1_TestPID.root",
+                            TString OutputDir = "../TriggerForRun3/EventFiltering2025/",
+                            Float_t ptthr = 7)
 {
 
   cout << "Input file: " << SPathIn << endl;
@@ -137,14 +136,6 @@ void PostProcessing_Filters(TString year = "23h_PIDpass3",
   if (!filein)
   {
     cout << "FileIn not available" << endl;
-    return;
-  }
-
-  TDirectoryFile *dirCascB;
-  dirCascB = (TFile *)filein->Get("cascade-builder");
-  if (!dirCascB)
-  {
-    cout << "cascade-builder not available" << endl;
     return;
   }
 
@@ -199,28 +190,6 @@ void PostProcessing_Filters(TString year = "23h_PIDpass3",
   legendNumberEvents->AddEntry("", Form("Number of selected events: %.0f", NEvents));
   legendNumberEvents->Draw();
 
-  // cascade candidates
-
-  TH1F *hCascCandidatesB = (TH1F *)dirCascB->Get("hCascadeCriteria");
-  if (!hCascCandidatesB)
-  {
-    cout << "hCascadeCriteria in cascade-builder not available " << endl;
-    return;
-  }
-
-  Int_t NInitialCascB = hCascCandidatesB->GetBinContent(1);
-  hCascCandidatesB->Scale(1. / NInitialCascB);
-  hCascCandidatesB->GetXaxis()->SetBinLabel(1, "All candidates");
-  hCascCandidatesB->GetXaxis()->SetBinLabel(2, "Lambda mass");
-  hCascCandidatesB->GetXaxis()->SetBinLabel(3, "Bach TPC refit");
-  hCascCandidatesB->GetXaxis()->SetBinLabel(4, "Bach TPC crossed rows");
-  hCascCandidatesB->GetXaxis()->SetBinLabel(5, "Bach DCAxy");
-  hCascCandidatesB->GetXaxis()->SetBinLabel(6, "Casc DCA dau");
-  hCascCandidatesB->GetXaxis()->SetBinLabel(7, "Casc Cos PA");
-  hCascCandidatesB->GetXaxis()->SetBinLabel(8, "Casc Radius");
-  TCanvas *canvasCascB = new TCanvas("canvasCascB", "canvasCascB", 800, 500);
-  hCascCandidatesB->Draw("text");
-
   TH1F *hCascCandidates = (TH1F *)dir->Get("hCandidate");
   if (!hCascCandidates)
   {
@@ -248,14 +217,15 @@ void PostProcessing_Filters(TString year = "23h_PIDpass3",
   TCanvas *canvasTrackQA2D = new TCanvas("canvasTrackQA2D", "canvasTrackQA2D", 800, 500);
   canvasTrackQA2D->Divide(2, 2);
 
-  const Int_t numQATrackHistos = 5;
+  const Int_t numQATrackHistos = 3;
   TH1F *hTrackQAPt = (TH1F *)dirQATrack->Get("hPtTriggerAllEv");
   canvasTrackQA->cd(1);
   hTrackQAPt->Draw("");
 
   TH2F *hTrackQA[numQATrackHistos - 1];
   TH1F *hTrackQA1D[numQATrackHistos - 1];
-  TString hSTrackQA[numQATrackHistos - 1] = {"hEtaTriggerAllEv", "hPhiTriggerAllEv", "hDCAxyTriggerAllEv", "hDCAzTriggerAllEv"};
+  // TString hSTrackQA[numQATrackHistos - 1] = {"hEtaTriggerAllEv", "hPhiTriggerAllEv", "hDCAxyTriggerAllEv", "hDCAzTriggerAllEv"};
+  TString hSTrackQA[numQATrackHistos - 1] = {"hEtaTriggerAllEv", "hPhiTriggerAllEv"};
 
   const Int_t numPtTrigg = 6;
   // Float_t binptTrigg[numPtTrigg + 1] = {0, 0.5, 1, 1.5, 2, 3, 10};
@@ -339,17 +309,13 @@ void PostProcessing_Filters(TString year = "23h_PIDpass3",
                                 "hTPCNsigmaXiBachPiMinus", "hTPCNsigmaXiV0PiMinus", "hTPCNsigmaXiV0Proton",
                                 "hTPCNsigmaOmegaBachKaPlus", "hTPCNsigmaOmegaV0PiPlus", "hTPCNsigmaOmegaV0AntiProton",
                                 "hTPCNsigmaOmegaBachKaMinus", "hTPCNsigmaOmegaV0PiMinus", "hTPCNsigmaOmegaV0Proton"};
-  if (isOldVersionBf2701)
-  {
-    SNSigmaTPCvsPt[0] = "hTPCNsigmaPi";
-    SNSigmaTPCvsPt[1] = "hTPCNsigmaPr";
-    SNSigmaTPCvsPt[2] = "hTPCNsigmaBachPi";
-    SNSigmaTPCvsPt[3] = "hTPCNsigmaBachKa";
-  }
+  TString SNSigmaTPCvsPtTitle[12] = {"XiBachPiPlus", "XiV0PiPlus", "XiV0AntiProton",
+                                     "XiBachPiMinus", "XiV0PiMinus", "XiV0Proton",
+                                     "OmegaBachKaPlus", "OmegaV0PiPlus", "OmegaV0AntiProton",
+                                     "OmegaBachKaMinus", "OmegaV0PiMinus", "OmegaV0Proton"};
+                                
   for (Int_t dau = 0; dau < 12; dau++)
   {
-    if (isOldVersionBf2701 && dau > 3)
-      continue;
     hNSigmaTPCvsPt[dau] = (TH2F *)dirQA->Get(SNSigmaTPCvsPt[dau]);
     if (!hNSigmaTPCvsPt[dau])
     {
@@ -372,11 +338,10 @@ void PostProcessing_Filters(TString year = "23h_PIDpass3",
   TH1F *hNSigmaSummaryGaus[12];
   TCanvas *cNSigmaSummary = new TCanvas("cNSigmaSummary", "cNSigmaSummary", 800, 500);
   cNSigmaSummary->Divide(6, 2);
+  StyleCanvas(cNSigmaSummary, 0.15, 0.05, 0.05, 0.15);
 
   for (Int_t dau = 0; dau < 12; dau++)
   {
-    if (isOldVersionBf2701 && dau > 3)
-      continue;
 
     canvasTPC[dau] = new TCanvas(Form("canvasTPC_dau%i", dau), Form("canvasTPC_dau%i", dau), 1800, 1400);
     canvasTPC[dau]->Divide(numPtDau / 2, 2);
@@ -392,18 +357,6 @@ void PostProcessing_Filters(TString year = "23h_PIDpass3",
         binptDau[pt] = binptDauPr[pt];
       else if (dau == 6 || dau == 9)
         binptDau[pt] = binptDauBachKa[pt];
-
-      if (isOldVersionBf2701)
-      {
-        if (dau == 0)
-          binptDau[pt] = binptDauPi[pt];
-        else if (dau == 1)
-          binptDau[pt] = binptDauPr[pt];
-        else if (dau == 2)
-          binptDau[pt] = binptDauBachPi[pt];
-        else if (dau == 6)
-          binptDau[pt] = binptDauBachKa[pt];
-      }
     }
 
     hNSigmaSummary[dau] = new TH1F("hNSigmaSummary_" + SNSigmaTPCvsPt[dau], "hNSigmaSummary_" + SNSigmaTPCvsPt[dau], numPtDau, binptDau);
@@ -418,7 +371,7 @@ void PostProcessing_Filters(TString year = "23h_PIDpass3",
       StyleHisto(hNSigmaTPC[dau][pt], 0, 1.2 * hNSigmaTPC[dau][pt]->GetBinContent(hNSigmaTPC[dau][pt]->GetMaximumBin()), 1, 20, "Nsigma", "Counts", SNSigmaTPCvsPt[dau] + " " + SPtDau[pt], 1, -6, 6, 1.4, 1.4, 1.2);
       hNSigmaTPC[dau][pt]->GetXaxis()->SetRangeUser(-6, 6);
       hNSigmaTPC[dau][pt]->GetYaxis()->SetRangeUser(0, 1.2 * hNSigmaTPC[dau][pt]->GetBinContent(hNSigmaTPC[dau][pt]->GetMaximumBin()));
-      TF1* gaussTPC = new TF1("gaussTPC", "gaus", -2.5, 2.5);
+      TF1 *gaussTPC = new TF1("gaussTPC", "gaus", -2.5, 2.5);
       gaussTPC->SetLineColor(2);
       hNSigmaTPC[dau][pt]->Fit("gaussTPC", "R+");
       canvasTPC[dau]->cd(pt + 1);
@@ -434,9 +387,37 @@ void PostProcessing_Filters(TString year = "23h_PIDpass3",
     }
     // summary plot
     cNSigmaSummary->cd(dau + 1);
-    hNSigmaSummary[dau]->SetTitle(SNSigmaTPCvsPt[dau]);
+    gPad->SetTopMargin(0.08);
+    gPad->SetLeftMargin(0.12);
+    gPad->SetRightMargin(0.05);
+    gPad->SetBottomMargin(0.1);
+    hNSigmaSummary[dau]->SetTitle(SNSigmaTPCvsPtTitle[dau]);
+    hNSigmaSummary[dau]->GetXaxis()->SetTitle("p_{TPC} (GeV/c)");
+    hNSigmaSummary[dau]->GetYaxis()->SetTitle("Mean N#sigma");
+    hNSigmaSummary[dau]->GetXaxis()->SetLabelSize(0.08);
+    hNSigmaSummary[dau]->GetXaxis()->SetTitleSize(0.1);
+    hNSigmaSummary[dau]->GetXaxis()->SetTitleOffset(0.4);
+    hNSigmaSummary[dau]->GetXaxis()->SetLabelOffset(0.0002);
+    hNSigmaSummary[dau]->GetYaxis()->SetLabelSize(0.1);
+    hNSigmaSummary[dau]->GetYaxis()->SetTitleOffset(0.7);
+    hNSigmaSummary[dau]->GetYaxis()->SetTitleSize(0.1);
+    hNSigmaSummary[dau]->SetLineColor(1);
+    hNSigmaSummary[dau]->SetMarkerColor(1);
+    hNSigmaSummary[dau]->SetTitleSize(0.3);
     hNSigmaSummary[dau]->GetYaxis()->SetRangeUser(-4, 4);
+    TF1 *lineAtZero = new TF1("lineAtZero", "0", 0, 10);
+    lineAtZero->SetLineColor(kRed);
+    lineAtZero->SetLineStyle(2);
+    TF1 *lineAtPlusOne = new TF1("lineAtPlusOne", "1", 0, 10);
+    lineAtPlusOne->SetLineColor(kBlue);
+    lineAtPlusOne->SetLineStyle(2);
+    TF1 *lineAtMinusOne = new TF1("lineAtMinusOne", "-1", 0, 10);
+    lineAtMinusOne->SetLineColor(kBlue);
+    lineAtMinusOne->SetLineStyle(2);
     hNSigmaSummary[dau]->Draw("same");
+    lineAtZero->Draw("same");
+    lineAtPlusOne->Draw("same");
+    lineAtMinusOne->Draw("same");
   }
 
   // Cascade topological variables (after all topo sleections, for the time being)
@@ -479,13 +460,6 @@ void PostProcessing_Filters(TString year = "23h_PIDpass3",
 
   for (Int_t XiorOmega = 0; XiorOmega < 2; XiorOmega++)
   {
-    if (isOldVersionBf2701)
-    {
-      SXiorOmega[0] = "";
-      prefix = "";
-      if (XiorOmega == 1)
-        continue;
-    }
     for (Int_t var = 0; var < NTopCascVar; var++)
     {
       hTopVar[var] = (TH1F *)dirCascVar->Get(prefix + TopVarCascInput[var] + SXiorOmega[XiorOmega]);
@@ -527,9 +501,7 @@ void PostProcessing_Filters(TString year = "23h_PIDpass3",
 
   for (Int_t var = 0; var < NKineCascVar; var++)
   {
-    if (isOldVersionBf2701 && var > 5)
-      continue;
-    if (isOldVersionBf2701 || (KineVarCascInput[var] != "hProperLifetimeXi" && KineVarCascInput[var] != "hProperLifetimeOmega"))
+    if ((KineVarCascInput[var] != "hProperLifetimeXi" && KineVarCascInput[var] != "hProperLifetimeOmega"))
       hKineVar[var] = (TH1F *)dirQA->Get(KineVarCascInput[var]);
     else
       hKineVar[var] = (TH1F *)dirCascVar->Get(KineVarCascInput[var]);
@@ -629,19 +601,14 @@ void PostProcessing_Filters(TString year = "23h_PIDpass3",
   canvasTrigger->SaveAs(Soutputfile + ".pdf");
   for (Int_t dau = 0; dau < 12; dau++)
   {
-    if (isOldVersionBf2701 && dau > 3)
-      continue;
     canvasTPC[dau]->SaveAs(Soutputfile + ".pdf");
   }
+  cNSigmaSummary->SaveAs(Soutputfile + ".pdf");
   canvasCasc->SaveAs(Soutputfile + ".pdf");
-  canvasCascB->SaveAs(Soutputfile + ".pdf");
   canvasTopology[0][0]->SaveAs(Soutputfile + ".pdf");
   canvasTopology[0][1]->SaveAs(Soutputfile + ".pdf");
-  if (!isOldVersionBf2701)
-  {
-    canvasTopology[1][0]->SaveAs(Soutputfile + ".pdf");
-    canvasTopology[1][1]->SaveAs(Soutputfile + ".pdf");
-  }
+  canvasTopology[1][0]->SaveAs(Soutputfile + ".pdf");
+  canvasTopology[1][1]->SaveAs(Soutputfile + ".pdf");
   canvasKine[0]->SaveAs(Soutputfile + ".pdf");
   canvasKine[1]->SaveAs(Soutputfile + ".pdf");
   canvas[0]->SaveAs(Soutputfile + ".pdf");
@@ -662,6 +629,7 @@ void PostProcessing_Filters(TString year = "23h_PIDpass3",
       outputfile->WriteTObject(hNSigmaTPC[dau][pt]);
     }
   }
+  outputfile->WriteTObject(cNSigmaSummary);
 
   outputfile->Close();
   cout << "Ho creato il file: " << Soutputfile << " (.pdf and .root)" << endl;
