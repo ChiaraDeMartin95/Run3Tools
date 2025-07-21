@@ -24,6 +24,7 @@
 #include "TLegend.h"
 #include "TPad.h"
 #include "TSpline.h"
+#include "fstream"
 
 void StyleHisto(TH1F *histo, Float_t Low, Float_t Up, Int_t color, Int_t style, TString titleX, TString titleY, TString title, Bool_t XRan\
 ge,
@@ -94,20 +95,24 @@ Float_t YLowPurity[numPart] = {0, 0, 0, 0, 0, 0, 0};
 Float_t YLow[numPart] = {0};
 Float_t YUp[numPart] = {0};
 
-Float_t YLowRatio[numChoice] = {0.95, 0, 0.9, 0.8, 0};
+Float_t YLowRatio[numChoice] = {0.95, 0.8, 0.9, 0.8, 0};
 Float_t YUpRatio[numChoice] = {1.05, 1.2, 1.1, 1.2, 2};
+
+Int_t runnumber[11] = {563182, 563183, 563197, 563263, 563264, 563279, 563291, 563317, 563335, 563336, 563348};
 
 void CompareSigmaWidthPurity_MultipleFiles(
     Int_t Chosenfile = 0,
-    TString filename = "list_QC.txt",
-    TString OutputDir = "../Run3QA/Periods/PbPb2023/LHC23zx_cpass0/",
-    Bool_t isMC = 0)
+    TString filename = "list_Yields_LHC25ac_batch1.txt",
+    TString OutputDir = "../TriggerForRun3/EventFiltering2025/",
+    TString OutputFileName = "_LHC25ac_batch1",
+    Bool_t isMC = 0,
+    Bool_t isYieldFromInvMassPostProcess = 1)
 {
 
   std::vector<std::string> name;
   std::vector<std::string> nameLegend;
   std::ifstream file(Form("%s", filename.Data()));
-  std::string remove = "../Run3QA/Periods/PbPb2023/LHC23zx_cpass0/PostProcessing_";
+  std::string remove = "../TriggerForRun3/EventFiltering2025/";
   std::string remove2 = ".root";
 
   cout << filename.Data() << endl;
@@ -159,6 +164,11 @@ void CompareSigmaWidthPurity_MultipleFiles(
 
   TFile *filein[numFiles];
 
+  if (isYieldFromInvMassPostProcess)
+  {
+    cout << "Do you want to study Xi (=3) or Omega (=5)?" << endl;
+    cin >> ChosenType;
+  }
   cout << "Do you want to compare Mean (=0), Sigma (=1), Purity (=2) or Yield per event (=3) ot efficiency (=4, only MC)?" << endl;
   cin >> Choice;
   if (!isMC && Choice == 4)
@@ -180,6 +190,8 @@ void CompareSigmaWidthPurity_MultipleFiles(
 
   for (Int_t part = 0; part < numPart; part++)
   {
+    if (isYieldFromInvMassPostProcess && part != ChosenType)
+      continue;
     cout << "\n\e[35mParticle:\e[39m " << Spart[part] << endl;
     if (Choice == 0)
     {
@@ -202,6 +214,9 @@ void CompareSigmaWidthPurity_MultipleFiles(
       YUp[part] = 1;
     }
     TString inputName = TypeHisto[Choice] + "_" + Spart[part];
+    if (isYieldFromInvMassPostProcess)
+      inputName = "histo" + TypeHisto[Choice];
+    cout << "Input name: " << inputName << endl;
 
     canvas[part] = new TCanvas("canvas" + Spart[part], "canvas" + Spart[part], 1000, 800);
     StyleCanvas(canvas[part], 0.15, 0.05, 0.05, 0.15);
@@ -210,8 +225,9 @@ void CompareSigmaWidthPurity_MultipleFiles(
     StylePad(pad1[part], 0.15, 0.05, 0.05, 0.01);
     StylePad(pad2[part], 0.15, 0.05, 0.03, 0.2);
 
-    TLegend *legend = new TLegend(0.5, 0.75, 0.8, 0.9);
+    TLegend *legend = new TLegend(0.2, 0.6, 0.5, 0.9);
     legend->AddEntry("", NamePart[part], "");
+    legend->SetTextSize(0.04);
 
     TF1 *lineMass = new TF1("lineMass", "pol0", 0, 8);
     lineMass->SetParameter(0, ParticleMassPDG[part]);
@@ -233,27 +249,24 @@ void CompareSigmaWidthPurity_MultipleFiles(
         return;
       }
       histo[ifile]->SetName(inputName + Form("%i", ifile));
-
       // Denom
       if (ifile == 0)
       {
         histoDenom = (TH1F *)filein[Chosenfile]->Get(inputName);
         histoDenom->SetName("histoDenom");
       }
-
       // Ratios
       histoRatio[ifile] = (TH1F *)histo[ifile]->Clone(inputName + Form("_Ratio%i", ifile));
       histoRatio[ifile]->Divide(histoDenom);
-
       for (Int_t b = 1; b <= histoRatio[ifile]->GetNbinsX(); b++)
       {
         // cout << "Num: " << histo[ifile]->GetBinContent(b) << endl;
         // cout << "Denom " << histoDenom->GetBinContent(b) << endl;
         // cout << "Ratio " << histoRatio[ifile]->GetBinContent(b) << endl;
       }
-
+      YUp[part] = 1.5 * histo[ifile]->GetBinContent(histo[ifile]->GetMaximumBin()); 
       StyleHisto(histo[ifile], YLow[part], YUp[part], color[ifile], 33, "", TitleY[Choice], "", 0, 0, 0, 1.5, 1.5, 2);
-      StyleHisto(histoRatio[ifile], YLowRatio[Choice], YUpRatio[Choice], color[ifile], 33, TitleXPt, Form("Ratio to %s", nameLegend[Chosenfile].c_str()), "", 0, 0, 0, 1.5, 1.5, 2);
+      StyleHisto(histoRatio[ifile], YLowRatio[Choice], YUpRatio[Choice], color[ifile], 33, TitleXPt, Form("Ratio to %i", runnumber[Chosenfile]), "", 0, 0, 0, 1.5, 1.5, 2);
       histoRatio[ifile]->GetXaxis()->SetLabelSize(0.08);
       histoRatio[ifile]->GetXaxis()->SetTitleSize(0.08);
       histoRatio[ifile]->GetXaxis()->SetTitleOffset(1.2);
@@ -261,7 +274,8 @@ void CompareSigmaWidthPurity_MultipleFiles(
       histoRatio[ifile]->GetYaxis()->SetTitleSize(0.08);
       histoRatio[ifile]->GetYaxis()->SetTitleOffset(0.8);
 
-      legend->AddEntry(histo[ifile], Form("%s", nameLegend[ifile].c_str()), "pl");
+      // legend->AddEntry(histo[ifile], Form("%s", nameLegend[ifile].c_str()), "pl");
+      legend->AddEntry(histo[ifile], Form("%i", runnumber[ifile]), "pl");
 
       canvas[part]->cd();
       pad1[part]->Draw();
@@ -282,7 +296,7 @@ void CompareSigmaWidthPurity_MultipleFiles(
     pad1[part]->cd();
     legend->Draw("same");
 
-    TString Sfileout = OutputDir + "Compare" + TypeHisto[Choice];
+    TString Sfileout = OutputDir + "Compare" + OutputFileName + "_" + Spart[ChosenType] + TypeHisto[Choice];
     cout << "Output file: " << Sfileout << endl;
     if (part == 0)
       canvas[part]->SaveAs(Sfileout + ".pdf(");
@@ -290,5 +304,6 @@ void CompareSigmaWidthPurity_MultipleFiles(
       canvas[part]->SaveAs(Sfileout + ".pdf)");
     else
       canvas[part]->SaveAs(Sfileout + ".pdf");
+    canvas[part]->SaveAs(Sfileout + ".png");  
   }
 }

@@ -82,17 +82,17 @@ Double_t spline(Double_t *x, Double_t *p)
 }
 
 const Int_t numPart = 7;
-const Int_t numChoice = 5; // mean, sigma, purity, yield, efficiency for MC
+const Int_t numChoice = 6; // mean, sigma, purity, yield, efficiency for MC, generated spectrum for MC
 Float_t ParticleMassPDG[numPart] = {0.497611, 1.115683, 1.115683, 1.32171, 1.32171, 1.67245, 1.67245};
 
 // histo0 -> num
 // histo1 -> denom
-void CompareSigmaWidthPurity(TString year0 = "LHC24l_batch5_skimmed",
-                             TString year1 = "LHC24l_batch5",
+void CompareSigmaWidthPurity(TString year0 = "LHC25ac_batch1",
+                             TString year1 = "LHC24ao",
                              TString yearRatioToPub = "",
-                             TString Sfilein0 = "../TriggerForRun3/EventFiltering2024_skimmedDATA/Yields_Omega_LHC24al_batch5_skimmed_OneGaussFit_TrackedCascades.root",
-                             TString Sfilein1 = "../TriggerForRun3/EventFiltering2024_skimmedDATA/Yields_Omega_LHC24al_batch5_OneGaussFit_TrackedCascades.root",
-                             TString OutputDir = "../TriggerForRun3/EventFiltering2024_skimmedDATA/",
+                             TString Sfilein0 = "../TriggerForRun3/EventFiltering2025/Yields_Xi_LHC25ac_batch1_OneGaussFit_TrackedCascades.root",
+                             TString Sfilein1 = "../TriggerForRun3/EventFiltering2025/Yields_Xi_2025config_LHC24ao_558801_OneGaussFit_TrackedCascades.root",
+                             TString OutputDir = "../TriggerForRun3/EventFiltering2025/",
                              Bool_t isPseudoEfficiency = 0,
                              Bool_t isOnlyPseudoEfficiency = 0,
                              TString SPublishedYieldForPseudoEff =
@@ -104,10 +104,10 @@ void CompareSigmaWidthPurity(TString year0 = "LHC24l_batch5_skimmed",
   // isYieldFromInvMassPostProcess = 1 if files in input are the oputput of the macro Yields_from_invmass.C
   Int_t Choice = 0;
   Int_t ChosenType = -1;
-  TString TypeHisto[numChoice] = {"Mean", "Sigma", "Purity", "Yield", "EfficiencyvsPt"};
+  TString TypeHisto[numChoice] = {"Mean ", "Sigma", "Purity", "Yield", "EfficiencyvsPt", "GeneratedParticles_Rintegrated"};
   TString Spart[numPart] = {"K0S", "Lam", "ALam", "XiMin", "XiPlu", "OmMin", "OmPlu"};
   TString NamePart[numPart] = {"K^{0}_{S}", "#Lambda", "#bar{#Lambda}", "#Xi^{-}", "#Xi^{+}", "#Omega^{-}", "#Omega^{+}"};
-  TString TitleY[numChoice] = {"Mean (GeV/#it{c}^{2})", "Sigma (GeV/#it{c}^{2})", "S/(S+B)", "1/#it{N}_{evt} d#it{N}/d#it{p}_{T} (GeV/#it{c})^{-1}", "Efficiency"};
+  TString TitleY[numChoice] = {"Mean (GeV/#it{c}^{2})", "Sigma (GeV/#it{c}^{2})", "S/(S+B)", "1/#it{N}_{evt} d#it{N}/d#it{p}_{T} (GeV/#it{c})^{-1}", "Efficiency", "1/#it{N}_{evt} d#it{N}/d#it{p}_{T} (GeV/#it{c})^{-1}"};
   TString TitleXPt = "#it{p}_{T} (GeV/#it{c})";
 
   Float_t YLowMean[numPart] = {0.485, 1.110, 1.110, 1.316, 1.316, 1.664, 1.664};
@@ -118,12 +118,17 @@ void CompareSigmaWidthPurity(TString year0 = "LHC24l_batch5_skimmed",
 
   Float_t YLow[numPart] = {0};
   Float_t YUp[numPart] = {0};
-  Float_t YLowRatio[numChoice] = {0.95, 0.8, 0.9, 0.8, 0};
-  Float_t YUpRatio[numChoice] = {1.05, 1.2, 1.1, 1.2, 2};
+  Float_t YLowRatio[numChoice] = {0.95, 0.7, 0.9, 0.9, 0, 0};
+  Float_t YUpRatio[numChoice] = {1.05, 1.3, 1.1, 1.1, 2, 20};
   if (Sfilein0.Index("Tracked") == -1)
   {
-    YLowRatio[3] = 0.5;
-    YUpRatio[3] = 2;
+    YLowRatio[3] = 0.7;
+    YUpRatio[3] = 1.3;
+  }
+  if (Sfilein0.Index("Tracked") != -1)
+  {
+    YLowRatio[3] = 0.2;
+    YUpRatio[3] = 1.3;
   }
 
   Int_t color0 = kRed + 2;
@@ -148,7 +153,7 @@ void CompareSigmaWidthPurity(TString year0 = "LHC24l_batch5_skimmed",
   Bool_t isGen = 0;
   if (!isOnlyPseudoEfficiency)
   {
-    cout << "Do you want to compare Mean (=0), Sigma (=1), Purity (=2) or Yield per event (=3) ot efficiency (=4, only MC)?" << endl;
+    cout << "Do you want to compare Mean (=0), Sigma (=1), Purity (=2) or Yield per event (=3) or efficiency (=4, only MC) or generated yield per event (=5, only MC)?" << endl;
     cin >> Choice;
     if (!isMC && Choice == 4)
       return;
@@ -243,6 +248,7 @@ void CompareSigmaWidthPurity(TString year0 = "LHC24l_batch5_skimmed",
       TString inputName = TypeHisto[Choice] + "_" + Spart[part];
       if (isYieldFromInvMassPostProcess)
         inputName = "histo" + TypeHisto[Choice];
+      cout << "Input name: " << inputName << endl;  
       histo0[part] = (TH1F *)filein0->Get(inputName);
       if (!histo0[part])
       {
@@ -322,12 +328,12 @@ void CompareSigmaWidthPurity(TString year0 = "LHC24l_batch5_skimmed",
       histoRatio[part]->GetYaxis()->SetTitleSize(0.08);
       histoRatio[part]->GetYaxis()->SetTitleOffset(0.8);
 
-      TF1 *lineMass = new TF1("lineMass", "pol0", 0, 8);
+      TF1 *lineMass = new TF1("lineMass", "pol0", 0, 10);
       lineMass->SetParameter(0, ParticleMassPDG[part]);
       lineMass->SetLineColor(kBlack);
       lineMass->SetLineStyle(7);
 
-      TF1 *lineAt1 = new TF1("lineAt1", "pol0", 0, 8);
+      TF1 *lineAt1 = new TF1("lineAt1", "pol0", 0, 10);
       lineAt1->SetParameter(0, 1);
       lineAt1->SetLineColor(kBlack);
       lineAt1->SetLineStyle(7);
@@ -349,7 +355,12 @@ void CompareSigmaWidthPurity(TString year0 = "LHC24l_batch5_skimmed",
       histoRatio[part]->Draw("same");
       lineAt1->Draw("same");
 
-      canvas[part]->SaveAs(Sfileout + ".pdf");
+      if (part == 0)
+        canvas[part]->SaveAs(Sfileout + ".pdf(");
+      else if (part == numPart - 1)
+        canvas[part]->SaveAs(Sfileout + ".pdf)");
+      else
+        canvas[part]->SaveAs(Sfileout + ".pdf");
       canvas[part]->SaveAs(Sfileout + ".png");
     }
   }
