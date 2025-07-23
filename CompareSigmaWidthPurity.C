@@ -90,8 +90,8 @@ Float_t ParticleMassPDG[numPart] = {0.497611, 1.115683, 1.115683, 1.32171, 1.321
 void CompareSigmaWidthPurity(TString year0 = "LHC25ac_batch1",
                              TString year1 = "LHC24ao",
                              TString yearRatioToPub = "",
-                             TString Sfilein0 = "../TriggerForRun3/EventFiltering2025/Yields_Xi_LHC25ac_batch1_OneGaussFit_TrackedCascades.root",
-                             TString Sfilein1 = "../TriggerForRun3/EventFiltering2025/Yields_Xi_2025config_LHC24ao_558801_OneGaussFit_TrackedCascades.root",
+                             TString Sfilein0 = "../TriggerForRun3/EventFiltering2025/Yields_Omega_LHC25ac_batch1_OneGaussFit_TrackedCascades_RadiusAnalysis.root",
+                             TString Sfilein1 = "../TriggerForRun3/EventFiltering2025/Yields_Omega_LHC25ao_OneGaussFit_TrackedCascades_RadiusAnalysis.root",
                              TString OutputDir = "../TriggerForRun3/EventFiltering2025/",
                              Bool_t isPseudoEfficiency = 0,
                              Bool_t isOnlyPseudoEfficiency = 0,
@@ -247,8 +247,7 @@ void CompareSigmaWidthPurity(TString year0 = "LHC25ac_batch1",
 
       TString inputName = TypeHisto[Choice] + "_" + Spart[part];
       if (isYieldFromInvMassPostProcess)
-        inputName = "histo" + TypeHisto[Choice];
-      cout << "Input name: " << inputName << endl;  
+        inputName = "histo" + TypeHisto[Choice];  
       histo0[part] = (TH1F *)filein0->Get(inputName);
       if (!histo0[part])
       {
