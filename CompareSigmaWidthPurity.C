@@ -87,11 +87,13 @@ Float_t ParticleMassPDG[numPart] = {0.497611, 1.115683, 1.115683, 1.32171, 1.321
 
 // histo0 -> num
 // histo1 -> denom
-void CompareSigmaWidthPurity(TString year0 = "LHC25ac_batch1",
-                             TString year1 = "LHC24ao",
+void CompareSigmaWidthPurity(TString year0 = "LHC25am_batch5_6_skimmed",
+                             TString year1 = "LHC25am_batch5_6",
                              TString yearRatioToPub = "",
-                             TString Sfilein0 = "../TriggerForRun3/EventFiltering2025/Yields_Omega_LHC25ac_batch1_OneGaussFit_TrackedCascades_RadiusAnalysis.root",
-                             TString Sfilein1 = "../TriggerForRun3/EventFiltering2025/Yields_Omega_LHC25ao_OneGaussFit_TrackedCascades_RadiusAnalysis.root",
+                             // TString Sfilein0 = "../TriggerForRun3/EventFiltering2025/Yields_Xi_LHC25ac_batch1_skimmed_OneGaussFit_TrackedCascades.root",
+                             // TString Sfilein0 = "../TriggerForRun3/EventFiltering2025_skimmedDATA/Yields_Omega_LHC25ai_skimmed_batch1_OneGaussFit_TrackedCascades.root",
+                             TString Sfilein0 = "../TriggerForRun3/EventFiltering2025/Yields_Omega_LHC25am_batch5_6_skimmed_OneGaussFit.root",
+                             TString Sfilein1 = "../TriggerForRun3/EventFiltering2025/Yields_Omega_LHC25am_batch5_6_OneGaussFit.root",
                              TString OutputDir = "../TriggerForRun3/EventFiltering2025/",
                              Bool_t isPseudoEfficiency = 0,
                              Bool_t isOnlyPseudoEfficiency = 0,
@@ -104,7 +106,7 @@ void CompareSigmaWidthPurity(TString year0 = "LHC25ac_batch1",
   // isYieldFromInvMassPostProcess = 1 if files in input are the oputput of the macro Yields_from_invmass.C
   Int_t Choice = 0;
   Int_t ChosenType = -1;
-  TString TypeHisto[numChoice] = {"Mean ", "Sigma", "Purity", "Yield", "EfficiencyvsPt", "GeneratedParticles_Rintegrated"};
+  TString TypeHisto[numChoice] = {"Mean", "Sigma", "Purity", "Yield", "EfficiencyvsPt", "GeneratedParticles_Rintegrated"};
   TString Spart[numPart] = {"K0S", "Lam", "ALam", "XiMin", "XiPlu", "OmMin", "OmPlu"};
   TString NamePart[numPart] = {"K^{0}_{S}", "#Lambda", "#bar{#Lambda}", "#Xi^{-}", "#Xi^{+}", "#Omega^{-}", "#Omega^{+}"};
   TString TitleY[numChoice] = {"Mean (GeV/#it{c}^{2})", "Sigma (GeV/#it{c}^{2})", "S/(S+B)", "1/#it{N}_{evt} d#it{N}/d#it{p}_{T} (GeV/#it{c})^{-1}", "Efficiency", "1/#it{N}_{evt} d#it{N}/d#it{p}_{T} (GeV/#it{c})^{-1}"};
@@ -118,18 +120,22 @@ void CompareSigmaWidthPurity(TString year0 = "LHC25ac_batch1",
 
   Float_t YLow[numPart] = {0};
   Float_t YUp[numPart] = {0};
-  Float_t YLowRatio[numChoice] = {0.95, 0.7, 0.9, 0.9, 0, 0};
-  Float_t YUpRatio[numChoice] = {1.05, 1.3, 1.1, 1.1, 2, 20};
+  // Float_t YLowRatio[numChoice] = {0.95, 0.7, 0.5, 0.9, 0, 0};
+  // Float_t YUpRatio[numChoice] = {1.05, 2, 1.1, 1.1, 2, 20};
+  Float_t YLowRatio[numChoice] = {0.99, 0.95, 0.95, 0.9, 0, 0};
+  Float_t YUpRatio[numChoice] = {1.01, 1.05, 1.05, 1.1, 2, 20};
+  /*
   if (Sfilein0.Index("Tracked") == -1)
   {
-    YLowRatio[3] = 0.7;
+    YLowRatio[3] = 0.; // 0.7
     YUpRatio[3] = 1.3;
   }
   if (Sfilein0.Index("Tracked") != -1)
   {
-    YLowRatio[3] = 0.2;
-    YUpRatio[3] = 1.3;
+    YLowRatio[3] = 0.0;
+    YUpRatio[3] = 1.5;
   }
+    */
 
   Int_t color0 = kRed + 2;
   Int_t color1 = kBlue + 2;
@@ -247,7 +253,7 @@ void CompareSigmaWidthPurity(TString year0 = "LHC25ac_batch1",
 
       TString inputName = TypeHisto[Choice] + "_" + Spart[part];
       if (isYieldFromInvMassPostProcess)
-        inputName = "histo" + TypeHisto[Choice];  
+        inputName = "histo" + TypeHisto[Choice];
       histo0[part] = (TH1F *)filein0->Get(inputName);
       if (!histo0[part])
       {

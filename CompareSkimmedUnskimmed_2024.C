@@ -6,7 +6,7 @@ const Float_t LFLimit = 5E-5;
 Int_t numBins = 6;
 Int_t iscale = 0; // 0 if input file has no mistakes. At some point axis labels where shifted by one bin and in those cases iscale = 1 should be set.
 
-void CompareSkimmedUnskimmed_2024(TString filename = "list2024af.txt", Int_t ChosenPeriod = 2)
+void CompareSkimmedUnskimmed_2024(TString filename = "list2024al.txt", Int_t ChosenPeriod = 2)
 {
 
     std::vector<std::string> name;

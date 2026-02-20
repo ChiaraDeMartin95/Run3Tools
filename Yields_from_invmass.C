@@ -128,9 +128,9 @@ TString titleYield = "1/N_{ev} dN/dp_{T}";
 const Int_t numPart = 7;
 TString TitleInvMass[numPart] = {"(#pi^{+}, #pi^{-}) invariant mass (GeV/#it{c}^{2})", "(p, #pi^{-}) invariant mass (GeV/#it{c}^{2})", "(#bar{p}, #pi^{-}) invariant mass (GeV/#it{c}^{2})", "(#Lambda, #pi^{-}) invariant mass (GeV/#it{c}^{2})"};
 TString namehisto[numPart] = {"h3dMassK0Short", "", "", "h2dMassXiMinus", "h2dMassXiPlus", "h2dMassOmegaMinus", "h2dMassOmegaPlus"};
-Float_t LowLimitMass[numPart] = {0.42, 1.09, 1.09, 1.307, 1.307, 1.657, 1.655}; // 0.44, 1.62 for omegas
+Float_t LowLimitMass[numPart] = {0.42, 1.09, 1.09, 1.307, 1.307, 1.657, 1.588}; // 0.44, 1.62 for omegas
 Float_t UpLimitMass[numPart] = {0.57, 1.14, 1.14, 1.335, 1.335, 1.685, 1.685};    // 0.55, 1.72 for omegas
-Float_t LowMassRange[numPart] = {0.48, 1.09, 1.09, 1.31, 1.31, 1.657, 1.655};
+Float_t LowMassRange[numPart] = {0.48, 1.09, 1.09, 1.31, 1.31, 1.657, 1.588};
 Float_t UpMassRange[numPart] = {0.51, 1.14, 1.14, 1.33, 1.33, 1.685, 1.685};
 
 Float_t min_range_signal[numPart] = {0.46, 1.105, 1.105, 1.31, 1.31, 1.65, 1.65}; // estremi region fit segnale (gaussiane)
@@ -146,11 +146,37 @@ TString Spart[numPart] = {"K0s", "Lambda", "AntiLambda", "XiNeg", "XiPos", "Omeg
 TString SpartType[numPart] = {"K0s", "Lambda", "Lambda", "Xi", "Xi", "Omega", "Omega"};
 TString IsOneOrTwoGauss[2] = {"_OneGaussFit", ""};
 
-void Yields_from_invmass(Int_t part = 3,
+void Yields_from_invmass(Int_t part = 5,
                          Bool_t isTrackedCasc = 0,
-                         TString SPathIn = "../TriggerForRun3/EventFiltering2022_skimmedDATA/AnalysisResults_22o_apass6_QC1_sampling_Train172541.root",
-                         TString OutputDir = "../TriggerForRun3/EventFiltering2022_skimmedDATA/",
-                         TString year = "LHC23v_pass4",
+                         Bool_t isRadiusAnalysis = 0,
+                         //TString SPathIn = "../TriggerForRun3/EventFiltering2025_SkimmedDATA/AnalysisResults_skimmed_fullrun_LHC25ac_batch3.root",
+                         //TString SPathIn = "../TriggerForRun3/EventFiltering2025_SkimmedDATA/AnalysisResults_skimmed_fullrun_LHC25ac_batch45.root",
+                         //TString SPathIn = "../TriggerForRun3/EventFiltering2025_SkimmedDATA/AnalysisResults_fullrun_LHC25ac_apass1_skimmed_563948.root",
+                         //TString SPathIn = "../TriggerForRun3/EventFiltering2025/AnalysisResults_fullrun_LHC25ac_apass1_563948.root",
+                         //TString SPathIn = "../TriggerForRun3/EventFiltering2025/AnalysisResults_fullrun_LHC25ah_apass1_batch3_4.root",
+                         //TString SPathIn = "../TriggerForRun3/EventFiltering2025_skimmedDATA/AnalysisResults_fullrun_LHC25ah_pass1_batch3_4_skimmed.root",
+                         //TString SPathIn = "../TriggerForRun3/EventFiltering2025/AnalysisResults_fullrun_batch5_LHC25ah.root",
+                         //TString SPathIn = "../TriggerForRun3/EventFiltering2025/AnalysisResults_skimmed_fullrun_orphan_LHC25ac_563998.root",
+                         //TString SPathIn = "../TriggerForRun3/EventFiltering2025/AnalysisResults_skimmed_fullrun_orphan_LHC25ac_563998.root",
+                         //TString SPathIn = "../TriggerForRun3/EventFiltering2025/AnalysisResults_fullrun_orphan_LHC25ac_563998.root",
+                         //TString SPathIn = "../TriggerForRun3/EventFiltering2025/AnalysisResults_fullrun_LHC25ai_566029.root",
+                         //TString SPathIn = "../TriggerForRun3/EventFiltering2025/AnalysisResults_fullrun_batch6_LHC25ah.root",
+                         //TString SPathIn = "../TriggerForRun3/EventFiltering2024/AnalysisResults_fullrun_LHC24al_batch5_apass1.root",
+                         //TString SPathIn = "../TriggerForRun3/EventFiltering2025/AnalysisResults_fullrun_LHC25ai_566029_Test2410.root",
+                         //TString SPathIn = "../TriggerForRun3/EventFiltering2025/AnalysisResults/LHC25ai/AnalysisResults_fullrun_batch2_LHC25ai.root",
+                         //TString SPathIn = "../TriggerForRun3/EventFiltering2025/AnalysisResults_fullrun_LHC25am_apass1_batch2.root",
+                         //TString SPathIn = "../TriggerForRun3/EventFiltering2025/AnalysisResults_fullrun_LHC25am_batch4.root",
+                         //TString SPathIn = "../TriggerForRun3/EventFiltering2025/AnalysisResults_fullrun_skimmed_LHC25am_batch3.root",
+                         TString SPathIn = "../TriggerForRun3/EventFiltering2025/AnalysisResults_fullrun_LHC25am_batch5_6.root",
+                         //TString SPathIn = "../TriggerForRun3/EventFiltering2025_skimmedDATA/AnalysisResults_fullrun_skimmed_batch1_LHC25ai.root",
+                         //TString SPathIn = "../TriggerForRun3/EventFiltering2025/AnalysisResults/LHC25ai/AnalysisResults_fullrun_LHC25ai_Test3010.root",
+                         //TString SPathIn = "../TriggerForRun3/EventFiltering2025/AnalysisResults/LHC25ac_pass1/AnalysisResults_fullrun_batch4_5_LHC25ac.root",
+                         //TString SPathIn = "../TriggerForRun3/EventFiltering2025/AnalysisResults/LHC25ac_pass1/AnalysisResults_fullrun_LHC25ac_batch3.root",
+                         //TString SPathIn = "../TriggerForRun3/EventFiltering2025/AnalysisResults/AnalysisResults_2025config_LHC24ao_558801.root",
+                         TString OutputDir = "../TriggerForRun3/EventFiltering2025/",
+                         //TString OutputDir = "../TriggerForRun3/EventFiltering2025_skimmedDATA/",
+                         TString year = "LHC25am_batch5_6",
+                         //TString year = "LHC25ai_Test3010",
                          Bool_t UseTwoGauss = 0,
                          Bool_t isBkgParab = 0,
                          Bool_t isMeanFixedPDG = 0,
@@ -245,10 +271,16 @@ void Yields_from_invmass(Int_t part = 3,
       dirCascName = "QAHistos";
     if (isTrackedCasc)
     {
-      if (part == 3)
+      if (part == 3){
         histoName = "hPtVsMassTrkXiSelected";
-      else
+        if (isRadiusAnalysis)
+          histoName = "hDecayRadiusVsXiMassSelected";
+      }
+      else{
         histoName = "hPtVsMassTrkOmegaSelected";
+        if (isRadiusAnalysis)
+          histoName = "hDecayRadiusVsOmegaMassSelected";
+      }
     }
     else
     {
@@ -331,13 +363,17 @@ void Yields_from_invmass(Int_t part = 3,
   h2->SetName("InvMassvsPt");
 
   const Int_t numPt = 12; // six pt intervals
+  //const Int_t numPt = 15; // six pt intervals
+
   // Float_t binpt[numPt + 1] = {0.4, 0.6, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.5, 3, 4}; // 10
   // Float_t binpt[numPt + 1] = {0.4, 0.6, 0.8, 1.0, 1.2, 1.6, 2.0};
 
   // Xi
   // Float_t binpt[numPt + 1] = {1.0, 1.5, 2.0, 2.3, 2.6, 5.0, 10.0};
   // Float_t binpt[numPt + 1] = {1.0, 1.5, 1.8, 2.1, 2.4, 2.6, 6.0};
+  
   Float_t binpt[numPt + 1] = {0.6, 1.0, 1.2, 1.5, 1.8, 2.1, 2.4, 2.7, 3.0, 4.0, 5.0, 7.0, 10.0};
+  //Float_t binpt[numPt + 1] = {0., 1, 2., 4., 6., 8., 10., 12, 14, 16, 18, 20, 22, 24, 26, 30}; //radius bins
 
   // Omega
   // Float_t binpt[numPt + 1] = {1.0, 1.5, 2.0, 3.0, 6.0};
@@ -363,6 +399,7 @@ void Yields_from_invmass(Int_t part = 3,
   {
     SPt[pt] = Form("%.1f < p_{T} < %.1f", binpt[pt], binpt[pt + 1]);
     cout << binpt[pt] << endl;
+    cout << SPt[pt] << endl;
 
     if (isV0CascadeAnalysis || isPostProcess || isTrackedCasc)
       hInvMass[pt] = (TH1F *)h2->ProjectionY(Form("hInvMass_pt%i", pt), h2->GetXaxis()->FindBin(binpt[pt] + 0.001), h2->GetXaxis()->FindBin(binpt[pt + 1] - 0.001));
@@ -902,6 +939,8 @@ void Yields_from_invmass(Int_t part = 3,
   Soutputfile += IsOneOrTwoGauss[UseTwoGauss];
   if (isTrackedCasc)
     Soutputfile += "_TrackedCascades";
+  if (isRadiusAnalysis)
+    Soutputfile += "_RadiusAnalysis";
   // save canvases
   canvas->SaveAs(Soutputfile + ".pdf(");
   canvasYield->SaveAs(Soutputfile + ".pdf");

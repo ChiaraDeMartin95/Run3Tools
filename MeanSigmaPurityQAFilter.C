@@ -152,26 +152,28 @@ Float_t YUp[numPart] = {0};
 Float_t YLowRatio[numChoice] = {0.99, 0.4, 0.5, 0, 0.8, 0.8, 0.8, 0.8};
 Float_t YUpRatio[numChoice] = {1.01, 1.6, 1.5, 2, 1.2, 1.2, 1.2, 1.2};
 
-const Int_t numPeriods = 7;
+const Int_t numPeriods = 9;
 // TString Srun[numPeriods] = {"LHC23f", "LHC23i", "LHC23g", "LHC23j", "LHC23k", "LHC23l", "LHC23m", "LHC23n", "LHC23o", "LHC23q", "LHC23r", "LHC23y", "LHC23z"};
 // TString Srun[numPeriods] = {"LHC23p", "LHC23s", "LHC23t", "LHC23u", "LHC23za", "LHC23zc", "LHC23zj", "LHC23zl", "LHC23l"};
 // TString Srun[numPeriods] = {"LHC23v", "LHC23ze", "LHC23zf", "LHC23zg", "LHC23zh", "LHC23zi", "LHC23zk", "LHC23zm", "LHC23zn","LHC23zq","LHC23zr","LHC23zt", "LHC23l"};
 
-// 500 kHz periods (11) N.B. zs contains too few events
-// TString Srun[numPeriods] = {"LHC23l", "LHC23p", "LHC23v", "LHC23za", "LHC23zc", "LHC23zj", "LHC23zl","LHC23zt"};
-// low IR periods
-// TString Srun[numPeriods] = {"LHC23i", "LHC23o", "LHC23zg", "LHC23zm", "LHC23n", "LHC23ze", "LHC23zf", "LHC23zk"};
-// TString IRLegend[numPeriods] = {"50 kHz", "50 kHz", "50 kHz", "50 kHz", "10 kHz", "23 kHz", "10 kHz", "10 kHz"};
+// 500 kHz periods (8)
+TString Srun[numPeriods] = {"LHC23l", "LHC23s", "LHC23u", "LHC23y", "LHC23za", "LHC23zc", "LHC23zj", "LHC23zs", "LHC23zt"};
+
+// low IR periods (15)
+//TString Srun[numPeriods] = {"LHC23h", "LHC23j", "LHC23q", "LHC23zh", "LHC23zn", "LHC23g", "LHC23o", "LHC23zg", "LHC23zm", "LHC23f", "LHC23n", "LHC23zd", "LHC23ze", "LHC23zf", "LHC23zk"};
+//TString IRLegend[numPeriods] = {"100 kHz", "100kHz", "100 kHz", "100 kHz", "100 kHz", "50 kHz", "50 kHz", "50 kHz", "50 kHz", "10 kHz", "10 kHz", "10 kHz", "23 kHz", "10 kHz", "10 kHz"};
+
 // Mixed sample
-// TString Srun[numPeriods] = {"LHC23l", "LHC23o", "LHC23i", "LHC23zk", "LHC23zf", "LHC23m", "LHC23t" };
-// TString IRLegend[numPeriods] = {"500 kHz", "50 kHz", "50 kHz", "10 kHz", "10 kHz", "250 kHz", "1000 kHz"};
-TString Srun[numPeriods] = {"537505", "537511", "537531", "537546", "537547", "537551", "537553"};
+//TString Srun[numPeriods] = {"LHC23zb", "LHC23t", "LHC23w", "LHC23l", "LHC23z", "LHC23k", "LHC23m", "LHC23r", "LHC23u", "LHC23h", "LHC23g", "LHC23f"};
+//TString IRLegend[numPeriods] = {"1500 kHz", "1000 kHz", "1000 kHz", "500 kHz", "350 kHz", "250 kHz", "250 kHz", "250 kHz", "250 kHz", "100 kHz", "50 kHz", "10 kHz"}; 
+//TString Srun[numPeriods] = {"537505", "537511", "537531", "537546", "537547", "537551", "537553"};
 TString IRLegend[numPeriods] = {""};
 
 void MeanSigmaPurityQAFilter(Int_t part = 8,
                              Int_t ChosenRun = 0,
                              Int_t Choice = 0,
-                             TString OutputDir = "../TriggerForRun3/EventFiltering2023/LHC23v_pass4/",
+                             TString OutputDir = "../TriggerForRun3/EventFiltering2023/AnalysisResults_pass4/",
                              TString year = "")
 {
 
@@ -267,6 +269,8 @@ void MeanSigmaPurityQAFilter(Int_t part = 8,
     stringout += TypeHistoSuffix;
   }
   stringout += "_" + Spart[part];
+  //stringout += "_MixedIR";
+  //stringout += "_MediumIR";
   stringoutpdf = stringout;
   stringout += ".root";
   TFile *fileout = new TFile(stringout, "RECREATE");
@@ -328,7 +332,7 @@ void MeanSigmaPurityQAFilter(Int_t part = 8,
   // get spectra in multiplicity classes
   for (Int_t m = numPeriods - 1; m >= 0; m--)
   {
-    PathIn = "../TriggerForRun3/EventFiltering2023/LHC23v_pass4/Yields_";
+    PathIn = OutputDir + "Yields_";
     PathIn += Spart[part];
     PathIn += "_" + year;
     // PathIn += "_Run" + Srun[m];
@@ -337,7 +341,7 @@ void MeanSigmaPurityQAFilter(Int_t part = 8,
     PathIn += ".root";
     if (Choice == 7)
     {
-      PathIn = "../TriggerForRun3/EventFiltering2023/LHC23v_pass4/FilterPostProcessing_";
+      PathIn = OutputDir + "FilterPostProcessing_";
       PathIn += Srun[m] + ".root";
     }
 
