@@ -18,6 +18,7 @@
 #include "TLine.h"
 #include "TRatioPlot.h"
 #include "TLegend.h"
+#include "TGraph.h"
 
 Bool_t reject = kTRUE;
 Double_t fparab(Double_t *x, Double_t *par)
@@ -44,13 +45,13 @@ float findMaximum(TH1F *lHist, float width);
 float findMaxValue(TH1F *lHist1, TH1F *lHist2);
 Double_t SetEfficiencyError(Int_t k, Int_t n);
 
-void PostProcessV0AndCascQA_AO2D(TString CollType = "PbPb",
-                                 Bool_t isMC = false,
+void PostProcessV0AndCascQA_AO2D(TString CollType = "pp",
+                                 Bool_t isMC = true,
                                  Int_t RebinTPC = 1,
                                  Int_t SkipCascFits = 0,      // 0 = don't skip, 1 = skip partc, 2 = skip all cascades
                                  Bool_t TopologyOnly = false, // true = only topology analysis, false = complete analysis
-                                 TString PathIn = "../Run3QA/Periods/PbPb2023/LHC23zx_cpass0/AnalysisResults_PbPb_2023_Test2.root",
-                                 TString PathOut = "../Run3QA/Periods/PbPb2023/LHC23zx_cpass0/PostProcess_PbPb_2023_Test2",
+                                 TString PathIn = "../Run3QA/Periods/LHC26b11/AnalysisResultsQAMCDoubleLambda.root",
+                                 TString PathOut = "../Run3QA/Periods/LHC26b11/PostProcess_qa_Test",
                                  Bool_t CheckOldPass = false, // true to compare two passes
                                  TString OldPassPath = "..",  // input/output file name (old pass to be compared with)
                                  Bool_t isMassvsRadiusPlots = 0)
@@ -131,8 +132,10 @@ void PostProcessV0AndCascQA_AO2D(TString CollType = "PbPb",
   if (isMC)
   {
     fHistGen3D = (TH3F *)dirEvt->Get("GeneratedParticles");
-    if (!fHistGen3D)
+    if (!fHistGen3D){
+      cout << "GeneratedParticles histo not found! " << endl;
       return;
+    }
   }
 
   TFile *f_old = CheckOldPass ? new TFile(OldPassPath, "") : nullptr;
@@ -214,7 +217,7 @@ void PostProcessV0AndCascQA_AO2D(TString CollType = "PbPb",
   const int kCumvariblesPerCanvas[kNCanvases + 1] = {0, 2, 8, 14, 18, 22};
   const int NTopCascInput = 18;
   const int NTopCascVar = 22;
-  TString TopVarCascInput[NTopCascInput] = {"CascPt", "V0Ctau", "CascCosPA", "V0CosPA", "V0CosPAToXi", "CascRadius", "V0Radius", "InvMassLambdaDaughter", "DcaCascDaughters", "DcaV0Daughters", "DcaBachToPV", "DcaV0ToPV", "DcaPosToPV", "DcaNegToPV", "CascyXi", "CascCtauXi", "CascyOmega", "CascCtauOmega"};
+  TString TopVarCascInput[NTopCascInput] = {"CascPt", "V0Ctau", "CascCosPA", "V0CosPA", "V0CosPAToXi", "CascRadius", "CascV0Radius", "InvMassLambdaDaughter", "DcaCascDaughters", "DcaV0Daughters", "DcaBachToPV", "DcaV0ToPV", "DcaPosToPV", "DcaNegToPV", "CascyXi", "CascCtauXi", "CascyOmega", "CascCtauOmega"};
   TString TopVarCasc[NTopCascVar] = {"Casc #it{p}_{T}", "V0 #it{c}#tau", "Casc #it{cos}#theta_{PA}", "V0 #it{cos}#theta_{PA}", "V0 #it{cos}#theta_{PA} To Casc", "Casc #it{R}", "V0 #it{R}", "#it{m}_{inv} #Lambda Daughter", "DCA Casc Daughters", "DCA V0 Daughters", "DCA Bach. To PV", "DCA V0 To PV", "DCA Pos. To PV", "DCA Neg. To PV", "#it{y}_{#Xi^{-}}", "#it{c}#tau_{ #Xi^{-}}", "#it{y}_{#Omega^{-}}", "#it{c}#tau_{ #Omega^{-}}", "#it{y}_{#Xi^{+}}", "#it{c}#tau_{ #Xi^{+}}", "#it{y}_{#Omega^{+}}", "#it{c}#tau_{ #Omega^{+}}"};
   TString TopVarCascUnit[NTopCascVar] = {"(GeV/#it{c})", "(cm)", "", "", "", "(cm)", "(cm)", "(GeV/#it{c}^2)", "(cm)", "(cm)", "(cm)", "(cm)", "(cm)", "(cm)", "", "(cm)", "", "(cm)", "", "(cm)", "", "(cm)"};
   float TopVarCascCutsRun2[NTopCascVar];
@@ -306,8 +309,10 @@ void PostProcessV0AndCascQA_AO2D(TString CollType = "PbPb",
     }
     (TopologyOnly && i_Canv == (kNCanvases - 1)) ? canvasTopologyCasc[i_Canv]->SaveAs(PathOut + ".pdf)") : canvasTopologyCasc[i_Canv]->SaveAs(PathOut + ".pdf");
   }
-  if (TopologyOnly)
+  if (TopologyOnly){
+    cout << "Topology analysis only" << endl;
     return;
+  }
 
   // Define pt binning
   const Int_t num = 9;
@@ -398,6 +403,8 @@ void PostProcessV0AndCascQA_AO2D(TString CollType = "PbPb",
   TCanvas *canvasMass[numPart];
   TCanvas *canvasResultsvsPt[numPart];
   TH3F *fhistoInvMass3DTrue[numPart];
+  TH3F *fhistoInvMass3D[numPart];
+  TH3F *fhistoInvMass3D_etalabel[numPart];
   TH2F *fhistoInvMass2D[numPart];
   TH2F *fhistoInvMass2DRadius[numPart];
   TH2F *fhistoInvMass2DTrue_Rintegrated[numPart];
@@ -406,7 +413,6 @@ void PostProcessV0AndCascQA_AO2D(TString CollType = "PbPb",
   TH1F *fhistoPt1DTrue[numPart];
   TH1F *fhistoR1DTrue[numPart];
 
-  TH3F *fhistoInvMass3D[numPart];
   TH2F *fhistoMassvsEta1_Eta2Neg[numPart];
   TH2F *fhistoMassvsEta1_Eta2Pos[numPart];
   TH1F *fhistoMassEtaPos[numPart];
@@ -726,20 +732,26 @@ void PostProcessV0AndCascQA_AO2D(TString CollType = "PbPb",
 
     if (part < 3)
     {
-      fhistoInvMass2D[part] = (TH2F *)dirV0->Get(NamehistoInvMass[part] + NameHisto);
+      fhistoInvMass3D_etalabel[part] = (TH3F *)dirV0->Get(NamehistoInvMass[part] + NameHisto);
     }
     else
     {
-      fhistoInvMass2D[part] = (TH2F *)dirCasc->Get(NamehistoInvMass[part] + NameHisto);
+      fhistoInvMass3D_etalabel[part] = (TH3F *)dirCasc->Get(NamehistoInvMass[part] + NameHisto);
     }
-    if (!fhistoInvMass2D[part])
-      continue;
+    if (!fhistoInvMass3D[part]){
+      cout << "No 3D histo found" << endl;
+      return;
+    }
+    fhistoInvMass2D[part] = (TH2F *)fhistoInvMass3D_etalabel[part]->Project3D("yxe");
+    fhistoInvMass2D[part]->SetName(NamehistoInvMass[part] + NameHisto + "_2D");
 
     // Fit loop
     cout << "Processing fits" << endl;
     for (Int_t pt = 0; pt < numEff; pt++)
     {
       fhistoInvMass1D[part][pt] = (TH1F *)fhistoInvMass2D[part]->ProjectionY(NamehistoInvMass[part] + Form("1D_Pt%i", pt), fhistoInvMass2D[part]->GetXaxis()->FindBin(NPt[pt][0] + 0.0001), fhistoInvMass2D[part]->GetXaxis()->FindBin(NPt[pt][1] - 0.0001));
+      if (!fhistoInvMass1D[part][pt])
+        cout << "no projection could be made " << endl;
       if (isMassvsRadiusPlots)
         fhistoInvMass1D[part][pt]->SetTitle(NamehistoInvMass[part] + " " + SPt[pt] + " cm");
       else
