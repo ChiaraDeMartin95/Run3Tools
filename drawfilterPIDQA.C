@@ -1,9 +1,10 @@
-void drawfilterPIDQA(TString filename = "listBis.txt") {
+void drawfilterPIDQA(TString filename = "listTPCITSMAPNew.txt")
+{
 
     std::vector<std::string> name;
     std::ifstream file(Form("%s", filename.Data()));
-    std::string remove = "/Users/mbp-cdm-01/Desktop/dottorato/1Anno/QAStrangeness/TriggerForRun3/EventFiltering2023/AnalysisResults_merged_";
-    std::string remove2 = "_round2.root";
+    std::string remove = "/Users/mbp-cdm-01/Desktop/dottorato/1Anno/QAStrangeness/TriggerForRun3/EventFiltering2023/AnalysisResults/AnalysisResults_";
+    std::string remove2 = ".root";
 
     if (file.is_open())
     {
@@ -43,7 +44,8 @@ void drawfilterPIDQA(TString filename = "listBis.txt") {
     for (int i = 0; i < nfiles; i++)
     {
 
-        f[i] = TFile::Open(Form("%s%s_round2.root", remove.c_str(), name[i].c_str()));
+        //f[i] = TFile::Open(Form("%s%s_round2.root", remove.c_str(), name[i].c_str()));
+        f[i] = TFile::Open(Form("%s%s.root", remove.c_str(), name[i].c_str()));
 
         hTPCNsigmaBachKa[i] = (TH2D *)f[i]->Get("lf-strangeness-filter/QAHistos/hTPCNsigmaOmegaBachKaMinus");
         hTPCNsigmaBachPr[i] = (TH2D *)f[i]->Get("lf-strangeness-filter/QAHistos/hTPCNsigmaOmegaV0Proton");
@@ -66,7 +68,6 @@ void drawfilterPIDQA(TString filename = "listBis.txt") {
         hTPCNsigmaPi[i]->Draw("colz");
         hTPCNsigmaPi[i]->GetYaxis()->SetRangeUser(0., 2.5);
         hTPCNsigmaPi[i]->GetXaxis()->SetRangeUser(-8., 8.);
-
     }
 
     TCanvas *c4 = new TCanvas("c4", "c4", 2000, 1000);

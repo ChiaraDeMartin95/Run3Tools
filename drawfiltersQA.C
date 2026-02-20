@@ -6,14 +6,14 @@ const Float_t LFLimit = 5E-5;
 Int_t numBins = 6;
 Int_t iscale = 0; //0 if input file has no mistakes. At some point axis labels where shifted by one bin and in those cases iscale = 1 should be set.
 
-void drawfiltersQA(TString filename = "list2023NN.txt", Int_t ChosenPeriod = 2)
+void drawfiltersQA(TString filename = "list2024af.txt", Int_t ChosenPeriod = 2)
 {
 
     std::vector<std::string> name;
     std::ifstream file(Form("%s", filename.Data()));
     // std::string remove = "/Users/mbp-cdm-01/Desktop/dottorato/1Anno/QAStrangeness/TriggerForRun3/EventFiltering2023/AnalysisResults_merged_";
     // std::string remove = "/Users/mbp-cdm-01/Desktop/dottorato/1Anno/QAStrangeness/TriggerForRun3/EventFiltering2023/AnalysisResults/AnalysisResults_";
-    std::string remove = "/Users/mbp-cdm-01/Desktop/ResearchTeachingActivity/QAStrangeness/TriggerForRun3/EventFiltering2023/LHC23v_pass4/AnalysisResults_LHC23v_pass4_CEFP_";
+    std::string remove = "/Users/mbp-cdm-01/Desktop/ResearchTeachingActivity/QAStrangeness/TriggerForRun3/EventFiltering2024/LHC24af_pass1/AnalysisResults_LHC24af_pass1_";
     std::string remove2 = ".root";
 
     cout << filename.Data() << endl;

@@ -36,9 +36,12 @@ void QAplots(string period = "LHC25am")
   time.Start();
 
   char pass_name[2][30] = {"apass1", "apass1_skimmed"};
-  const int nruns = 9;
-  int runnumber[nruns] = {566848, 566859, 566871, 566893, 566905, 566906, 566907, 566921, 566935};
-  // int runnumber[nruns] = {566947, 566980, 566995, 567005, 567006, 567014, 567017, 567023, 567039, 567040, 567050, 567063, 567078, 567109, 567121, 567122, 567136, 567147, 567148, 567149, 567160, 567174, 567186};
+  const int nruns = 42;
+  // int runnumber[nruns] = {566848, 566859, 566871, 566893, 566905, 566906, 566907, 566921, 566935};
+  int runnumber[nruns] = {567199, 567213, 567226, 567227, 567241, 567269, 567270, 567271, 567272, 567284, 567324, 567325, 567326, 567338, 567351, 567352, 567355, 567356, 567374, 567375, 567378,
+                          567379, 567396, 567408, 567426, 567443, 567444, 567445, 567449, 567534, 567546, 567547, 567548, 567549, 567551, 567567, 567568, 567569, 567570, 567572, 567576, 567592};
+int runnumberShort[nruns] = {199, 213, 226, 227, 241, 269, 270, 271, 272, 284, 324, 325, 326, 338, 351, 352, 355, 356, 374, 375, 378,
+                          379, 396, 408, 426, 443, 444, 445, 449, 534, 546, 547, 548, 549, 551, 567, 568, 569, 570, 572, 576, 592};
 
   //------------ read files
   TFile *file_in2025[nruns] = {0x0};
@@ -54,11 +57,11 @@ void QAplots(string period = "LHC25am")
   for (int irun = 0; irun < nruns; irun++)
   {
     // if(gSystem->GetPathInfo(Form("AnalysisResults_fullrun_%s_%s_%d.root",period.c_str(),pass_name[0],runnumber[irun]),dummy1,dummy2,dummy3,dummy4) != 0) cout << "File Not Found! Try again" << endl;
-    file_in2024[irun] = new TFile(Form("../TriggerForRun3/EventFiltering2025/AnalysisResults_fullrun_skimmed_LHC25am_batch3_%d.root", runnumber[irun]), "read");
-    file_in2025[irun] = new TFile(Form("../TriggerForRun3/EventFiltering2025/AnalysisResults_fullrun_LHC25am_batch3_%d.root", runnumber[irun]), "read");
+    file_in2024[irun] = new TFile(Form("../TriggerForRun3/EventFiltering2025/AnalysisResults_fullrun_skimmed_LHC25am_batch4_5_%d.root", runnumber[irun]), "read");
+    file_in2025[irun] = new TFile(Form("../TriggerForRun3/EventFiltering2025/AnalysisResults_fullrun_LHC25am_batch4_5_%d.root", runnumber[irun]), "read");
     // printf("Open File: %s\n",file_in[irun]->GetName());
     //
-    file_in_skimmed[irun] = new TFile(Form("../TriggerForRun3/EventFiltering2025/AnalysisResults_fullrun_skimmed_LHC25am_batch3_%d.root", runnumber[irun]), "read");
+    file_in_skimmed[irun] = new TFile(Form("../TriggerForRun3/EventFiltering2025/AnalysisResults_fullrun_skimmed_LHC25am_batch4_5_%d.root", runnumber[irun]), "read");
   }
 
   // color palette
@@ -153,8 +156,9 @@ void QAplots(string period = "LHC25am")
       hEvSelFinal2025[i]->GetXaxis()->SetBinLabel(j, binlabel[j - 1]);
     }
 
-    for (Int_t j = 1; j <= hEvSelFinal_skimmed[i]->GetNbinsX(); j++){
-      hEvSelFinal_skimmed[i]->GetXaxis()->SetBinLabel(j,binlabel[j-1]);
+    for (Int_t j = 1; j <= hEvSelFinal_skimmed[i]->GetNbinsX(); j++)
+    {
+      hEvSelFinal_skimmed[i]->GetXaxis()->SetBinLabel(j, binlabel[j - 1]);
     }
   }
 
@@ -236,7 +240,7 @@ void QAplots(string period = "LHC25am")
   cratio->cd();
   cratio->SetMargin(0.15, 0.1, 0.15, 0.1);
   TH1F *hratio = new TH1F(Form("hratio%d", 0), ";;Ratio Skimmed/Unskimmed", numBins, 0, numBins);
-  hratio->SetTitle("LHC24am batch3");
+  hratio->SetTitle("LHC24am batch5_6");
   hratio->GetXaxis()->SetBinLabel(1, "OmegaDueToOtherFilters");
   hratio->GetXaxis()->SetBinLabel(2, "hOmega");
   hratio->GetXaxis()->SetBinLabel(3, "Xi-N");
@@ -265,7 +269,7 @@ void QAplots(string period = "LHC25am")
     legratio->AddEntry(hRatio[i], Form("%d", runnumber[i]), "pl");
   }
   legratio->Draw("same");
-  cratio->SaveAs("ratioskimmunskimm_LHC24am_batch3.png");
+  cratio->SaveAs("ratioskimmunskimm_LHC24am_batch4_5.png");
 
   //------------ #events for each filter
   TCanvas *cfull = new TCanvas("cfull", "cfull", 800, 800);
@@ -531,7 +535,7 @@ void QAplots(string period = "LHC25am")
       hselectivity[ifilter]->SetTitle(Form("%s: Lam+Lam", period.c_str()));
 
     for (int irun = 0; irun < nruns; irun++)
-      hselectivity[ifilter]->GetXaxis()->SetBinLabel(irun + 1, Form("%d", runnumber[irun]));
+      hselectivity[ifilter]->GetXaxis()->SetBinLabel(irun + 1, Form("%d", runnumberShort[irun]));
     hselectivity[ifilter]->GetYaxis()->SetRangeUser(LowLimit[ifilter], UpLimit[ifilter]);
     hselectivity[ifilter]->Draw();
 
@@ -600,5 +604,5 @@ void QAplots(string period = "LHC25am")
     //cout << "i: " << i << " cont: " << hSelectivity_period[i]->GetBinContent(i+1) << endl;
   }
     */
-  cselectivity_period->SaveAs(Form("cselectivity_period_%s_batch4.png", period.c_str()));
+  cselectivity_period->SaveAs(Form("cselectivity_period_%s_batch5_6.png", period.c_str()));
 }
