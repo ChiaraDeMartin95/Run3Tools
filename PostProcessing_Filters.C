@@ -125,9 +125,9 @@ const Float_t massParticle[numPart] = {1.32171, 1.67245};
 // TString Spart[numPart+2] = {"XiNeg", "XiPos", "OmegaNeg", "OmegaPlus"};
 TString Spart[numPart] = {"Xi", "Omega"};
 
-void PostProcessing_Filters(TString year = "",
-                            TString SPathIn = "../TriggerForRun3/EventFiltering2025/AnalysisResults_LHC25ac_pass1_TestPID.root",
-                            TString OutputDir = "../TriggerForRun3/EventFiltering2025/",
+void PostProcessing_Filters(TString year = "LHC26ac_batch1",
+                            TString SPathIn = "../TriggerForRun3/EventFiltering2026/LHC26ac_batch1/AnalysisResults_fullrun_LHC26ac_batch1.root",
+                            TString OutputDir = "../TriggerForRun3/EventFiltering2026/LHC26ac_batch1/",
                             Float_t ptthr = 7)
 {
 
@@ -309,11 +309,15 @@ void PostProcessing_Filters(TString year = "",
                                 "hTPCNsigmaXiBachPiMinus", "hTPCNsigmaXiV0PiMinus", "hTPCNsigmaXiV0Proton",
                                 "hTPCNsigmaOmegaBachKaPlus", "hTPCNsigmaOmegaV0PiPlus", "hTPCNsigmaOmegaV0AntiProton",
                                 "hTPCNsigmaOmegaBachKaMinus", "hTPCNsigmaOmegaV0PiMinus", "hTPCNsigmaOmegaV0Proton"};
-  TString SNSigmaTPCvsPtTitle[12] = {"XiBachPiPlus", "XiV0PiPlus", "XiV0AntiProton",
-                                     "XiBachPiMinus", "XiV0PiMinus", "XiV0Proton",
-                                     "OmegaBachKaPlus", "OmegaV0PiPlus", "OmegaV0AntiProton",
-                                     "OmegaBachKaMinus", "OmegaV0PiMinus", "OmegaV0Proton"};
-                                
+  // TString SNSigmaTPCvsPtTitle[12] = {"XiBachPiPlus", "XiV0PiPlus", "XiV0AntiProton",
+  //                                    "XiBachPiMinus", "XiV0PiMinus", "XiV0Proton",
+  //                                    "OmegaBachKaPlus", "OmegaV0PiPlus", "OmegaV0AntiProton",
+  //                                    "OmegaBachKaMinus", "OmegaV0PiMinus", "OmegaV0Proton"};
+  TString SNSigmaTPCvsPtTitle[12] = {"#pi^{+} from #Xi^{+}", "#pi^{+} from V0", "#bar{p} from V0",
+                                     "#pi^{-} from #Xi^{-}", "#pi^{-} from V0", "p from V0",
+                                     "K^{+} from #Omega^{+}", "#pi^{+} from V0", "#bar{p} from V0",
+                                     "K^{-} from #Omega^{-}", "#pi^{-} from V0", "p from V0"};
+
   for (Int_t dau = 0; dau < 12; dau++)
   {
     hNSigmaTPCvsPt[dau] = (TH2F *)dirQA->Get(SNSigmaTPCvsPt[dau]);
@@ -336,7 +340,7 @@ void PostProcessing_Filters(TString year = "",
   TCanvas *canvasTPC[12];
   TH1F *hNSigmaSummary[12];
   TH1F *hNSigmaSummaryGaus[12];
-  TCanvas *cNSigmaSummary = new TCanvas("cNSigmaSummary", "cNSigmaSummary", 800, 500);
+  TCanvas *cNSigmaSummary = new TCanvas("cNSigmaSummary", "cNSigmaSummary", 1200, 800);
   cNSigmaSummary->Divide(6, 2);
   StyleCanvas(cNSigmaSummary, 0.15, 0.05, 0.05, 0.15);
 
@@ -388,22 +392,25 @@ void PostProcessing_Filters(TString year = "",
     // summary plot
     cNSigmaSummary->cd(dau + 1);
     gPad->SetTopMargin(0.08);
-    gPad->SetLeftMargin(0.12);
-    gPad->SetRightMargin(0.05);
-    gPad->SetBottomMargin(0.1);
-    hNSigmaSummary[dau]->SetTitle(SNSigmaTPCvsPtTitle[dau]);
+    gPad->SetLeftMargin(0.16);
+    gPad->SetRightMargin(0.02);
+    gPad->SetBottomMargin(0.16);
+    TLegend *legendParticle = new TLegend(0.2, 0.8, 0.9, 0.9);
+    legendParticle->SetBorderSize(0);
+    legendParticle->SetTextSize(0.12);
+    legendParticle->AddEntry("", SNSigmaTPCvsPtTitle[dau], "");
+    hNSigmaSummary[dau]->SetTitle("");
     hNSigmaSummary[dau]->GetXaxis()->SetTitle("p_{TPC} (GeV/c)");
     hNSigmaSummary[dau]->GetYaxis()->SetTitle("Mean N#sigma");
     hNSigmaSummary[dau]->GetXaxis()->SetLabelSize(0.08);
     hNSigmaSummary[dau]->GetXaxis()->SetTitleSize(0.1);
-    hNSigmaSummary[dau]->GetXaxis()->SetTitleOffset(0.4);
-    hNSigmaSummary[dau]->GetXaxis()->SetLabelOffset(0.0002);
+    hNSigmaSummary[dau]->GetXaxis()->SetTitleOffset(0.8);
+    hNSigmaSummary[dau]->GetXaxis()->SetLabelOffset(0.005);
     hNSigmaSummary[dau]->GetYaxis()->SetLabelSize(0.1);
     hNSigmaSummary[dau]->GetYaxis()->SetTitleOffset(0.7);
     hNSigmaSummary[dau]->GetYaxis()->SetTitleSize(0.1);
     hNSigmaSummary[dau]->SetLineColor(1);
     hNSigmaSummary[dau]->SetMarkerColor(1);
-    hNSigmaSummary[dau]->SetTitleSize(0.3);
     hNSigmaSummary[dau]->GetYaxis()->SetRangeUser(-4, 4);
     TF1 *lineAtZero = new TF1("lineAtZero", "0", 0, 10);
     lineAtZero->SetLineColor(kRed);
@@ -418,6 +425,7 @@ void PostProcessing_Filters(TString year = "",
     lineAtZero->Draw("same");
     lineAtPlusOne->Draw("same");
     lineAtMinusOne->Draw("same");
+    legendParticle->Draw();
   }
 
   // Cascade topological variables (after all topo sleections, for the time being)
