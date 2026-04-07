@@ -24,11 +24,11 @@
 const Float_t StrLimit = 4.3E-5;
 const Float_t LFLimit = 5E-5;
 const Int_t numTriggers = 12; // Interesting trigger
-Int_t iscale = 0;  // 0 if input file has no mistakes. At some point axis labels where shifted by one bin and in those cases iscale = 1 should be set.
+Int_t iscale = 0;             // 0 if input file has no mistakes. At some point axis labels where shifted by one bin and in those cases iscale = 1 should be set.
 
 void ErrRatioCorr(TH1F *hNum, TH1F *hDenom, TH1F *hRatio, Int_t FullCorr);
 
-void QAplots(string period = "LHC26ac")
+void QAplots_runbyrun(string period = "LHC26ac_batch1")
 {
 
   gROOT->SetBatch(kTRUE);
@@ -39,10 +39,11 @@ void QAplots(string period = "LHC26ac")
   time.Start();
 
   char pass_name[2][30] = {"apass1", "apass1_skimmed"}; // AnalysisResults_fullrun_LHC25ah_ctf_skim_full_564704
-  const int nruns_2025 = 9;
+  const int nruns_2025 = 20;
   // int runnumber_2025[nruns_2025] = {565007,565030,565118,565129,565140,565152,565167,565178,565190,565211,565225,565236,565252,565263,565274,565275,565277,565296};
   // int runnumber_2025[nruns_2025] = { 566598, 566611, 566639, 566641, 566642, 566653, 566656, 566657};
-  int runnumber_2025[nruns_2025] = {570051, 570054, 570064, 570065, 570066, 570077, 570079, 570091, 570102};
+  // int runnumber_2025[nruns_2025] = {570051, 570054, 570064, 570065, 570066, 570077, 570079, 570091, 570102};
+  int runnumber_2025[nruns_2025] = {570051, 570054, 570065, 570066, 570077, 570079, 570091, 570102, 569945, 569947, 569978, 569980, 569981, 569982, 570011, 570012, 570025, 570036, 570049, 570050};
 
   //------------ read files
   TFile *file_in2025[nruns_2025] = {0x0};
@@ -120,7 +121,7 @@ void QAplots(string period = "LHC26ac")
     hEvSel_filters2025[i]->SetBinContent(12, hEvSelFinal2025[i]->GetBinContent(hEvSelFinal2025[i]->GetXaxis()->FindBin("sigma-p") + iscale));
   }
 
-  cout <<"hleoo" << endl;
+  cout << "hleoo" << endl;
   //------------ #events for each filter
   TCanvas *cfull = new TCanvas("cfull", "cfull", 800, 800);
   cfull->cd();
@@ -158,7 +159,7 @@ void QAplots(string period = "LHC26ac")
   leg->SetTextFont(42);
   leg->SetBorderSize(0);
   leg->SetNColumns(2);
-    cout <<"hleoo" << endl;
+  cout << "hleoo" << endl;
 
   for (int i = 0; i < nruns_2025; i++)
   {
@@ -184,9 +185,9 @@ void QAplots(string period = "LHC26ac")
   TH1F *hSelectivity_period2025[numTriggers];
   //"Omegas", "h-Omega", "Xi-N", "HighMultFT0M+Omega", "Tracked Omega", "Double Omega", "Omega+Xi",
   //"Lam+Lam", "HighMultTrack+Omega", "HighMultFT0M", "HighMultTrack", "sigma-p"
-  Float_t LowLimit[numTriggers] = {2e-6, 6e-6, 1.3e-6, 3e-6, 2e-6, 1e-7, 0.4e-6, 1e-6, 1e-6, 2e-5, 1e-6, 4.5e-6};
-  Float_t UpLimit[numTriggers] = {3e-4, 1.5e-5, 2e-6, 9e-6, 8e-6, 4.5e-7, 4e-6, 3e-7, 5e-6, 10e-5, 4e-6, 6.5e-6};
-  for (int ifilter = 0; ifilter  < numTriggers; ifilter++)
+  Float_t LowLimit[numTriggers] = {2e-6, 6e-6, 1.3e-6, 6e-6, 5e-6, 3e-7, 1.5e-6, 2e-7, 1e-6, 2e-5, 1e-6, 4.5e-6};
+  Float_t UpLimit[numTriggers] = {3e-4, 1.5e-5, 2e-6, 10e-6, 9e-6, 6e-7, 3.5e-6, 6e-7, 4e-6, 10e-5, 7e-6, 6.5e-6};
+  for (int ifilter = 0; ifilter < numTriggers; ifilter++)
   {
     for (int irun = 0; irun < nruns_2025; irun++)
     {
@@ -202,14 +203,14 @@ void QAplots(string period = "LHC26ac")
   }
 
   TH1F *hSel_allfilters2025 = new TH1F(Form("hSel2026_allfilters_run_%d", runnumber_2025[0]), Form("hSel2026_allfilters_run_%d", runnumber_2025[0]), numTriggers, 0, numTriggers);
-  for (int ifilter = 0; ifilter  < numTriggers; ifilter++)
+  for (int ifilter = 0; ifilter < numTriggers; ifilter++)
   {
     hSel_allfilters2025->SetBinContent(ifilter + 1, hSelectivity2025[ifilter][0]->GetBinContent(1));
     hSel_allfilters2025->SetBinError(ifilter + 1, TMath::Sqrt(hSelectivity2025[ifilter][0]->GetBinContent(1)) / tot_processed2025);
   }
 
   TString *xlabel[numTriggers];
-  for (int ifilter = 0; ifilter  < numTriggers; ifilter++)
+  for (int ifilter = 0; ifilter < numTriggers; ifilter++)
   {
     if (ifilter == 0)
       xlabel[ifilter] = new TString("Omega");
@@ -276,8 +277,9 @@ void QAplots(string period = "LHC26ac")
   //------------ selectivity for each filter for each run
   TCanvas *cselectivity[numTriggers];
   TH1F *hselectivity_2025[numTriggers];
+  TFile *fileout = new TFile(Form("QAplots_runbyrun_%s.root", period.c_str()), "recreate");
 
-  for (int ifilter = 0; ifilter  < numTriggers; ifilter++)
+  for (int ifilter = 0; ifilter < numTriggers; ifilter++)
   {
     cselectivity[ifilter] = new TCanvas(Form("cselectivity_filter%d", ifilter), Form("cselectivity_filter%d", ifilter), 800, 800);
     cselectivity[ifilter]->cd();
@@ -318,10 +320,14 @@ void QAplots(string period = "LHC26ac")
     hselectivity_2025[ifilter]->Draw();
 
     cout << "Selectivity for filter: " << hselectivity_2025[ifilter]->GetTitle() << endl;
+    float runAvg = 0;
+    int runCounter = 0;
     for (int irun = 0; irun < nruns_2025; irun++)
     {
       color = nruns_2025 - irun - 1 + FI;
-      cout <<"For run: " << runnumber_2025[irun] << " " << hSelectivity2025[ifilter][irun]->GetBinContent(irun+1) << endl;
+      cout << "For run: " << runnumber_2025[irun] << " " << hSelectivity2025[ifilter][irun]->GetBinContent(irun + 1) << endl;
+      runAvg += hSelectivity2025[ifilter][irun]->GetBinContent(irun + 1);
+      runCounter++;
       hSelectivity2025[ifilter][irun]->GetYaxis()->SetRangeUser(LowLimit[ifilter], UpLimit[ifilter]);
       hSelectivity2025[ifilter][irun]->SetLineColor(color);
       hSelectivity2025[ifilter][irun]->SetMarkerColor(color);
@@ -329,6 +335,26 @@ void QAplots(string period = "LHC26ac")
       hSelectivity2025[ifilter][irun]->SetMarkerStyle(20);
       hSelectivity2025[ifilter][irun]->DrawCopy("PSAME");
     }
+    runAvg /= runCounter;
+    cout << "Average selectivity for filter " << ifilter << ": " << runAvg << endl;
+    TF1 *fAvg = new TF1(Form("fAvg_filter%d", ifilter), "[0]", 0, nruns_2025);
+    fAvg->SetParameter(0, runAvg);
+    fAvg->SetLineColor(kMagenta + 2);
+    fAvg->SetLineWidth(3);
+    fAvg->SetLineStyle(2);
+    fAvg->Draw("same");
+    TF1 *fAvgPlus = new TF1(Form("fAvgPlus_filter%d", ifilter), "[0]", 0, nruns_2025);
+    fAvgPlus->SetParameter(0, runAvg + 0.1 * runAvg);
+    fAvgPlus->SetLineColor(kBlack);
+    fAvgPlus->SetLineWidth(2);
+    fAvgPlus->SetLineStyle(2);
+    fAvgPlus->Draw("same");
+    TF1 *fAvgMinus = new TF1(Form("fAvgMinus_filter%d", ifilter), "[0]", 0, nruns_2025);
+    fAvgMinus->SetParameter(0, runAvg - 0.1 * runAvg);
+    fAvgMinus->SetLineColor(kBlack);
+    fAvgMinus->SetLineWidth(2);
+    fAvgMinus->SetLineStyle(2);
+    fAvgMinus->Draw("same");
     if (ifilter == 0)
       cselectivity[ifilter]->SaveAs(Form("cselectivity_period_%s_filter_Omega.png", period.c_str()));
     if (ifilter == 1)
@@ -353,7 +379,13 @@ void QAplots(string period = "LHC26ac")
       cselectivity[ifilter]->SaveAs(Form("cselectivity_period_%s_filter_HighMultTrack.png", period.c_str()));
     if (ifilter == 11)
       cselectivity[ifilter]->SaveAs(Form("cselectivity_period_%s_filter_sigma-p.png", period.c_str()));
+
+    fileout->cd();
+    fAvg->Write();
   }
+  fileout->Close();
+  cout << "I stored the average values for each filter in the file: " << endl;
+  cout << fileout->GetName() << endl;
 
   // cout << hSelectivity_period[0]->GetBinContent(1) << endl;
 }
