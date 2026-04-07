@@ -22,10 +22,10 @@
 
 const Float_t StrLimit = 4.3E-5;
 const Float_t LFLimit = 5E-5;
-Int_t numBins = 8; // Interesting trigger
-Int_t iscale = 0;  // 0 if input file has no mistakes. At some point axis labels where shifted by one bin and in those cases iscale = 1 should be set.
+const Int_t numBins = 11; // Interesting trigger
+Int_t iscale = 0;         // 0 if input file has no mistakes. At some point axis labels where shifted by one bin and in those cases iscale = 1 should be set.
 
-void QAplots(string period = "LHC25am")
+void QAplots_Sara(string period = "LHC26ac_batch1")
 {
 
   gROOT->SetBatch(kTRUE);
@@ -36,12 +36,10 @@ void QAplots(string period = "LHC25am")
   time.Start();
 
   char pass_name[2][30] = {"apass1", "apass1_skimmed"};
-  const int nruns = 42;
+  const int nruns = 20;
   // int runnumber[nruns] = {566848, 566859, 566871, 566893, 566905, 566906, 566907, 566921, 566935};
-  int runnumber[nruns] = {567199, 567213, 567226, 567227, 567241, 567269, 567270, 567271, 567272, 567284, 567324, 567325, 567326, 567338, 567351, 567352, 567355, 567356, 567374, 567375, 567378,
-                          567379, 567396, 567408, 567426, 567443, 567444, 567445, 567449, 567534, 567546, 567547, 567548, 567549, 567551, 567567, 567568, 567569, 567570, 567572, 567576, 567592};
-int runnumberShort[nruns] = {199, 213, 226, 227, 241, 269, 270, 271, 272, 284, 324, 325, 326, 338, 351, 352, 355, 356, 374, 375, 378,
-                          379, 396, 408, 426, 443, 444, 445, 449, 534, 546, 547, 548, 549, 551, 567, 568, 569, 570, 572, 576, 592};
+  int runnumber[nruns] = {570051, 570054, 570065, 570066, 570077, 570079, 570091, 570102, 569945, 569947, 569978, 569980, 569981, 569982, 570011, 570012, 570025, 570036, 570049, 570050};
+  int runnumberShort[nruns] = {570051, 570054, 570065, 570066, 570077, 570079, 570091, 570102, 569945, 569947, 569978, 569980, 569981, 569982, 570011, 570012, 570025, 570036, 570049, 570050};
 
   //------------ read files
   TFile *file_in2025[nruns] = {0x0};
@@ -57,11 +55,11 @@ int runnumberShort[nruns] = {199, 213, 226, 227, 241, 269, 270, 271, 272, 284, 3
   for (int irun = 0; irun < nruns; irun++)
   {
     // if(gSystem->GetPathInfo(Form("AnalysisResults_fullrun_%s_%s_%d.root",period.c_str(),pass_name[0],runnumber[irun]),dummy1,dummy2,dummy3,dummy4) != 0) cout << "File Not Found! Try again" << endl;
-    file_in2024[irun] = new TFile(Form("../TriggerForRun3/EventFiltering2025/AnalysisResults_fullrun_skimmed_LHC25am_batch4_5_%d.root", runnumber[irun]), "read");
-    file_in2025[irun] = new TFile(Form("../TriggerForRun3/EventFiltering2025/AnalysisResults_fullrun_LHC25am_batch4_5_%d.root", runnumber[irun]), "read");
+    file_in2024[irun] = new TFile(Form("../TriggerForRun3/EventFiltering2026/LHC26ac_batch1/AnalysisResults_fullrun_skimmed_LHC26ac_batch1_%d.root", runnumber[irun]), "read");
+    file_in2025[irun] = new TFile(Form("../TriggerForRun3/EventFiltering2026/LHC26ac_batch1/AnalysisResults_fullrun_LHC26ac_batch1_%d.root", runnumber[irun]), "read");
     // printf("Open File: %s\n",file_in[irun]->GetName());
     //
-    file_in_skimmed[irun] = new TFile(Form("../TriggerForRun3/EventFiltering2025/AnalysisResults_fullrun_skimmed_LHC25am_batch4_5_%d.root", runnumber[irun]), "read");
+    file_in_skimmed[irun] = new TFile(Form("../TriggerForRun3/EventFiltering2026/LHC26ac_batch1/AnalysisResults_fullrun_skimmed_LHC26ac_batch1_%d.root", runnumber[irun]), "read");
   }
 
   // color palette
@@ -140,14 +138,14 @@ int runnumberShort[nruns] = {199, 213, 226, 227, 241, 269, 270, 271, 272, 284, 3
     {
       hEvSelFinal_skimmed[i]->SetBinContent(j, hEvSel_skimmed[i]->GetBinContent(j));
       hEvSelFinal_skimmed[i]->SetBinError(j, TMath::Sqrt(hEvSel_skimmed[i]->GetBinContent(j)));
-      cout << "skimmed run: " << runnumber[i] << " |bin: " << j << " val: " << hEvSelFinal_skimmed[i]->GetBinContent(j) << endl;
-      // if(runnumber[i]==551759) cout << "skimmed run: " << runnumber[i] << " |bin: " << j << " val: " << hEvSelFinal_skimmed[i]->GetBinContent(j) << endl;
+      // cout << "skimmed run: " << runnumber[i] << " |bin: " << j << " val: " << hEvSelFinal_skimmed[i]->GetBinContent(j) << endl;
+      //  if(runnumber[i]==551759) cout << "skimmed run: " << runnumber[i] << " |bin: " << j << " val: " << hEvSelFinal_skimmed[i]->GetBinContent(j) << endl;
     }
     hEvSelFinal_skimmed[i]->SetLineColor(color);
   }
 
   // name of each filter/column
-  char binlabel[18][30] = {"All events", "Processed events", "Events w/ high-pT hadron", "Omegas", "h-Omega", "2Xi", "3Xi", "4Xi", "Xi-N", "Omega large R", "Xi", "Tracked Xi", "Tracked Omega", "HighMult+Omega", "Double Omega", "Omega+Xi", "Lam+Lam"};
+  char binlabel[21][30] = {"All events", "Processed events", "Events w/ high-pT hadron", "Omegas", "h-Omega", "2Xi", "3Xi", "4Xi", "Xi-N", "Omega large R", "Xi", "Tracked Xi", "Tracked Omega", "HighMultFT0M+Omega", "Double Omega", "Omega+Xi", "Lam+Lam", "HighMultTrack+Omega", "HighMultFT0M", "HighMultTrack", "sigma-p"};
 
   for (int i = 0; i < nruns; i++)
   {
@@ -179,47 +177,48 @@ int runnumberShort[nruns] = {199, 213, 226, 227, 241, 269, 270, 271, 272, 284, 3
 
   for (int i = 0; i < nruns; i++)
   {
-    hEvSel_filters2025[i] = new TH1F(Form("hEvSel_filters%d", i), ";;Events", numBins - 1, 0, numBins - 1);
+    hEvSel_filters2025[i] = new TH1F(Form("hEvSel_filters%d", i), ";;Events", numBins, 0, numBins - 1);
     hEvSel_filters2025[i]->SetBinContent(1, hEvSelFinal2025[i]->GetBinContent(hEvSelFinal2025[i]->GetXaxis()->FindBin("Omegas") + iscale));
-    hEvSel_filters2025[i]->SetBinContent(2, hEvSelFinal2025[i]->GetBinContent(hEvSelFinal2025[i]->GetXaxis()->FindBin("h-Omega") + iscale));
+    hEvSel_filters2025[i]->SetBinContent(2, hEvSelFinal2025[i]->GetBinContent(hEvSelFinal2025[i]->GetXaxis()->FindBin("sigma-p") + iscale));
     hEvSel_filters2025[i]->SetBinContent(3, hEvSelFinal2025[i]->GetBinContent(hEvSelFinal2025[i]->GetXaxis()->FindBin("Xi-N") + iscale));
-    hEvSel_filters2025[i]->SetBinContent(4, hEvSelFinal2025[i]->GetBinContent(hEvSelFinal2025[i]->GetXaxis()->FindBin("HighMult+Omega") + iscale));
-    hEvSel_filters2025[i]->SetBinContent(5, hEvSelFinal2025[i]->GetBinContent(hEvSelFinal2025[i]->GetXaxis()->FindBin("Tracked Omega") + iscale));
-    hEvSel_filters2025[i]->SetBinContent(6, hEvSelFinal2025[i]->GetBinContent(hEvSelFinal2025[i]->GetXaxis()->FindBin("Double Omega") + iscale));
-    hEvSel_filters2025[i]->SetBinContent(7, hEvSelFinal2025[i]->GetBinContent(hEvSelFinal2025[i]->GetXaxis()->FindBin("Omega+Xi") + iscale));
-    hEvSel_filters2025[i]->SetBinContent(8, hEvSelFinal2025[i]->GetBinContent(hEvSelFinal2025[i]->GetXaxis()->FindBin("Lam+Lam") + iscale));
-    hEvSel_skimmed_filters[i] = new TH1F(Form("hEvSel_skimmed_filters%d", i), ";;Events", numBins - 1, 0, numBins - 1);
+    hEvSel_filters2025[i]->SetBinContent(4, hEvSelFinal2025[i]->GetBinContent(hEvSelFinal2025[i]->GetXaxis()->FindBin("Tracked Omega") + iscale));
+    hEvSel_filters2025[i]->SetBinContent(5, hEvSelFinal2025[i]->GetBinContent(hEvSelFinal2025[i]->GetXaxis()->FindBin("Double Omega") + iscale));
+    hEvSel_filters2025[i]->SetBinContent(6, hEvSelFinal2025[i]->GetBinContent(hEvSelFinal2025[i]->GetXaxis()->FindBin("Omega+Xi") + iscale));
+    hEvSel_filters2025[i]->SetBinContent(7, hEvSelFinal2025[i]->GetBinContent(hEvSelFinal2025[i]->GetXaxis()->FindBin("Lam+Lam") + iscale));
+    hEvSel_filters2025[i]->SetBinContent(8, hEvSelFinal2025[i]->GetBinContent(hEvSelFinal2025[i]->GetXaxis()->FindBin("HighMultFT0M+Omega") + iscale));
+    hEvSel_filters2025[i]->SetBinContent(9, hEvSelFinal2025[i]->GetBinContent(hEvSelFinal2025[i]->GetXaxis()->FindBin("HighMultTrack+Omega") + iscale));
+    hEvSel_filters2025[i]->SetBinContent(10, hEvSelFinal2025[i]->GetBinContent(hEvSelFinal2025[i]->GetXaxis()->FindBin("HighMultFT0M") + iscale));
+    hEvSel_filters2025[i]->SetBinContent(11, hEvSelFinal2025[i]->GetBinContent(hEvSelFinal2025[i]->GetXaxis()->FindBin("HighMultTrack") + iscale));
+    hEvSel_skimmed_filters[i] = new TH1F(Form("hEvSel_skimmed_filters%d", i), ";;Events", numBins, 0, numBins - 1);
     hEvSel_skimmed_filters[i]->SetBinContent(1, hEvSelFinal_skimmed[i]->GetBinContent(hEvSelFinal_skimmed[i]->GetXaxis()->FindBin("Omegas") + iscale));
-    hEvSel_skimmed_filters[i]->SetBinContent(2, hEvSelFinal_skimmed[i]->GetBinContent(hEvSelFinal_skimmed[i]->GetXaxis()->FindBin("h-Omega") + iscale));
+    hEvSel_skimmed_filters[i]->SetBinContent(2, hEvSelFinal_skimmed[i]->GetBinContent(hEvSelFinal_skimmed[i]->GetXaxis()->FindBin("sigma-p") + iscale));
     hEvSel_skimmed_filters[i]->SetBinContent(3, hEvSelFinal_skimmed[i]->GetBinContent(hEvSelFinal_skimmed[i]->GetXaxis()->FindBin("Xi-N") + iscale));
-    hEvSel_skimmed_filters[i]->SetBinContent(4, hEvSelFinal_skimmed[i]->GetBinContent(hEvSelFinal_skimmed[i]->GetXaxis()->FindBin("HighMult+Omega") + iscale));
-    hEvSel_skimmed_filters[i]->SetBinContent(5, hEvSelFinal_skimmed[i]->GetBinContent(hEvSelFinal_skimmed[i]->GetXaxis()->FindBin("Tracked Omega") + iscale));
-    hEvSel_skimmed_filters[i]->SetBinContent(6, hEvSelFinal_skimmed[i]->GetBinContent(hEvSelFinal_skimmed[i]->GetXaxis()->FindBin("Double Omega") + iscale));
-    hEvSel_skimmed_filters[i]->SetBinContent(7, hEvSelFinal_skimmed[i]->GetBinContent(hEvSelFinal_skimmed[i]->GetXaxis()->FindBin("Omega+Xi") + iscale));
-    hEvSel_skimmed_filters[i]->SetBinContent(8, hEvSelFinal_skimmed[i]->GetBinContent(hEvSelFinal_skimmed[i]->GetXaxis()->FindBin("Lam+Lam") + iscale));
+    hEvSel_skimmed_filters[i]->SetBinContent(4, hEvSelFinal_skimmed[i]->GetBinContent(hEvSelFinal_skimmed[i]->GetXaxis()->FindBin("Tracked Omega") + iscale));
+    hEvSel_skimmed_filters[i]->SetBinContent(5, hEvSelFinal_skimmed[i]->GetBinContent(hEvSelFinal_skimmed[i]->GetXaxis()->FindBin("Double Omega") + iscale));
+    hEvSel_skimmed_filters[i]->SetBinContent(6, hEvSelFinal_skimmed[i]->GetBinContent(hEvSelFinal_skimmed[i]->GetXaxis()->FindBin("Omega+Xi") + iscale));
+    hEvSel_skimmed_filters[i]->SetBinContent(7, hEvSelFinal_skimmed[i]->GetBinContent(hEvSelFinal_skimmed[i]->GetXaxis()->FindBin("Lam+Lam") + iscale));
+    hEvSel_skimmed_filters[i]->SetBinContent(8, hEvSelFinal_skimmed[i]->GetBinContent(hEvSelFinal_skimmed[i]->GetXaxis()->FindBin("HighMultFT0M+Omega") + iscale));
+    hEvSel_skimmed_filters[i]->SetBinContent(9, hEvSelFinal_skimmed[i]->GetBinContent(hEvSelFinal_skimmed[i]->GetXaxis()->FindBin("HighMultTrack+Omega") + iscale));
+    hEvSel_skimmed_filters[i]->SetBinContent(10, hEvSelFinal_skimmed[i]->GetBinContent(hEvSelFinal_skimmed[i]->GetXaxis()->FindBin("HighMultFT0M") + iscale));
+    hEvSel_skimmed_filters[i]->SetBinContent(11, hEvSelFinal_skimmed[i]->GetBinContent(hEvSelFinal_skimmed[i]->GetXaxis()->FindBin("HighMultTrack") + iscale));
   }
 
   TH1F *hEvSel_filters2024[nruns] = {0x0};
-  // TH1F *hEvSel_skimmed_filters[nruns] = {0x0};
-
+  
   for (int i = 0; i < nruns; i++)
   {
-    hEvSel_filters2024[i] = new TH1F(Form("hEvSel_filters%d", i), ";;Events", numBins - 1, 0, numBins - 1);
+    hEvSel_filters2024[i] = new TH1F(Form("hEvSel_filters%d", i), ";;Events", numBins, 0, numBins - 1);
     hEvSel_filters2024[i]->SetBinContent(1, hEvSelFinal2024[i]->GetBinContent(hEvSelFinal2024[i]->GetXaxis()->FindBin("Omegas") + iscale));
-    hEvSel_filters2024[i]->SetBinContent(2, hEvSelFinal2024[i]->GetBinContent(hEvSelFinal2024[i]->GetXaxis()->FindBin("h-Omega") + iscale));
+    hEvSel_filters2024[i]->SetBinContent(2, hEvSelFinal2024[i]->GetBinContent(hEvSelFinal2024[i]->GetXaxis()->FindBin("sigma-p") + iscale));
     hEvSel_filters2024[i]->SetBinContent(3, hEvSelFinal2024[i]->GetBinContent(hEvSelFinal2024[i]->GetXaxis()->FindBin("Xi-N") + iscale));
-    hEvSel_filters2024[i]->SetBinContent(4, hEvSelFinal2024[i]->GetBinContent(hEvSelFinal2024[i]->GetXaxis()->FindBin("HighMult+Omega") + iscale));
-    hEvSel_filters2024[i]->SetBinContent(5, hEvSelFinal2024[i]->GetBinContent(hEvSelFinal2024[i]->GetXaxis()->FindBin("Tracked Omega") + iscale));
-    hEvSel_filters2024[i]->SetBinContent(6, hEvSelFinal2024[i]->GetBinContent(hEvSelFinal2024[i]->GetXaxis()->FindBin("Double Omega") + iscale));
-    hEvSel_filters2024[i]->SetBinContent(7, hEvSelFinal2024[i]->GetBinContent(hEvSelFinal2024[i]->GetXaxis()->FindBin("Omega+Xi") + iscale));
-    // hEvSel_skimmed_filters[i] = new TH1F(Form("hEvSel_skimmed_filters%d", i), ";;Events", numBins - 1, 0, numBins - 1);
-    // hEvSel_skimmed_filters[i]->SetBinContent(1, hEvSelFinal_skimmed[i]->GetBinContent(hEvSelFinal_skimmed[i]->GetXaxis()->FindBin("Omegas") + iscale));
-    // hEvSel_skimmed_filters[i]->SetBinContent(2, hEvSelFinal_skimmed[i]->GetBinContent(hEvSelFinal_skimmed[i]->GetXaxis()->FindBin("h-Omega") + iscale));
-    // hEvSel_skimmed_filters[i]->SetBinContent(3, hEvSelFinal_skimmed[i]->GetBinContent(hEvSelFinal_skimmed[i]->GetXaxis()->FindBin("Xi-N") + iscale));
-    // hEvSel_skimmed_filters[i]->SetBinContent(4, hEvSelFinal_skimmed[i]->GetBinContent(hEvSelFinal_skimmed[i]->GetXaxis()->FindBin("HighMult+Omega") + iscale));
-    // hEvSel_skimmed_filters[i]->SetBinContent(5, hEvSelFinal_skimmed[i]->GetBinContent(hEvSelFinal_skimmed[i]->GetXaxis()->FindBin("Tracked Omega") + iscale));
-    // hEvSel_skimmed_filters[i]->SetBinContent(6, hEvSelFinal_skimmed[i]->GetBinContent(hEvSelFinal_skimmed[i]->GetXaxis()->FindBin("Double Omega") + iscale));
-    // hEvSel_skimmed_filters[i]->SetBinContent(7, hEvSelFinal_skimmed[i]->GetBinContent(hEvSelFinal_skimmed[i]->GetXaxis()->FindBin("Omega+Xi") + iscale));
+    hEvSel_filters2024[i]->SetBinContent(4, hEvSelFinal2024[i]->GetBinContent(hEvSelFinal2024[i]->GetXaxis()->FindBin("Tracked Omega") + iscale));
+    hEvSel_filters2024[i]->SetBinContent(5, hEvSelFinal2024[i]->GetBinContent(hEvSelFinal2024[i]->GetXaxis()->FindBin("Double Omega") + iscale));
+    hEvSel_filters2024[i]->SetBinContent(6, hEvSelFinal2024[i]->GetBinContent(hEvSelFinal2024[i]->GetXaxis()->FindBin("Omega+Xi") + iscale));
+    hEvSel_filters2024[i]->SetBinContent(7, hEvSelFinal2024[i]->GetBinContent(hEvSelFinal2024[i]->GetXaxis()->FindBin("Lam+Lam") + iscale));
+    hEvSel_filters2024[i]->SetBinContent(8, hEvSelFinal2024[i]->GetBinContent(hEvSelFinal2024[i]->GetXaxis()->FindBin("HighMultFT0M+Omega") + iscale));
+    hEvSel_filters2024[i]->SetBinContent(9, hEvSelFinal2024[i]->GetBinContent(hEvSelFinal2024[i]->GetXaxis()->FindBin("HighMultTrack+Omega") + iscale));
+    hEvSel_filters2024[i]->SetBinContent(10, hEvSelFinal2024[i]->GetBinContent(hEvSelFinal2024[i]->GetXaxis()->FindBin("HighMultFT0M") + iscale));
+    hEvSel_filters2024[i]->SetBinContent(11, hEvSelFinal2024[i]->GetBinContent(hEvSelFinal2024[i]->GetXaxis()->FindBin("HighMultTrack") + iscale));
   }
 
   //------------ ratio skimmed/unskimmed
@@ -232,6 +231,8 @@ int runnumberShort[nruns] = {199, 213, 226, 227, 241, 269, 270, 271, 272, 284, 3
     {
       hRatio[irun]->SetBinContent(ibin + 1, hEvSel_skimmed_filters[irun]->GetBinContent(ibin + 1) / hEvSel_filters2025[irun]->GetBinContent(ibin + 1));
       cout << "run: " << runnumber[irun] << " |bin: " << ibin + 1 << " skimmed: " << hEvSel_skimmed_filters[irun]->GetBinContent(ibin + 1) << " unskimmed: " << hEvSel_filters2025[irun]->GetBinContent(ibin + 1) << " ratio: " << hRatio[irun]->GetBinContent(ibin + 1) << endl;
+      if (ibin == 9) // if bin is HighMultFT0M, set ratio to 1 since this filter is only applied in the skimmed data
+        hRatio[irun]->SetBinContent(ibin + 1, hRatio[irun]->GetBinContent(ibin + 1) * 4);
     }
     // hRatio[irun]->Sumw2();
   }
@@ -240,15 +241,18 @@ int runnumberShort[nruns] = {199, 213, 226, 227, 241, 269, 270, 271, 272, 284, 3
   cratio->cd();
   cratio->SetMargin(0.15, 0.1, 0.15, 0.1);
   TH1F *hratio = new TH1F(Form("hratio%d", 0), ";;Ratio Skimmed/Unskimmed", numBins, 0, numBins);
-  hratio->SetTitle("LHC24am batch5_6");
+  hratio->SetTitle(Form("%s", period.c_str()));
   hratio->GetXaxis()->SetBinLabel(1, "OmegaDueToOtherFilters");
-  hratio->GetXaxis()->SetBinLabel(2, "hOmega");
+  hratio->GetXaxis()->SetBinLabel(2, "sigma-p");
   hratio->GetXaxis()->SetBinLabel(3, "Xi-N");
-  hratio->GetXaxis()->SetBinLabel(4, "HighMult+Omega");
-  hratio->GetXaxis()->SetBinLabel(5, "Tracked Omega");
-  hratio->GetXaxis()->SetBinLabel(6, "Double Omega");
-  hratio->GetXaxis()->SetBinLabel(7, "Omega+Xi");
-  hratio->GetXaxis()->SetBinLabel(8, "Lam+Lam");
+  hratio->GetXaxis()->SetBinLabel(4, "Tracked Omega");
+  hratio->GetXaxis()->SetBinLabel(5, "Double Omega");
+  hratio->GetXaxis()->SetBinLabel(6, "Omega+Xi");
+  hratio->GetXaxis()->SetBinLabel(7, "Lam+Lam");
+  hratio->GetXaxis()->SetBinLabel(8, "HighMultFT0M+Omega");
+  hratio->GetXaxis()->SetBinLabel(9, "HighMultTrack+Omega");
+  hratio->GetXaxis()->SetBinLabel(10, "HighMultFT0M");
+  hratio->GetXaxis()->SetBinLabel(11, "HighMultTrack");
   hratio->SetStats(0);
   hratio->GetYaxis()->SetRangeUser(0.01, 1.5);
   hratio->Draw("same");
@@ -269,7 +273,7 @@ int runnumberShort[nruns] = {199, 213, 226, 227, 241, 269, 270, 271, 272, 284, 3
     legratio->AddEntry(hRatio[i], Form("%d", runnumber[i]), "pl");
   }
   legratio->Draw("same");
-  cratio->SaveAs("ratioskimmunskimm_LHC24am_batch4_5.png");
+  cratio->SaveAs(Form("ratioskimmunskimm_%s.png", period.c_str()));
 
   //------------ #events for each filter
   TCanvas *cfull = new TCanvas("cfull", "cfull", 800, 800);
@@ -331,13 +335,13 @@ int runnumberShort[nruns] = {199, 213, 226, 227, 241, 269, 270, 271, 272, 284, 3
   cfull->SaveAs(Form("cfull_%s_total.png", period.c_str()));
 
   //------------ selectivity: #events for each filter/#total events (all processed events)
-  TH1F *hSelectivity2025[8][nruns];
-  Double_t tot_filters2025[8];
+  TH1F *hSelectivity2025[numBins][nruns];
+  Double_t tot_filters2025[numBins];
   Double_t tot_processed2025 = 0.;
-  TH1F *hSelectivity_period2025[8];
-  Float_t LowLimit[8] = {2e-6, 6e-6, 1.6e-6, 7e-6, 5e-6, 1.5e-7, 1.8e-6, 1.5e-7};
-  Float_t UpLimit[8] = {3e-4, 1.5e-5, 2.2e-6, 1.6e-5, 7e-6, 3.5e-7, 2.2e-6, 3.5e-7};
-  for (int ifilter = 0; ifilter < 8; ifilter++)
+  TH1F *hSelectivity_period2025[numBins];
+  Float_t LowLimit[numBins] = {2e-6, 6e-6, 1.3e-6, 6e-6, 5e-6, 3e-7, 1.5e-6, 2e-7, 1e-6, 2e-5, 1e-6};
+  Float_t UpLimit[numBins] = {3e-4, 1.5e-5, 2e-6, 10e-6, 9e-6, 6e-7, 3.5e-6, 6e-7, 4e-6, 10e-5, 7e-6};
+  for (int ifilter = 0; ifilter < numBins; ifilter++)
   {
     for (int irun = 0; irun < nruns; irun++)
     {
@@ -347,10 +351,10 @@ int runnumberShort[nruns] = {199, 213, 226, 227, 241, 269, 270, 271, 272, 284, 3
       tot_filters2025[ifilter] += hEvSel_filters2025[irun]->GetBinContent(ifilter + 1);
       tot_processed2025 += hEvSelFinal2025[irun]->GetBinContent(hEvSelFinal2025[irun]->GetXaxis()->FindBin("Processed events"));
 
-      cout << "run: " << irun << " |filter: " << ifilter << " |content: " << hSelectivity2025[ifilter][irun]->GetBinContent(irun + 1) << endl;
+      // cout << "run: " << irun << " |filter: " << ifilter << " |selectivity: " << hSelectivity2025[ifilter][irun]->GetBinContent(irun + 1) << endl;
       // cout << " **** run: " << irun << " |filter: " << ifilter << " |eventi: " << hEvSel_filters[irun]->GetBinContent(ifilter+1) << " |tot: " << hEvSelFinal[irun]->GetBinContent(hEvSelFinal[irun]->GetXaxis()->FindBin("Processed events")) << " |sel: " << hSelectivity[ifilter][irun]->GetBinContent(irun+1) << endl;
-      //  if(ifilter==0) cout << "run: " << irun << " |sel: " << hSelectivity[ifilter][irun]->GetBinContent(irun+1) << endl;
-      //  if(ifilter==0) cout << "irun: " << irun << " |cont filt: " << hEvSel_filters[irun]->GetBinContent(ifilter+1) << endl;
+      //   if(ifilter==0) cout << "run: " << irun << " |sel: " << hSelectivity[ifilter][irun]->GetBinContent(irun+1) << endl;
+      //   if(ifilter==0) cout << "irun: " << irun << " |cont filt: " << hEvSel_filters[irun]->GetBinContent(ifilter+1) << endl;
     }
 
     hSelectivity_period2025[ifilter] = new TH1F(Form("Selectivity2025_filter_%d_period_%s", ifilter, period.c_str()), Form("Selectivity2025_filter_%d_period_%s", ifilter, period.c_str()), numBins - 1, 0, numBins - 1);
@@ -359,11 +363,11 @@ int runnumberShort[nruns] = {199, 213, 226, 227, 241, 269, 270, 271, 272, 284, 3
     // cout << "filter: " << ifilter << " sel tot: " << hSelectivity_period[ifilter]->GetBinContent(ifilter+1) << endl;
   }
 
-  TH1F *hSelectivity2024[7][nruns];
-  Double_t tot_filters2024[7];
+  TH1F *hSelectivity2024[numBins][nruns];
+  Double_t tot_filters2024[numBins];
   Double_t tot_processed2024 = 0.;
-  TH1F *hSelectivity_period2024[7];
-  for (int ifilter = 0; ifilter < 7; ifilter++)
+  TH1F *hSelectivity_period2024[numBins];
+  for (int ifilter = 0; ifilter < numBins; ifilter++)
   {
     for (int irun = 0; irun < nruns; irun++)
     {
@@ -387,39 +391,45 @@ int runnumberShort[nruns] = {199, 213, 226, 227, 241, 269, 270, 271, 272, 284, 3
 
   //--- if we have only 1 run
   TH1F *hSel_allfilters2025 = new TH1F(Form("hSel2025_allfilters_run_%d", runnumber[0]), Form("hSel2025_allfilters_run_%d", runnumber[0]), 8, 0, 8);
-  for (int ifilter = 0; ifilter < 8; ifilter++)
+  for (int ifilter = 0; ifilter < numBins; ifilter++)
   {
     hSel_allfilters2025->SetBinContent(ifilter + 1, hSelectivity2025[ifilter][0]->GetBinContent(1));
-    cout << "2025 filter:" << ifilter << " |content: " << hSel_allfilters2025->GetBinContent(ifilter + 1) << endl;
+    // cout << "2025 filter:" << ifilter << " |content: " << hSel_allfilters2025->GetBinContent(ifilter + 1) << endl;
   }
 
-  TH1F *hSel_allfilters2024 = new TH1F(Form("hSel2024_allfilters_run_%d", runnumber[0]), Form("hSel2024_allfilters_run_%d", runnumber[0]), 7, 0, 7);
-  for (int ifilter = 0; ifilter < 7; ifilter++)
+  TH1F *hSel_allfilters2024 = new TH1F(Form("hSel2024_allfilters_run_%d", runnumber[0]), Form("hSel2024_allfilters_run_%d", runnumber[0]), numBins, 0, numBins);
+  for (int ifilter = 0; ifilter < numBins; ifilter++)
   {
     hSel_allfilters2024->SetBinContent(ifilter + 1, hSelectivity2024[ifilter][0]->GetBinContent(1));
-    cout << "2024 filter:" << ifilter << " |content: " << hSel_allfilters2024->GetBinContent(ifilter + 1) << endl;
-    // cout<<"filter:" << ifilter <<" |content: " << hSelectivity[ifilter][0]->GetBinContent(1) << " |content now: " << hSel_allfilters->GetBinContent(ifilter+1) << endl;
+    // cout << "2024 filter:" << ifilter << " |content: " << hSel_allfilters2024->GetBinContent(ifilter + 1) << endl;
+    //  cout<<"filter:" << ifilter <<" |content: " << hSelectivity[ifilter][0]->GetBinContent(1) << " |content now: " << hSel_allfilters->GetBinContent(ifilter+1) << endl;
   }
 
-  TString *xlabel[8];
-  for (int ifilter = 0; ifilter < 8; ifilter++)
+  TString *xlabel[numBins];
+  for (int ifilter = 0; ifilter < numBins; ifilter++)
   {
     if (ifilter == 0)
       xlabel[ifilter] = new TString("Omega");
     if (ifilter == 1)
-      xlabel[ifilter] = new TString("hOmega");
+      xlabel[ifilter] = new TString("sigma-p");
     if (ifilter == 2)
       xlabel[ifilter] = new TString("Xi-N");
     if (ifilter == 3)
-      xlabel[ifilter] = new TString("HighMult+Omega");
-    if (ifilter == 4)
       xlabel[ifilter] = new TString("Tracked Omega");
-    if (ifilter == 5)
+    if (ifilter == 4)
       xlabel[ifilter] = new TString("Double Omega");
-    if (ifilter == 6)
+    if (ifilter == 5)
       xlabel[ifilter] = new TString("Omega+Xi");
-    if (ifilter == 7)
+    if (ifilter == 6)
       xlabel[ifilter] = new TString("Lam+Lam");
+    if (ifilter == 7)
+      xlabel[ifilter] = new TString("HighMultFT0M+Omega");
+    if (ifilter == 8)
+      xlabel[ifilter] = new TString("HighMultTrack+Omega");
+    if (ifilter == 9)
+      xlabel[ifilter] = new TString("HighMultFT0M");
+    if (ifilter == 10)
+      xlabel[ifilter] = new TString("HighMultTrack");
   }
 
   TCanvas *cselallfilters = new TCanvas("cselallfilters", "cselallfilters", 1400, 1400);
@@ -504,10 +514,10 @@ int runnumberShort[nruns] = {199, 213, 226, 227, 241, 269, 270, 271, 272, 284, 3
   cselallfilters_ratio->SaveAs(Form("cselallfilters_ratio_%s_total.png", period.c_str()));
 
   //------------ selectivity for each filter for each run
-  TCanvas *cselectivity[8];
-  TH1F *hselectivity[8];
+  TCanvas *cselectivity[numBins];
+  TH1F *hselectivity[numBins];
 
-  for (int ifilter = 0; ifilter < 8; ifilter++)
+  for (int ifilter = 0; ifilter < numBins; ifilter++)
   {
     cselectivity[ifilter] = new TCanvas(Form("cselectivity_filter%d", ifilter), Form("cselectivity_filter%d", ifilter), 800, 800);
     cselectivity[ifilter]->cd();
@@ -520,7 +530,7 @@ int runnumberShort[nruns] = {199, 213, 226, 227, 241, 269, 270, 271, 272, 284, 3
     if (ifilter == 0)
       hselectivity[ifilter]->SetTitle(Form("%s: Omega", period.c_str()));
     if (ifilter == 1)
-      hselectivity[ifilter]->SetTitle(Form("%s: hOmega", period.c_str()));
+      hselectivity[ifilter]->SetTitle(Form("%s: sigma-p", period.c_str()));
     if (ifilter == 2)
       hselectivity[ifilter]->SetTitle(Form("%s: Xi-N", period.c_str()));
     if (ifilter == 3)
@@ -533,6 +543,14 @@ int runnumberShort[nruns] = {199, 213, 226, 227, 241, 269, 270, 271, 272, 284, 3
       hselectivity[ifilter]->SetTitle(Form("%s: Omega+Xi", period.c_str()));
     if (ifilter == 7)
       hselectivity[ifilter]->SetTitle(Form("%s: Lam+Lam", period.c_str()));
+    if (ifilter == 8)
+      hselectivity[ifilter]->SetTitle(Form("%s: HighMultFT0M+Omega", period.c_str()));
+    if (ifilter == 9)
+      hselectivity[ifilter]->SetTitle(Form("%s: HighMultTrack+Omega", period.c_str()));
+    if (ifilter == 10)
+      hselectivity[ifilter]->SetTitle(Form("%s: HighMult", period.c_str()));
+    if (ifilter == 11)
+      hselectivity[ifilter]->SetTitle(Form("%s: HighMultTrack", period.c_str()));
 
     for (int irun = 0; irun < nruns; irun++)
       hselectivity[ifilter]->GetXaxis()->SetBinLabel(irun + 1, Form("%d", runnumberShort[irun]));
@@ -549,23 +567,6 @@ int runnumberShort[nruns] = {199, 213, 226, 227, 241, 269, 270, 271, 272, 284, 3
       hSelectivity2025[ifilter][irun]->SetMarkerStyle(20);
       hSelectivity2025[ifilter][irun]->DrawCopy("PSAME");
     }
-
-    if (ifilter == 0)
-      cselectivity[ifilter]->SaveAs(Form("cselectivity_period_%s_filter_Omega.png", period.c_str()));
-    if (ifilter == 1)
-      cselectivity[ifilter]->SaveAs(Form("cselectivity_period_%s_filter_hOmega.png", period.c_str()));
-    if (ifilter == 2)
-      cselectivity[ifilter]->SaveAs(Form("cselectivity_period_%s_filter_Xi-N.png", period.c_str()));
-    if (ifilter == 3)
-      cselectivity[ifilter]->SaveAs(Form("cselectivity_period_%s_filter_HighMult+Omega.png", period.c_str()));
-    if (ifilter == 4)
-      cselectivity[ifilter]->SaveAs(Form("cselectivity_period_%s_filter_Tracked Omega.png", period.c_str()));
-    if (ifilter == 5)
-      cselectivity[ifilter]->SaveAs(Form("cselectivity_period_%s_filter_Double Omega.png", period.c_str()));
-    if (ifilter == 6)
-      cselectivity[ifilter]->SaveAs(Form("cselectivity_period_%s_filter_Omega+Xi.png", period.c_str()));
-    if (ifilter == 7)
-      cselectivity[ifilter]->SaveAs(Form("cselectivity_period_%s_filter_Lam+Lam.png", period.c_str()));
   }
 
   // cout << hSelectivity_period[0]->GetBinContent(1) << endl;
@@ -579,15 +580,18 @@ int runnumberShort[nruns] = {199, 213, 226, 227, 241, 269, 270, 271, 272, 284, 3
   cselectivity_period->SetGridx();
 
   TH1F *hselectivity_period = new TH1F("hselectivity_period_total", ";;Trigger Selectivity", numBins - 1, 0, numBins - 1);
-  hselectivity_period->SetTitle(Form("%s batch1_2", period.c_str()));
+  hselectivity_period->SetTitle(Form("%s", period.c_str()));
   hselectivity_period->GetXaxis()->SetBinLabel(1, "Omega");
-  hselectivity_period->GetXaxis()->SetBinLabel(2, "hOmega");
+  hselectivity_period->GetXaxis()->SetBinLabel(2, "sigma-p");
   hselectivity_period->GetXaxis()->SetBinLabel(3, "Xi-N");
-  hselectivity_period->GetXaxis()->SetBinLabel(4, "HighMult+Omega");
-  hselectivity_period->GetXaxis()->SetBinLabel(5, "Tracked Omega");
-  hselectivity_period->GetXaxis()->SetBinLabel(6, "Double Omega");
-  hselectivity_period->GetXaxis()->SetBinLabel(7, "Omega+Xi");
-  hselectivity_period->GetXaxis()->SetBinLabel(8, "Lam+Lam");
+  hselectivity_period->GetXaxis()->SetBinLabel(4, "Tracked Omega");
+  hselectivity_period->GetXaxis()->SetBinLabel(5, "Double Omega");
+  hselectivity_period->GetXaxis()->SetBinLabel(6, "Omega+Xi");
+  hselectivity_period->GetXaxis()->SetBinLabel(7, "Lam+Lam");
+  hselectivity_period->GetXaxis()->SetBinLabel(8, "HighMultFT0M+Omega");
+  hselectivity_period->GetXaxis()->SetBinLabel(9, "HighMultTrack+Omega");
+  hselectivity_period->GetXaxis()->SetBinLabel(10, "HighMultFT0M");
+  hselectivity_period->GetXaxis()->SetBinLabel(11, "HighMultTrack");
   hselectivity_period->SetStats(0);
   hselectivity_period->GetYaxis()->SetRangeUser(1e-9, 1e-3);
   hselectivity_period->Draw();
@@ -604,5 +608,5 @@ int runnumberShort[nruns] = {199, 213, 226, 227, 241, 269, 270, 271, 272, 284, 3
     //cout << "i: " << i << " cont: " << hSelectivity_period[i]->GetBinContent(i+1) << endl;
   }
     */
-  cselectivity_period->SaveAs(Form("cselectivity_period_%s_batch5_6.png", period.c_str()));
+  cselectivity_period->SaveAs(Form("cselectivity_period_%s.png", period.c_str()));
 }
