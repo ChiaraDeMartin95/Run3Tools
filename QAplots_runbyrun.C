@@ -28,7 +28,7 @@ Int_t iscale = 0;             // 0 if input file has no mistakes. At some point 
 
 void ErrRatioCorr(TH1F *hNum, TH1F *hDenom, TH1F *hRatio, Int_t FullCorr);
 
-void QAplots_runbyrun(string period = "LHC26ac_batch1")
+void QAplots_runbyrun(string period = "LHC26ac_batch2")
 {
 
   gROOT->SetBatch(kTRUE);
@@ -39,11 +39,13 @@ void QAplots_runbyrun(string period = "LHC26ac_batch1")
   time.Start();
 
   char pass_name[2][30] = {"apass1", "apass1_skimmed"}; // AnalysisResults_fullrun_LHC25ah_ctf_skim_full_564704
-  const int nruns_2025 = 20;
-  // int runnumber_2025[nruns_2025] = {565007,565030,565118,565129,565140,565152,565167,565178,565190,565211,565225,565236,565252,565263,565274,565275,565277,565296};
-  // int runnumber_2025[nruns_2025] = { 566598, 566611, 566639, 566641, 566642, 566653, 566656, 566657};
-  // int runnumber_2025[nruns_2025] = {570051, 570054, 570064, 570065, 570066, 570077, 570079, 570091, 570102};
-  int runnumber_2025[nruns_2025] = {570051, 570054, 570065, 570066, 570077, 570079, 570091, 570102, 569945, 569947, 569978, 569980, 569981, 569982, 570011, 570012, 570025, 570036, 570049, 570050};
+
+  // LHC26ac_batch1
+  // const int nruns_2025 = 20;
+  // int runnumber_2025[nruns_2025] = {569945, 569947, 569978, 569980, 569981, 569982, 570011, 570012, 570025, 570036, 570049, 570050, 570051, 570054, 570065, 570066, 570077, 570079, 570091, 570102};
+  // LHC26ac_batch2
+  const int nruns_2025 = 14;
+  int runnumber_2025[nruns_2025] = {570128, 570143, 570158, 570159, 570160, 570162, 570163, 570165, 570166, 570191, 570205, 570243, 570279, 570292};
 
   //------------ read files
   TFile *file_in2025[nruns_2025] = {0x0};
@@ -51,9 +53,9 @@ void QAplots_runbyrun(string period = "LHC26ac_batch1")
 
   for (int irun = 0; irun < nruns_2025; irun++)
   {
-    if (gSystem->GetPathInfo(Form("../TriggerForRun3/EventFiltering2026/LHC26ac_batch1/AnalysisResults_fullrun_LHC26ac_batch1_%d.root", runnumber_2025[irun]), dummy1, dummy2, dummy3, dummy4) != 0)
+    if (gSystem->GetPathInfo(Form("../TriggerForRun3/EventFiltering2026/LHC26ac_batch2/AnalysisResults_fullrun_LHC26ac_apass1_%d.root", runnumber_2025[irun]), dummy1, dummy2, dummy3, dummy4) != 0)
       cout << "File Not Found! Try again" << endl;
-    file_in2025[irun] = new TFile(Form("../TriggerForRun3/EventFiltering2026/LHC26ac_batch1/AnalysisResults_fullrun_LHC26ac_batch1_%d.root", runnumber_2025[irun]), "read");
+    file_in2025[irun] = new TFile(Form("../TriggerForRun3/EventFiltering2026/LHC26ac_batch2/AnalysisResults_fullrun_LHC26ac_apass1_%d.root", runnumber_2025[irun]), "read");
     printf("Open File: %s\n", file_in2025[irun]->GetName());
   }
 
@@ -69,6 +71,8 @@ void QAplots_runbyrun(string period = "LHC26ac_batch1")
   //------------ #events for each filter
   TH1F *hEvSel2025[nruns_2025] = {0x0};
   TH1F *hEvSelFinal2025[nruns_2025] = {0x0};
+  TH1F *hMultFT0MNorm[nruns_2025] = {0x0};
+  TH1F *hMultFT0MNormRatio[nruns_2025] = {0x0};
   Double_t TotEvtMax2025 = 0;
 
   for (int i = 0; i < nruns_2025; i++)
@@ -77,7 +81,49 @@ void QAplots_runbyrun(string period = "LHC26ac_batch1")
     hEvSel2025[i]->SetName(Form("hEvSel2025_%d", i));
     if (hEvSel2025[i]->GetBinContent(1) > TotEvtMax2025)
       TotEvtMax2025 = hEvSel2025[i]->GetBinContent(1);
+    hMultFT0MNorm[i] = (TH1F *)file_in2025[i]->Get("lf-strangeness-filter/EventsvsMultiplicity/AllEventsvsMultiplicityFT0MNorm");
+    hMultFT0MNorm[i]->Scale(1. / hEvSel2025[i]->GetBinContent(1));
+    hMultFT0MNorm[i]->Rebin(4);
   }
+
+  TCanvas *cMultFT0MNorm = new TCanvas("cMultFT0MNorm", "cMultFT0MNorm", 800, 800);
+  cMultFT0MNorm->cd();
+  cMultFT0MNorm->SetMargin(0.15, 0.15, 0.13, 0.08); // left,right,bottom,top
+  cMultFT0MNorm->SetLogy();
+  for (int i = 0; i < nruns_2025; i++)
+  {
+    color = nruns_2025 - i - 1 + FI;
+    hMultFT0MNorm[i]->SetLineColor(color);
+    hMultFT0MNorm[i]->SetTitle("T0M distribution normalised to processed events");
+    hMultFT0MNorm[i]->Draw("hist same");
+  }
+  TLegend *legendMultFT0MNorm = new TLegend(0.2, 0.55, 0.51, 0.9);
+  legendMultFT0MNorm->SetFillStyle(0);
+  legendMultFT0MNorm->SetBorderSize(0);
+  legendMultFT0MNorm->SetTextAlign(12);
+  legendMultFT0MNorm->SetTextSize(0.025);
+  for (int i = 0; i < nruns_2025; i++)
+  {
+    legendMultFT0MNorm->AddEntry(hMultFT0MNorm[i], Form("Run %d", runnumber_2025[i]), "l");
+  }
+  legendMultFT0MNorm->Draw();
+  cMultFT0MNorm->SaveAs(Form("cMultFT0MNorm_%s.pdf", period.c_str()));
+  cMultFT0MNorm->SaveAs(Form("cMultFT0MNorm_%s.png", period.c_str()));
+  cMultFT0MNorm->SaveAs(Form("cMultFT0MNorm_%s.eps", period.c_str()));
+
+  TCanvas *cMultFT0MNormRatio = new TCanvas("cMultFT0MNormRatio", "cMultFT0MNormRatio", 800, 800);
+  cMultFT0MNormRatio->cd();
+  cMultFT0MNormRatio->SetMargin(0.15, 0.15, 0.13, 0.08); // left,right,bottom,top
+  for (int i = 0; i < nruns_2025; i++)
+  {
+    hMultFT0MNormRatio[i] = (TH1F *)hMultFT0MNorm[i]->Clone(Form("hMultFT0MNormRatio_%d", i));
+    hMultFT0MNormRatio[i]->Divide(hMultFT0MNorm[0]);
+    hMultFT0MNormRatio[i]->Draw("hist same");
+  }
+  legendMultFT0MNorm->Draw();
+  cMultFT0MNormRatio->SaveAs(Form("cMultFT0MNormRatio_%s.pdf", period.c_str()));
+  cMultFT0MNormRatio->SaveAs(Form("cMultFT0MNormRatio_%s.png", period.c_str()));
+  cMultFT0MNormRatio->SaveAs(Form("cMultFT0MNormRatio_%s.eps", period.c_str()));
 
   for (int i = 0; i < nruns_2025; i++)
   {
@@ -270,9 +316,9 @@ void QAplots_runbyrun(string period = "LHC26ac_batch1")
   hSel_allfilters2025->SetMarkerSize(3);
   hSel_allfilters2025->SetMarkerStyle(20);
   hSel_allfilters2025->DrawCopy("PSAME");
-  leg_sel->AddEntry(hSel_allfilters2025, "2026 ac batch1", "pl");
+  leg_sel->AddEntry(hSel_allfilters2025, "2026 ac batch2", "pl");
   leg_sel->Draw("same");
-  cselallfilters->SaveAs("cselallfilters_total_2026ac_batch1.png");
+  cselallfilters->SaveAs("cselallfilters_total_2026ac_batch2.png");
 
   //------------ selectivity for each filter for each run
   TCanvas *cselectivity[numTriggers];
