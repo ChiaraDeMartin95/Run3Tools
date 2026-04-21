@@ -46,15 +46,15 @@ float findMaxValue(TH1F *lHist1, TH1F *lHist2);
 Double_t SetEfficiencyError(Int_t k, Int_t n);
 
 void PostProcessV0AndCascQA_AO2D_New2026(TString CollType = "pp",
-                                 Bool_t isMC = false,
-                                 Int_t RebinTPC = 1,
-                                 Int_t SkipCascFits = 0,      // 0 = don't skip, 1 = skip partc, 2 = skip all cascades
-                                 Bool_t TopologyOnly = false, // true = only topology analysis, false = complete analysis
-                                 TString PathIn = "../Run3QA/Periods/LHC26b11/AnalysisResults_LHC26b11_fullQA_Train661226.root",
-                                 TString PathOut = "../Run3QA/Periods/LHC26b11/PostProcess_LHC26b11_fullQA_Train661226",
-                                 Bool_t CheckOldPass = false, // true to compare two passes
-                                 TString OldPassPath = "..",  // input/output file name (old pass to be compared with)
-                                 Bool_t isMassvsRadiusPlots = 0)
+                                         Bool_t isMC = false,
+                                         Int_t RebinTPC = 1,
+                                         Int_t SkipCascFits = 0,      // 0 = don't skip, 1 = skip partc, 2 = skip all cascades
+                                         Bool_t TopologyOnly = false, // true = only topology analysis, false = complete analysis
+                                         TString PathIn = "../Run3QA/Periods/LHC26b11/AnalysisResults_LHC26b11_fullQA_Train661226.root",
+                                         TString PathOut = "../Run3QA/Periods/LHC26b11/PostProcess_LHC26b11_fullQA_Train661226",
+                                         Bool_t CheckOldPass = false, // true to compare two passes
+                                         TString OldPassPath = "..",  // input/output file name (old pass to be compared with)
+                                         Bool_t isMassvsRadiusPlots = 0)
 {
   // Define pass names
   TString pass_names[2] = {"pass1", "pass3"};
@@ -216,10 +216,10 @@ void PostProcessV0AndCascQA_AO2D_New2026(TString CollType = "pp",
     fHistTopV0[var]->DrawCopy("hist");
     SelLineRun2 = new TLine(TopVarV0CutsRun2[var], fHistTopV0[var]->GetMinimum(), TopVarV0CutsRun2[var], fHistTopV0[var]->GetMaximum());
     SelLineRun2->SetLineColor(kGray);
-    //SelLineRun2->DrawClone("same");
+    // SelLineRun2->DrawClone("same");
     SelLine = new TLine(TopVarV0Cuts[var], fHistTopV0[var]->GetMinimum(), TopVarV0Cuts[var], fHistTopV0[var]->GetMaximum());
-    //SelLine->DrawClone("same");
-    //checkExactLimit(fHistTopV0[var], TopVarV0Cuts[var], (var != 2) ? true : false, cutCheckLabels);
+    // SelLine->DrawClone("same");
+    // checkExactLimit(fHistTopV0[var], TopVarV0Cuts[var], (var != 2) ? true : false, cutCheckLabels);
     setPadOptions(true);
     fHistTopV0[var]->Write();
   }
@@ -301,17 +301,17 @@ void PostProcessV0AndCascQA_AO2D_New2026(TString CollType = "pp",
       fHistTopCasc1D[var]->DrawCopy("hist");
       SelLineRun2 = new TLine(TopVarCascCutsRun2[var], fHistTopCasc1D[var]->GetMinimum(), TopVarCascCutsRun2[var], fHistTopCasc1D[var]->GetMaximum());
       SelLineRun2->SetLineColor(kGray);
-      //SelLineRun2->DrawClone("same");
+      // SelLineRun2->DrawClone("same");
       SelLine = new TLine(TopVarCascCuts[var], fHistTopCasc1D[var]->GetMinimum(), TopVarCascCuts[var], fHistTopCasc1D[var]->GetMaximum());
       SelLine->SetLineColor(kBlack);
-      //SelLine->DrawClone("same");
+      // SelLine->DrawClone("same");
       if (TopVarCascCutsCheckLimit[var])
       {
-        //checkExactLimit(fHistTopCasc1D[var], TopVarCascCuts[var], TopVarCascCutsCheckLimit[var] - 1, cutCheckLabels);
+        // checkExactLimit(fHistTopCasc1D[var], TopVarCascCuts[var], TopVarCascCutsCheckLimit[var] - 1, cutCheckLabels);
       }
       if (var == 7)
       {
-        //checkIntervalWidth(fHistTopCasc1D[var], InvMassWindow, cutCheckLabels);
+        // checkIntervalWidth(fHistTopCasc1D[var], InvMassWindow, cutCheckLabels);
       }
       if (var > 1 && var != 7 && var <= 13)
       {
@@ -492,6 +492,7 @@ void PostProcessV0AndCascQA_AO2D_New2026(TString CollType = "pp",
   TH1F *fHistYield[numPart];
   TH1F *fHistSSB[numPart];
   TH1F *fHistSB[numPart];
+  Double_t fTotalYield[numPart] = {0};
 
   for (Int_t part = 0; part < numPart; part++)
   {
@@ -517,26 +518,26 @@ void PostProcessV0AndCascQA_AO2D_New2026(TString CollType = "pp",
       PtVector[0] = 0.3;
       SPt[0] = "0.3-6.0";
       SPt[1] = "0.3-0.7";
-      //numEff = numPt - 1;
+      // numEff = numPt - 1;
     }
     else
     {
       NPt[0][0] = 0.7; // lower limit
       NPt[1][0] = 0.7;
-      //NPt[2][0] = 1.3;
-      //NPt[3][0] = 1.8;
-      //NPt[1][1] = 1.3;
-      //NPt[2][1] = 1.8;
-      //NPt[3][1] = 3;
+      // NPt[2][0] = 1.3;
+      // NPt[3][0] = 1.8;
+      // NPt[1][1] = 1.3;
+      // NPt[2][1] = 1.8;
+      // NPt[3][1] = 3;
       SPt[0] = "0.7-6.0";
-      //SPt[1] = "0.7-1.3";
-      //SPt[2] = "1.3-1.8";
-      //SPt[3] = "1.8-3.0";
+      // SPt[1] = "0.7-1.3";
+      // SPt[2] = "1.3-1.8";
+      // SPt[3] = "1.8-3.0";
       PtVector[0] = 0.7;
-      //PtVector[1] = 1.3;
-      //PtVector[2] = 1.8;
-      //PtVector[3] = 3;
-      //numEff = 4;
+      // PtVector[1] = 1.3;
+      // PtVector[2] = 1.8;
+      // PtVector[3] = 3;
+      // numEff = 4;
     }
     numEffPart[part] = numEff;
 
@@ -902,6 +903,8 @@ void PostProcessV0AndCascQA_AO2D_New2026(TString CollType = "pp",
       fHistSSB[part]->SetBinError(pt, ErrSSB[part][pt]);
       fHistSB[part]->SetBinContent(pt, SB[part][pt]);
       fHistSB[part]->SetBinError(pt, ErrSB[part][pt]);
+
+      fTotalYield[part] += YieldSNotScaled[part][pt];
     }
 
     canvasMass[part]->SaveAs(PathOut + ".pdf");
@@ -1190,11 +1193,18 @@ void PostProcessV0AndCascQA_AO2D_New2026(TString CollType = "pp",
   f_out->Close();
   cout << "Mission accomplished! " << endl;
 
+  cout << "\n\nTotal number of events: " << NEvents << endl;
+  cout << "Reco particles / events: " << endl;
+  for (Int_t part = 0; part < numPart; part++)
+  {
+    cout << NamePart[part] << ": " << fTotalYield[part] / NEvents << endl;
+  }
+
   Float_t RelUnc = 0.05;
   cout << "Estimates! " << endl;
   cout << "How many events do we need for a small statistical uncertainty " << endl;
   cout << "on the spectrum in the largest pt interval(the one with less counts)? " << endl;
-  cout << " Which uncertainty do you want? " << endl;
+  cout << " Which uncertainty do you want? Decomment the following part :) " << endl;
   // cin >> RelUnc;
   Float_t EstimateNevt = 0;
   Float_t EstimateNevtCorrect = 0;
@@ -1204,7 +1214,7 @@ void PostProcessV0AndCascQA_AO2D_New2026(TString CollType = "pp",
     // if (part != 3 && part != 4 && part!=0 )
     if (part == 5 || part == 6)
       continue;
-    cout << "\nParticle: " << NamePart[part] << endl;
+    //cout << "\nParticle: " << NamePart[part] << endl;
     for (Int_t pt = 0; pt < numEffPart[part]; pt++)
     {
       if (pt == 0)
@@ -1212,12 +1222,12 @@ void PostProcessV0AndCascQA_AO2D_New2026(TString CollType = "pp",
       SvsRelUnc = (1. + 2. / SB[part][pt]) / pow(RelUnc, 2);
       EstimateNevtCorrect = SvsRelUnc * 1. / BinWidth[part][pt] * 1. / YieldSBis[part][pt];
       EstimateNevt = 1. / pow(RelUnc, 2) * SB[part][pt] / (SB[part][pt] + 1) * 1. / BinWidth[part][pt] * 1. / YieldSBis[part][pt];
-      cout << "\nPt: " << SPtPart[part][pt] << " (" << BinWidth[part][pt] << ")" << endl;
-      cout << "SigmaN/N " << 1. / sqrt(SPlusB[part][pt]) << " SigmaS/S (correct) " << sqrt(YieldBNotScaled[part][pt] + SPlusB[part][pt]) / YieldSBisNotScaled[part][pt] << endl;
-      cout << "Rel error on yield: " << ErrYieldSBis[part][pt] / YieldSBis[part][pt] << endl;
-      cout << "Ratio (approx / correct) " << 1. / sqrt(SPlusB[part][pt]) / (sqrt(YieldBNotScaled[part][pt] + SPlusB[part][pt]) / YieldSBisNotScaled[part][pt]) << endl;
-      cout << "Number of events needed for " << RelUnc << " uncertainty: " << EstimateNevt << " better: " << EstimateNevtCorrect << endl;
-      cout << "Actual number of events in this period: " << NEvents << endl;
+      // cout << "\nPt: " << SPtPart[part][pt] << " (" << BinWidth[part][pt] << ")" << endl;
+      // cout << "SigmaN/N " << 1. / sqrt(SPlusB[part][pt]) << " SigmaS/S (correct) " << sqrt(YieldBNotScaled[part][pt] + SPlusB[part][pt]) / YieldSBisNotScaled[part][pt] << endl;
+      // cout << "Rel error on yield: " << ErrYieldSBis[part][pt] / YieldSBis[part][pt] << endl;
+      // cout << "Ratio (approx / correct) " << 1. / sqrt(SPlusB[part][pt]) / (sqrt(YieldBNotScaled[part][pt] + SPlusB[part][pt]) / YieldSBisNotScaled[part][pt]) << endl;
+      // cout << "Number of events needed for " << RelUnc << " uncertainty: " << EstimateNevt << " better: " << EstimateNevtCorrect << endl;
+      // cout << "Actual number of events in this period: " << NEvents << endl;
     }
   }
 
