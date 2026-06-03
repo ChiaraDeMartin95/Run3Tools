@@ -28,7 +28,7 @@ Int_t iscale = 0;             // 0 if input file has no mistakes. At some point 
 
 void ErrRatioCorr(TH1F *hNum, TH1F *hDenom, TH1F *hRatio, Int_t FullCorr);
 
-void QAplots_runbyrun(string period = "LHC26ac_batch2")
+void QAplots_runbyrun(string period = "LHC26ai")
 {
 
   gROOT->SetBatch(kTRUE);
@@ -44,18 +44,29 @@ void QAplots_runbyrun(string period = "LHC26ac_batch2")
   // const int nruns_2025 = 20;
   // int runnumber_2025[nruns_2025] = {569945, 569947, 569978, 569980, 569981, 569982, 570011, 570012, 570025, 570036, 570049, 570050, 570051, 570054, 570065, 570066, 570077, 570079, 570091, 570102};
   // LHC26ac_batch2
-  const int nruns_2025 = 14;
-  int runnumber_2025[nruns_2025] = {570128, 570143, 570158, 570159, 570160, 570162, 570163, 570165, 570166, 570191, 570205, 570243, 570279, 570292};
-
+  //const int nruns_2025 = 14;
+  //int runnumber_2025[nruns_2025] = {570128, 570143, 570158, 570159, 570160, 570162, 570163, 570165, 570166, 570191, 570205, 570243, 570279, 570292};
+  // LHC26ac_batch3.1+3.4
+  //const int nruns_2025 = 8;
+  //int runnumber_2025[nruns_2025] = {570551, 570564, 570587, 570588, 570590, 570606, 570607, 570608};
+  //LHC26af_batch1
+  //const int nruns_2025 = 10;
+  //int runnumber_2025[nruns_2025] = {571002, 571014, 571019, 571021, 571023, 571043, 571146, 571169, 571170, 571183};
+  //LHC26ae
+  //const int nruns_2025 = 15;
+  //int runnumber_2025[nruns_2025] = {570733, 570734, 570739, 570760, 570794, 570805, 570822, 570826, 570851, 570863, 570866, 570867, 570869, 570870, 570872};
+  //LHC26ai_batch2
+  const int nruns_2025 = 20;
+  int runnumber_2025[nruns_2025] = {571534, 571556, 571568, 571569, 571571, 571572, 571584, 571585, 571587, 571602, 571613, 571632, 571633, 571635, 571636, 571638, 571640, 571656, 571660, 571661};
   //------------ read files
   TFile *file_in2025[nruns_2025] = {0x0};
   // TFile *file_in_skimmed[nruns] = {0x0};
 
   for (int irun = 0; irun < nruns_2025; irun++)
   {
-    if (gSystem->GetPathInfo(Form("../TriggerForRun3/EventFiltering2026/LHC26ac_batch2/AnalysisResults_fullrun_LHC26ac_apass1_%d.root", runnumber_2025[irun]), dummy1, dummy2, dummy3, dummy4) != 0)
+    if (gSystem->GetPathInfo(Form("../TriggerForRun3/EventFiltering2026/LHC26ai_batch2/AnalysisResults_fullrun_LHC26ai_batch2_%d.root", runnumber_2025[irun]), dummy1, dummy2, dummy3, dummy4) != 0)
       cout << "File Not Found! Try again" << endl;
-    file_in2025[irun] = new TFile(Form("../TriggerForRun3/EventFiltering2026/LHC26ac_batch2/AnalysisResults_fullrun_LHC26ac_apass1_%d.root", runnumber_2025[irun]), "read");
+    file_in2025[irun] = new TFile(Form("../TriggerForRun3/EventFiltering2026/LHC26ai_batch2/AnalysisResults_fullrun_LHC26ai_batch2_%d.root", runnumber_2025[irun]), "read");
     printf("Open File: %s\n", file_in2025[irun]->GetName());
   }
 
@@ -231,8 +242,8 @@ void QAplots_runbyrun(string period = "LHC26ac_batch2")
   TH1F *hSelectivity_period2025[numTriggers];
   //"Omegas", "h-Omega", "Xi-N", "HighMultFT0M+Omega", "Tracked Omega", "Double Omega", "Omega+Xi",
   //"Lam+Lam", "HighMultTrack+Omega", "HighMultFT0M", "HighMultTrack", "sigma-p"
-  Float_t LowLimit[numTriggers] = {2e-6, 6e-6, 1.3e-6, 6e-6, 5e-6, 3e-7, 1.5e-6, 2e-7, 1e-6, 2e-5, 1e-6, 4.5e-6};
-  Float_t UpLimit[numTriggers] = {3e-4, 1.5e-5, 2e-6, 10e-6, 9e-6, 6e-7, 3.5e-6, 6e-7, 4e-6, 10e-5, 7e-6, 6.5e-6};
+  Float_t LowLimit[numTriggers] = {2e-6, 6e-6, 1e-6, 5e-6, 5e-6, 1e-7, 1.5e-6, 2e-7, 1e-6, 1e-5, 1e-6, 5e-6};
+  Float_t UpLimit[numTriggers] = {3e-4, 1.5e-5, 3e-6, 8e-6, 9e-6, 5e-7, 3.5e-6, 6e-7, 4e-6, 20e-5, 3e-6, 8e-6};
   for (int ifilter = 0; ifilter < numTriggers; ifilter++)
   {
     for (int irun = 0; irun < nruns_2025; irun++)
@@ -316,9 +327,9 @@ void QAplots_runbyrun(string period = "LHC26ac_batch2")
   hSel_allfilters2025->SetMarkerSize(3);
   hSel_allfilters2025->SetMarkerStyle(20);
   hSel_allfilters2025->DrawCopy("PSAME");
-  leg_sel->AddEntry(hSel_allfilters2025, "2026 ac batch2", "pl");
+  leg_sel->AddEntry(hSel_allfilters2025, "2026 ai batch2", "pl");
   leg_sel->Draw("same");
-  cselallfilters->SaveAs("cselallfilters_total_2026ac_batch2.png");
+  cselallfilters->SaveAs("cselallfilters_total_2026ai_batch2.png");
 
   //------------ selectivity for each filter for each run
   TCanvas *cselectivity[numTriggers];
