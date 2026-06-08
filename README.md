@@ -1,4 +1,10 @@
-# Run3Tools
+# Macros used for the QA of strangeness filters for the skimming of pp data collected by ALICE in Run 3 (updated at the end of Run 3 skimming):**
+- Yields_from_invmass.C
+- CompareSigmaWidthPurity.C
+- QAplots_runbyrun.C
+- QAplots_SkimmedUnskimmed.C
+
+# Description of main macros in this repo
 
 PostProcessing_Filters.C -> takes the output of the filter task (https://github.com/AliceO2Group/O2Physics/blob/master/EventFiltering/PWGLF/strangenessFilter.cxx) and post processes it 
 
@@ -9,9 +15,3 @@ CompareSigmaWidthPurity.C --> takes in input mean or sigma or purity or raw yiel
 QAplots_runbyrun.C --> compares the selectivity of the different filters, run by run
 
 QAplots_SkimmedUnskimmed.C --> computes the ratio between the selectivity of filters in the skimmed sample vs the original unskimmed sample, run by run
-
-Macros used for the QA of strangeness filters for the skimming of pp data collected by ALICE in Run 3 (updated at the end of Run 3 skimming):
-- Yields_from_invmass.C
-- CompareSigmaWidthPurity.C
-- QAplots_runbyrun.C
-- QAplots_SkimmedUnskimmed.C
