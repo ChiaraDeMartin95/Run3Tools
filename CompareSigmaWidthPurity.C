@@ -25,8 +25,7 @@
 #include "TPad.h"
 #include "TSpline.h"
 
-void StyleHisto(TH1F *histo, Float_t Low, Float_t Up, Int_t color, Int_t style, TString titleX, TString titleY, TString title, Bool_t XRan\
-ge,
+void StyleHisto(TH1F *histo, Float_t Low, Float_t Up, Int_t color, Int_t style, TString titleX, TString titleY, TString title, Bool_t XRange,
                 Float_t XLow, Float_t XUp, Float_t xOffset, Float_t yOffset, Float_t mSize)
 {
   histo->GetYaxis()->SetRangeUser(Low, Up);
@@ -87,14 +86,12 @@ Float_t ParticleMassPDG[numPart] = {0.497611, 1.115683, 1.115683, 1.32171, 1.321
 
 // histo0 -> num
 // histo1 -> denom
-void CompareSigmaWidthPurity(TString year0 = "LHC25am_batch5_6_skimmed",
-                             TString year1 = "LHC25am_batch5_6",
+void CompareSigmaWidthPurity(TString year0 = "LHC26ai_batch2_skimmed",
+                             TString year1 = "LHC26ai_batch2",
                              TString yearRatioToPub = "",
-                             // TString Sfilein0 = "../TriggerForRun3/EventFiltering2025/Yields_Xi_LHC25ac_batch1_skimmed_OneGaussFit_TrackedCascades.root",
-                             // TString Sfilein0 = "../TriggerForRun3/EventFiltering2025_skimmedDATA/Yields_Omega_LHC25ai_skimmed_batch1_OneGaussFit_TrackedCascades.root",
-                             TString Sfilein0 = "../TriggerForRun3/EventFiltering2025/Yields_Omega_LHC25am_batch5_6_skimmed_OneGaussFit.root",
-                             TString Sfilein1 = "../TriggerForRun3/EventFiltering2025/Yields_Omega_LHC25am_batch5_6_OneGaussFit.root",
-                             TString OutputDir = "../TriggerForRun3/EventFiltering2025/",
+                             TString Sfilein0 = "../TriggerForRun3/EventFiltering2026/LHC26ai_batch2/Yields_Omega_LHC26ai_batch2_skimmed_OneGaussFit_TrackedCascades.root",
+                             TString Sfilein1 = "../TriggerForRun3/EventFiltering2026/LHC26ai_batch2/Yields_Omega_LHC26ai_batch2_OneGaussFit_TrackedCascades.root",
+                             TString OutputDir = "../TriggerForRun3/EventFiltering2026/LHC26ai_batch2/",
                              Bool_t isPseudoEfficiency = 0,
                              Bool_t isOnlyPseudoEfficiency = 0,
                              TString SPublishedYieldForPseudoEff =
@@ -122,8 +119,8 @@ void CompareSigmaWidthPurity(TString year0 = "LHC25am_batch5_6_skimmed",
   Float_t YUp[numPart] = {0};
   // Float_t YLowRatio[numChoice] = {0.95, 0.7, 0.5, 0.9, 0, 0};
   // Float_t YUpRatio[numChoice] = {1.05, 2, 1.1, 1.1, 2, 20};
-  Float_t YLowRatio[numChoice] = {0.99, 0.95, 0.95, 0.9, 0, 0};
-  Float_t YUpRatio[numChoice] = {1.01, 1.05, 1.05, 1.1, 2, 20};
+  Float_t YLowRatio[numChoice] = {0.99, 0.95, 0.8, 0.7, 0, 0};
+  Float_t YUpRatio[numChoice] = {1.01, 1.05, 1.2, 1.3, 2, 20};
   /*
   if (Sfilein0.Index("Tracked") == -1)
   {
@@ -375,9 +372,9 @@ void CompareSigmaWidthPurity(TString year0 = "LHC25am_batch5_6_skimmed",
   TH1F *histoPubError[numPart];
   TH1F *histoNum[numPart];
   TH1F *histoRatioToPub[numPart];
-  TDirectoryFile *dir;
-  TDirectoryFile *dir1;
-  TDirectoryFile *dir2;
+  TDirectoryFile *dir = nullptr;
+  TDirectoryFile *dir1 = nullptr;
+  TDirectoryFile *dir2 = nullptr;
   TString SfilePub = "";
   TString FileName[numPart] = {"1", "2", "2", "3", "3", "4", "4"};
   TString HistoNumber[numPart] = {"11", "11", "11", "11", "11", "6", "6"};
@@ -398,7 +395,7 @@ void CompareSigmaWidthPurity(TString year0 = "LHC25am_batch5_6_skimmed",
   Float_t Low[numPart] = {0, 0.4, 0.4, 0.6, 0.6, 0.9, 0.9};
   Float_t Up[numPart] = {0, 4, 4, 4, 4, 4, 4};
 
-  TFile *fileTemp;
+  TFile *fileTemp = nullptr;
   TString SfileTemp = "";
 
   if (isPseudoEfficiency)

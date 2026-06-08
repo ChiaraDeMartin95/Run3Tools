@@ -149,34 +149,9 @@ TString IsOneOrTwoGauss[2] = {"_OneGaussFit", ""};
 void Yields_from_invmass(Int_t part = 5,
                          Bool_t isTrackedCasc = 0,
                          Bool_t isRadiusAnalysis = 0,
-                         //TString SPathIn = "../TriggerForRun3/EventFiltering2025_SkimmedDATA/AnalysisResults_skimmed_fullrun_LHC25ac_batch3.root",
-                         //TString SPathIn = "../TriggerForRun3/EventFiltering2025_SkimmedDATA/AnalysisResults_skimmed_fullrun_LHC25ac_batch45.root",
-                         //TString SPathIn = "../TriggerForRun3/EventFiltering2025_SkimmedDATA/AnalysisResults_fullrun_LHC25ac_apass1_skimmed_563948.root",
-                         //TString SPathIn = "../TriggerForRun3/EventFiltering2025/AnalysisResults_fullrun_LHC25ac_apass1_563948.root",
-                         //TString SPathIn = "../TriggerForRun3/EventFiltering2025/AnalysisResults_fullrun_LHC25ah_apass1_batch3_4.root",
-                         //TString SPathIn = "../TriggerForRun3/EventFiltering2025_skimmedDATA/AnalysisResults_fullrun_LHC25ah_pass1_batch3_4_skimmed.root",
-                         //TString SPathIn = "../TriggerForRun3/EventFiltering2025/AnalysisResults_fullrun_batch5_LHC25ah.root",
-                         //TString SPathIn = "../TriggerForRun3/EventFiltering2025/AnalysisResults_skimmed_fullrun_orphan_LHC25ac_563998.root",
-                         //TString SPathIn = "../TriggerForRun3/EventFiltering2025/AnalysisResults_skimmed_fullrun_orphan_LHC25ac_563998.root",
-                         //TString SPathIn = "../TriggerForRun3/EventFiltering2025/AnalysisResults_fullrun_orphan_LHC25ac_563998.root",
-                         //TString SPathIn = "../TriggerForRun3/EventFiltering2025/AnalysisResults_fullrun_LHC25ai_566029.root",
-                         //TString SPathIn = "../TriggerForRun3/EventFiltering2025/AnalysisResults_fullrun_batch6_LHC25ah.root",
-                         //TString SPathIn = "../TriggerForRun3/EventFiltering2024/AnalysisResults_fullrun_LHC24al_batch5_apass1.root",
-                         //TString SPathIn = "../TriggerForRun3/EventFiltering2025/AnalysisResults_fullrun_LHC25ai_566029_Test2410.root",
-                         //TString SPathIn = "../TriggerForRun3/EventFiltering2025/AnalysisResults/LHC25ai/AnalysisResults_fullrun_batch2_LHC25ai.root",
-                         //TString SPathIn = "../TriggerForRun3/EventFiltering2025/AnalysisResults_fullrun_LHC25am_apass1_batch2.root",
-                         //TString SPathIn = "../TriggerForRun3/EventFiltering2025/AnalysisResults_fullrun_LHC25am_batch4.root",
-                         //TString SPathIn = "../TriggerForRun3/EventFiltering2025/AnalysisResults_fullrun_skimmed_LHC25am_batch3.root",
-                         TString SPathIn = "../TriggerForRun3/EventFiltering2025/AnalysisResults_fullrun_LHC25am_batch5_6.root",
-                         //TString SPathIn = "../TriggerForRun3/EventFiltering2025_skimmedDATA/AnalysisResults_fullrun_skimmed_batch1_LHC25ai.root",
-                         //TString SPathIn = "../TriggerForRun3/EventFiltering2025/AnalysisResults/LHC25ai/AnalysisResults_fullrun_LHC25ai_Test3010.root",
-                         //TString SPathIn = "../TriggerForRun3/EventFiltering2025/AnalysisResults/LHC25ac_pass1/AnalysisResults_fullrun_batch4_5_LHC25ac.root",
-                         //TString SPathIn = "../TriggerForRun3/EventFiltering2025/AnalysisResults/LHC25ac_pass1/AnalysisResults_fullrun_LHC25ac_batch3.root",
-                         //TString SPathIn = "../TriggerForRun3/EventFiltering2025/AnalysisResults/AnalysisResults_2025config_LHC24ao_558801.root",
-                         TString OutputDir = "../TriggerForRun3/EventFiltering2025/",
-                         //TString OutputDir = "../TriggerForRun3/EventFiltering2025_skimmedDATA/",
-                         TString year = "LHC25am_batch5_6",
-                         //TString year = "LHC25ai_Test3010",
+                         TString SPathIn = "../TriggerForRun3/EventFiltering2026/LHC26ai_batch2/AnalysisResults_fullrun_skimmed_LHC26ai_batch2.root",
+                         TString OutputDir = "../TriggerForRun3/EventFiltering2026/LHC26ai_batch2/",
+                         TString year = "LHC26ai_batch2_skimmed",
                          Bool_t UseTwoGauss = 0,
                          Bool_t isBkgParab = 0,
                          Bool_t isMeanFixedPDG = 0,
@@ -209,13 +184,13 @@ void Yields_from_invmass(Int_t part = 5,
     return;
   }
 
-  TDirectoryFile *dir;
-  TDirectoryFile *dirEvt;
-  TDirectoryFile *dirCasc;
-  TH3F *h3;
-  TH2F *h2;
-  TH2F *h2Bis;
-  TH1F *hEvents;
+  TDirectoryFile *dir = nullptr;
+  TDirectoryFile *dirEvt = nullptr;
+  TDirectoryFile *dirCasc = nullptr;
+  TH3F *h3 = nullptr;
+  TH2F *h2 = nullptr;
+  TH2F *h2Bis = nullptr;
+  TH1F *hEvents = nullptr;
 
   if (isV0CascadeAnalysis)
   {

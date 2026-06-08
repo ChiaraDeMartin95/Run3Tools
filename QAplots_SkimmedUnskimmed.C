@@ -25,7 +25,7 @@ const Float_t LFLimit = 5E-5;
 const Int_t numBins = 11; // Interesting trigger
 Int_t iscale = 0;         // 0 if input file has no mistakes. At some point axis labels where shifted by one bin and in those cases iscale = 1 should be set.
 
-void QAplots_Sara(string period = "LHC26ac_batch1")
+void QAplots_SkimmedUnskimmed(string period = "LHC26ai")
 {
 
   gROOT->SetBatch(kTRUE);
@@ -36,10 +36,24 @@ void QAplots_Sara(string period = "LHC26ac_batch1")
   time.Start();
 
   char pass_name[2][30] = {"apass1", "apass1_skimmed"};
-  const int nruns = 20;
+  //const int nruns = 5;
   // int runnumber[nruns] = {566848, 566859, 566871, 566893, 566905, 566906, 566907, 566921, 566935};
-  int runnumber[nruns] = {570051, 570054, 570065, 570066, 570077, 570079, 570091, 570102, 569945, 569947, 569978, 569980, 569981, 569982, 570011, 570012, 570025, 570036, 570049, 570050};
-  int runnumberShort[nruns] = {570051, 570054, 570065, 570066, 570077, 570079, 570091, 570102, 569945, 569947, 569978, 569980, 569981, 569982, 570011, 570012, 570025, 570036, 570049, 570050};
+  // int runnumber[nruns] = {570051, 570054, 570065, 570066, 570077, 570079, 570091, 570102, 569945, 569947, 569978, 569980, 569981, 569982, 570011, 570012, 570025, 570036, 570049, 570050};
+  // int runnumber[nruns] = {570551, 570564, 570587, 570588, 570590, 570606, 570607, 570608};
+  // int runnumberShort[nruns] = {570551, 570564, 570587, 570588, 570590, 570606, 570607, 570608};
+  // int runnumber[nruns] = {570733, 570734, 570739, 570760, 570794, 570805, 570822, 570826, 570851, 570863, 570866, 570867, 570869, 570870, 570872};
+  // int runnumberShort[nruns] = {570733, 570734, 570739, 570760, 570794, 570805, 570822, 570826, 570851, 570863, 570866, 570867, 570869, 570870, 570872};
+  // int runnumberShort[nruns] = {570051, 570054, 570065, 570066, 570077, 570079, 570091, 570102, 569945, 569947, 569978, 569980, 569981, 569982, 570011, 570012, 570025, 570036, 570049, 570050};
+  // LHC26ag
+  // int runnumber[nruns] = {571234, 571236, 571237, 571238, 571240, 571252, 571253, 571254, 571268, 571269, 571287, 571288, 571290};
+  // int runnumberShort[nruns] = {571234, 571236, 571237, 571238, 571240, 571252, 571253, 571254, 571268, 571269, 571287, 571288, 571290};
+  // LHC26ai_batch1
+  //int runnumber[nruns] = {571424, 571438, 571449, 571462, 571473};
+  //int runnumberShort[nruns] = {571424, 571438, 571449, 571462, 571473};
+  //LHC26ai_batch2
+  const int nruns = 18;
+  int runnumber[nruns] = {571534, 571556, 571568, 571571, 571572, 571584, 571585, 571602, 571613, 571632, 571633, 571635, 571636, 571638, 571640, 571656, 571660, 571661};
+  int runnumberShort[nruns] = {571534, 571556, 571568, 571571, 571572, 571584, 571585, 571602, 571613, 571632, 571633, 571635, 571636, 571638, 571640, 571656, 571660, 571661};
 
   //------------ read files
   TFile *file_in2025[nruns] = {0x0};
@@ -55,11 +69,11 @@ void QAplots_Sara(string period = "LHC26ac_batch1")
   for (int irun = 0; irun < nruns; irun++)
   {
     // if(gSystem->GetPathInfo(Form("AnalysisResults_fullrun_%s_%s_%d.root",period.c_str(),pass_name[0],runnumber[irun]),dummy1,dummy2,dummy3,dummy4) != 0) cout << "File Not Found! Try again" << endl;
-    file_in2024[irun] = new TFile(Form("../TriggerForRun3/EventFiltering2026/LHC26ac_batch1/AnalysisResults_fullrun_skimmed_LHC26ac_batch1_%d.root", runnumber[irun]), "read");
-    file_in2025[irun] = new TFile(Form("../TriggerForRun3/EventFiltering2026/LHC26ac_batch1/AnalysisResults_fullrun_LHC26ac_batch1_%d.root", runnumber[irun]), "read");
+    file_in2024[irun] = new TFile(Form("../TriggerForRun3/EventFiltering2026/LHC26ai_batch2/AnalysisResults_fullrun_skimmed_LHC26ai_%d.root", runnumber[irun]), "read");
+    file_in2025[irun] = new TFile(Form("../TriggerForRun3/EventFiltering2026/LHC26ai_batch2/AnalysisResults_fullrun_LHC26ai_batch2_%d.root", runnumber[irun]), "read");
     // printf("Open File: %s\n",file_in[irun]->GetName());
     //
-    file_in_skimmed[irun] = new TFile(Form("../TriggerForRun3/EventFiltering2026/LHC26ac_batch1/AnalysisResults_fullrun_skimmed_LHC26ac_batch1_%d.root", runnumber[irun]), "read");
+    file_in_skimmed[irun] = new TFile(Form("../TriggerForRun3/EventFiltering2026/LHC26ai_batch2/AnalysisResults_fullrun_skimmed_LHC26ai_%d.root", runnumber[irun]), "read");
   }
 
   // color palette
@@ -204,7 +218,7 @@ void QAplots_Sara(string period = "LHC26ac_batch1")
   }
 
   TH1F *hEvSel_filters2024[nruns] = {0x0};
-  
+
   for (int i = 0; i < nruns; i++)
   {
     hEvSel_filters2024[i] = new TH1F(Form("hEvSel_filters%d", i), ";;Events", numBins, 0, numBins - 1);

@@ -216,7 +216,6 @@ void QAplots_runbyrun(string period = "LHC26ai")
   leg->SetTextFont(42);
   leg->SetBorderSize(0);
   leg->SetNColumns(2);
-  cout << "hleoo" << endl;
 
   for (int i = 0; i < nruns_2025; i++)
   {
@@ -242,7 +241,7 @@ void QAplots_runbyrun(string period = "LHC26ai")
   TH1F *hSelectivity_period2025[numTriggers];
   //"Omegas", "h-Omega", "Xi-N", "HighMultFT0M+Omega", "Tracked Omega", "Double Omega", "Omega+Xi",
   //"Lam+Lam", "HighMultTrack+Omega", "HighMultFT0M", "HighMultTrack", "sigma-p"
-  Float_t LowLimit[numTriggers] = {2e-6, 6e-6, 1e-6, 5e-6, 5e-6, 1e-7, 1.5e-6, 2e-7, 1e-6, 1e-5, 1e-6, 5e-6};
+  Float_t LowLimit[numTriggers] = {2e-6, 6e-6, 1e-6, e-6, 5e-6, 1e-7, 1.5e-6, 2e-7, 1e-6, 1e-5, 1e-6, 5e-6};
   Float_t UpLimit[numTriggers] = {3e-4, 1.5e-5, 3e-6, 8e-6, 9e-6, 5e-7, 3.5e-6, 6e-7, 4e-6, 20e-5, 3e-6, 8e-6};
   for (int ifilter = 0; ifilter < numTriggers; ifilter++)
   {
