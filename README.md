@@ -1,4 +1,4 @@
-# Macros used for the QA of strangeness filters for the skimming of pp data collected by ALICE in Run 3 (updated at the end of Run 3 skimming):**
+**Macros used for the QA of strangeness filters for the skimming of pp data collected by ALICE in Run 3 (updated at the end of Run 3 skimming):**
 - Yields_from_invmass.C
 - CompareSigmaWidthPurity.C
 - QAplots_runbyrun.C
