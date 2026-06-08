@@ -4,7 +4,7 @@
 - QAplots_runbyrun.C
 - QAplots_SkimmedUnskimmed.C
 
-**Macros used to do the QA of weak decay vertices (V0s, casacdes) in new Monte Carlo productions or new data reconstructions in Run 3: **
+**Macros used to do the QA of weak decay vertices (V0s, casacdes) in new Monte Carlo productions or new data reconstructions in Run 3:**
 - PostProcessV0AndCascQA_AO2D.C
 - PostProcessV0AndCascQA_AO2D_New2026.C (for productions since May 2026)
 These macros take in input the output of the QA task: https://github.com/AliceO2Group/O2Physics/blob/master/PWGLF/Tasks/QC/v0cascadesqa.cxx
